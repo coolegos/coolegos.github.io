@@ -1,0 +1,710 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="截图," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Android 中选择一张图片然后截取部分作为头像是一个非常常见的需求。当然很多个性化的应用中都会有自己专门定制的选择图片和裁剪图片。但本文现在主要讨论的是一些系统的东西，包括打开系统图片的选择、调用系统的截图功能。">
+<meta name="keywords" content="截图">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 截图，兼容android 5.0和大图片">
+<meta property="og:url" content="http://localhost:4000/2015/09/07/Android-截图，兼容android-5-0和大图片/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="Android 中选择一张图片然后截取部分作为头像是一个非常常见的需求。当然很多个性化的应用中都会有自己专门定制的选择图片和裁剪图片。但本文现在主要讨论的是一些系统的东西，包括打开系统图片的选择、调用系统的截图功能。">
+<meta property="og:updated_time" content="2017-11-26T09:16:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 截图，兼容android 5.0和大图片">
+<meta name="twitter:description" content="Android 中选择一张图片然后截取部分作为头像是一个非常常见的需求。当然很多个性化的应用中都会有自己专门定制的选择图片和裁剪图片。但本文现在主要讨论的是一些系统的东西，包括打开系统图片的选择、调用系统的截图功能。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2015/09/07/Android-截图，兼容android-5-0和大图片/"/>
+
+
+
+
+
+  <title> Android 截图，兼容android 5.0和大图片 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2015/09/07/Android-截图，兼容android-5-0和大图片/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android 截图，兼容android 5.0和大图片
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-09-07T23:48:00+08:00">
+                2015-09-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android/" itemprop="url" rel="index">
+                    <span itemprop="name">android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Android 中选择一张图片然后截取部分作为头像是一个非常常见的需求。当然很多个性化的应用中都会有自己专门定制的选择图片和裁剪图片。但本文现在主要讨论的是一些系统的东西，包括打开系统图片的选择、调用系统的截图功能。</p>
+<a id="more"></a>
+<p>以前在调用系统的截图的时候我都是这样使用的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);</div><div class="line">intent.setType(&quot;image/*&quot;);</div><div class="line">intent.putExtra(&quot;crop&quot;, &quot;true&quot;);</div><div class="line">intent.putExtra(&quot;aspectX&quot;, 1);</div><div class="line">intent.putExtra(&quot;aspectY&quot;, 1);</div><div class="line">intent.putExtra(&quot;outputX&quot;, 120);</div><div class="line">intent.putExtra(&quot;outputY&quot;, 120);</div><div class="line">intent.putExtra(&quot;return-data&quot;, true);</div><div class="line">startActivityForResult(intent, CROP_IMG);</div></pre></td></tr></table></figure>
+<p>这样写好像真的很简单也很好懂，Intent.ACTION_PICK 打开选择图片的界面，然后通过下面的intent 的一些设置就可以截取一张图片了。这样写在我的很多的机器上确实也没有什么问题，但是直到碰到了5.0 的手机。在5.0 的手机中，首先出现的一个问题是，上面的代码没有出现图片的裁剪功能。流程变成了选择图片，点击图片以后就选择了整张的图片。选择一整张图片确实是没问题，但是需求是必须给用户一个截取图片的过程（其实选取一整张图片还是有一个很严重的问题的，就是图片太大的问题）。</p>
+<p>经过分析，这个的问题是在5.0 的手机中，只执行了一个选择图片的过程。或许应该将图片的选择和图片的截取分开才能完成自己的需求。</p>
+<p><strong>第一步：如何打开图片的选择界面。</strong></p>
+<p>1.<code>Intent.ACTION_PICK = &quot;android.intent.action.PICK&quot;;</code>选择一个数据返回它的URI。返回的格式：<code>content://media/external/images/media/67</code>。在所有的版本中都是返回这样的格式。</p>
+<p>2.<code>Intent.ACTION_GET_CONTENT = &quot;android.intent.action.GET_CONTENT&quot;;</code>选择一个数据。</p>
+<p>API 19及以上，返回的Uri：<code>content://com.android.providers.media.documents/document/image%3A57425</code></p>
+<p>API 19以下，返回的Uri：<code>content://media/external/images/media/31956</code></p>
+<p>在API 19中又可以从下载内容（其实在API 19及以上从很多不同的地方拿到的Uri不相同）中打开一些内容，Uri是这样的类型。<br><code>content://com.android.providers.downloads.documents/document/4</code></p>
+<p>3.<code>Intent.ACTION_OPEN_DOCUMENT = &quot;android.intent.action.OPEN_DOCUMENT&quot;;</code>(API 19以后才有这个)，可以打开云端的文件。只有在API 19以上才可以使用，得到的Uri跟API 19在<code>Intent.ACTION_GET_CONTENT</code>中得到的一样。</p>
+<p>所以第一步可以有三种选择来打开一个选择图片的界面。根据我们的需求应该选择ACTION_PICK 来做，因为只有这个可以兼容所有的版本。（当然使用ACTION_GET_CONTENT 和ACTION_OPEN_DOCUMENT 也是可以做的，但是区分其实蛮大的）<br>使用ACTION_PICK，打开图片选择的过程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent(&quot;android.intent.action.PICK&quot;);</div><div class="line">intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, &quot;image/*&quot;);</div><div class="line">startActivityForResult(intent, PICK_IMG);</div></pre></td></tr></table></figure>
+<p>在选中一张图片以后就会在onActivityResult中得到一张图片的Uri。然后就需要打开这张图片并裁剪。</p>
+<p><strong>第二步.如何的截取图片。</strong></p>
+<p>系统的截图 <code>com.android.camera.action.CROP</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent(&quot;com.android.camera.action.CROP&quot;);</div><div class="line">intent.setDataAndType(uri, &quot;image/*&quot;); </div><div class="line">intent.putExtra(&quot;crop&quot;, &quot;true&quot;);  //为true才会出现裁剪的框</div><div class="line">intent.putExtra(&quot;aspectX&quot;, 1);    //宽高的比例</div><div class="line">intent.putExtra(&quot;aspectY&quot;, 1);</div><div class="line">intent.putExtra(&quot;outputX&quot;, width); // 裁剪得到的宽</div><div class="line">intent.putExtra(&quot;outputY&quot;, height);// 裁剪得到的高</div><div class="line">intent.putExtra(&quot;return-data&quot;, true); // 返回数据</div><div class="line">intent.putExtra(&quot;scale&quot;, true);       </div><div class="line">intent.putExtra(&quot;scaleUpIfNeeded&quot;, true); // 去掉黑边</div><div class="line">intent.putExtra(&quot;noFaceDetection&quot;, true); // 不需要人脸识别</div><div class="line">startActivityForResult(intent, CUT_IMG);</div></pre></td></tr></table></figure>
+<p>这样就可以在onActivityResult 方法中做相关的处理。<br><code>Bitmap bitmap = data.getParcelableExtra(&quot;data&quot;);</code><br>其实只有基于AOSP 的Android 手机才会具有<code>com.android.camera.action.CROP</code>，所以需要做相应的异常的处理。所以需要加一个<code>ActivityNotFoundException</code>的异常的处理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">try</div><div class="line">    &#123;</div><div class="line">        Intent intent = new Intent(&quot;com.android.camera.action.CROP&quot;);</div><div class="line">        intent.setDataAndType(uri, &quot;image/*&quot;);</div><div class="line">        intent.putExtra(&quot;crop&quot;, &quot;true&quot;);</div><div class="line">        intent.putExtra(&quot;aspectX&quot;, 1);</div><div class="line">        intent.putExtra(&quot;aspectY&quot;, 1);</div><div class="line">        intent.putExtra(&quot;outputX&quot;, width);</div><div class="line">        intent.putExtra(&quot;outputY&quot;, height);</div><div class="line">        intent.putExtra(&quot;return-data&quot;, true); </div><div class="line">        intent.putExtra(&quot;scale&quot;, true);</div><div class="line">        intent.putExtra(&quot;scaleUpIfNeeded&quot;, true);</div><div class="line">        intent.putExtra(&quot;noFaceDetection&quot;, true);</div><div class="line">        startActivityForResult(intent, CUT_IMG);</div><div class="line">    &#125;</div><div class="line">    catch (ActivityNotFoundException e)</div><div class="line">    &#123;</div><div class="line">        // 如果手机不是基于AOSP的话就是不能这么做的。可以直接通过出过来的uri来得到整张的图片</div><div class="line">        Bitmap bitmap = null;</div><div class="line">        bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这样在很多机器上测试的时候都没有问题，但是这样就结束了吗？还没有。当图片很大的时候，这样还是会出现问题，一整张图片可能直接会使内存溢出，或者说裁剪的一张图片会使内存溢出（特别是对手机像素很高的来说）。所有呢，最好的情况是对图片进行压缩。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options opts = new Options();</div><div class="line">opts.inJustDecodeBounds = true; // 为true的话就不会decode的时候生成Bitmap。</div><div class="line">BitmapFactory.decodeStream(is, null, opts);</div><div class="line">// 但是可以通过opts拿到图片的宽和高</div><div class="line">int bmpWidth = opts.outWidth;    </div><div class="line">int bmpHeight = opts.outHeight;</div><div class="line">// 选择一个比较大的比例，这样缩放以后就不会放不下</div><div class="line">int scale = Math.max(bmpWidth / 300, bmpHeight / 300);</div><div class="line">opts.inSampleSize = scale;  // 设置缩放的比例</div><div class="line">// 这样得到的就是一个压缩以后的图片，一般不会内存溢出（注意这个地方是is1）</div><div class="line">Bitmap bitmap = BitmapFactory.decodeStream(is1, null, opts);</div></pre></td></tr></table></figure>
+<p>所以呢可以专门写一个用来压缩的函数。（我这里是指定大小为300，300）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * 通过Uri得到压缩以后的图片</div><div class="line"> */</div><div class="line">private Bitmap getBitmapFromBigImagByUri(Uri uri)</div><div class="line">&#123;</div><div class="line">    Bitmap result = null;</div><div class="line">    InputStream is1 = null;</div><div class="line">    InputStream is2 = null;</div><div class="line">    try</div><div class="line">    &#123;</div><div class="line">        // 如果图片太大，这个地方依旧会出现问题</div><div class="line">        // Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);</div><div class="line">        // 使用两个inputstream的原因</div><div class="line">        // http://stackoverflow.com/questions/12841482/resizing-bitmap-from-inputstream</div><div class="line">        is1 = getContentResolver().openInputStream(uri);</div><div class="line">        is2 = getContentResolver().openInputStream(uri);</div><div class="line">        BitmapFactory.Options opts1 = new Options();</div><div class="line">        opts1.inJustDecodeBounds = true;</div><div class="line">        BitmapFactory.decodeStream(is1, null, opts1);</div><div class="line">        int bmpWidth = opts1.outWidth;</div><div class="line">        int bmpHeight = opts1.outHeight;</div><div class="line">        int scale = Math.max(bmpWidth / 300, bmpHeight / 300);</div><div class="line">        BitmapFactory.Options opts2 = new Options();</div><div class="line">        // 缩放的比例</div><div class="line">        opts2.inSampleSize = scale;</div><div class="line">        // 内存不足时可被回收</div><div class="line">        opts2.inPurgeable = true;</div><div class="line">        // 设置为false,表示不仅Bitmap的属性，也要加载bitmap</div><div class="line">        opts2.inJustDecodeBounds = false;</div><div class="line">        result = BitmapFactory.decodeStream(is2, null, opts2);</div><div class="line">    &#125;</div><div class="line">    catch (Exception ex)</div><div class="line">    &#123;</div><div class="line">    &#125;</div><div class="line">    finally</div><div class="line">    &#123;</div><div class="line">        if (is1 != null)</div><div class="line">        &#123;</div><div class="line">            try</div><div class="line">            &#123;</div><div class="line">                is1.close();</div><div class="line">            &#125;</div><div class="line">            catch (IOException e1)</div><div class="line">            &#123;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (is2 != null)</div><div class="line">        &#123;</div><div class="line">            try</div><div class="line">            &#123;</div><div class="line">                is2.close();</div><div class="line">            &#125;</div><div class="line">            catch (IOException e2)</div><div class="line">            &#123;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/截图/" rel="tag"># 截图</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/08/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/08/24/Native和H5两种情况的头像上传/" rel="prev" title="Native和H5两种情况的头像上传">
+                Native和H5两种情况的头像上传 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

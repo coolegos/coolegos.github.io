@@ -1,0 +1,797 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="framework,PMS," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="本文是基于api 25(Android 7.1.1)，主要是安装保存在sd 卡的应用apk 的流程。">
+<meta name="keywords" content="framework,PMS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PMS之apk安装流程">
+<meta property="og:url" content="http://localhost:4000/2017/12/28/PMS之apk安装流程/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="本文是基于api 25(Android 7.1.1)，主要是安装保存在sd 卡的应用apk 的流程。">
+<meta property="og:image" content="http://localhost:4000/img/PMS安装apk流程之安装仅安装.png">
+<meta property="og:updated_time" content="2017-12-28T16:03:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PMS之apk安装流程">
+<meta name="twitter:description" content="本文是基于api 25(Android 7.1.1)，主要是安装保存在sd 卡的应用apk 的流程。">
+<meta name="twitter:image" content="http://localhost:4000/img/PMS安装apk流程之安装仅安装.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2017/12/28/PMS之apk安装流程/"/>
+
+
+
+
+
+  <title> PMS之apk安装流程 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/12/28/PMS之apk安装流程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PMS之apk安装流程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-28T23:18:11+08:00">
+                2017-12-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android-framework/" itemprop="url" rel="index">
+                    <span itemprop="name">android framework</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文是基于api 25(Android 7.1.1)，主要是安装保存在sd 卡的应用apk 的流程。<a id="more"></a></p>
+<h3 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h3><h4 id="两种不同的应用"><a href="#两种不同的应用" class="headerlink" title="两种不同的应用"></a>两种不同的应用</h4><p><code>/system/app/</code>目录下代表的是系统应用。<br><code>/data/app/</code>目录下代表的是安装的应用。</p>
+<h4 id="安装的方式"><a href="#安装的方式" class="headerlink" title="安装的方式"></a>安装的方式</h4><ol>
+<li>保存在sd 卡以后安装</li>
+<li>通过<code>adb</code>脚本安装</li>
+<li>通过应用市场安装</li>
+</ol>
+<p>本文的流程是保存在sd 卡以后安装的流程。</p>
+<h4 id="PMS-代码注意点"><a href="#PMS-代码注意点" class="headerlink" title="PMS 代码注意点"></a>PMS 代码注意点</h4><p><code>PackageManagerService</code>(后续用PMS 表示)的最上方注释需要仔细阅读(不然看源码可能有点懵)。<br>这里稍微的解释下注释的内容。PMS 中有很多方法的后缀是LI、LIF、LPr、LPw。需要理解是什么意思就需要知道PMS 中有两个很重要的锁<code>mPackages</code>和<code>mInstallLock</code>以及一个<code>mFrozenPackages</code>变量。还要了解一个注解的使用<code>com.android.internal.annotations.GuardedBy</code>(这个注解可以被<code>Method</code>和<code>Field</code>使用，意思是使用相应的<code>Method</code>或<code>Field</code>的时候一定需要拥有相应的锁)。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">方法</th>
+<th style="text-align:center">意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">fooLI</td>
+<td style="text-align:center">需要<code>mInstallLock</code>锁</td>
+</tr>
+<tr>
+<td style="text-align:left">fooLIF</td>
+<td style="text-align:center">需要<code>mInstallLock</code>锁，并且需要包是frozen</td>
+</tr>
+<tr>
+<td style="text-align:left">fooLPr</td>
+<td style="text-align:center">需要<code>mPackages</code>锁以后读</td>
+</tr>
+<tr>
+<td style="text-align:left">fooLPw</td>
+<td style="text-align:center">需要<code>mPackages</code>锁以后写</td>
+</tr>
+</tbody>
+</table>
+<p><code>mPackages</code>使用的非常频繁(例如：四大组建的调用)但是占用的时间比较短。<code>mInstallLock</code>则只在‘安装’(与sd 卡交互等等)的时候才会使用，并且执行内容比较耗时。在<code>synchronized(mPackages)</code>的代码块中不允许出现<code>synchronized(mInstallLock)</code></p>
+<h4 id="客户端调用安装的代码"><a href="#客户端调用安装的代码" class="headerlink" title="客户端调用安装的代码"></a>客户端调用安装的代码</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent(Intent.ACTION_VIEW);</div><div class="line">intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</div><div class="line">intent.setDataAndType(Uri.fromFile(new File(fileName)), &quot;application/vnd.android.package-archive&quot;);</div><div class="line">intent.putExtra(&quot;android.intent.extra.INSTALLER_PACKAGE_NAME&quot;, context.getPackageName());</div><div class="line">context.startActivity(intent);</div></pre></td></tr></table></figure>
+<p>客户端可能需要手动调用安装的apk 的逻辑。</p>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><ol>
+<li><code>adb shell dumpsys package p</code>查看安装的包信息。从<code>PackageManagerService#dump</code>代码可以看到相应的打印信息</li>
+<li>从<code>com.android.packageinstaller</code>进程开始，这个进程代表的就是安装Apk 的功能。</li>
+<li><code>aosp/frameworks/base/core/res/res/values/attrs_manifest.xml</code>对应的是AndroidManifest 中声明的信息</li>
+</ol>
+<h3 id="安装流程"><a href="#安装流程" class="headerlink" title="安装流程"></a>安装流程</h3><p>安装的总体时序图<img src="/img/PMS安装apk流程之安装仅安装.png" alt="PMS安装apk流程之安装仅安装"></p>
+<p>第1步，已经将apk 拷贝到了<code>/data/app/vmdlxxxxx.tmp/PackageInstaller</code>(<strong>这里没有详细看vmdlxxxxx.tmp 的命名规则</strong>)</p>
+<p>第2不，会命名出base.apk。</p>
+<p>第3步，简要的解析了manifest 和application 标签中的信息，然后生成了ApkLite。</p>
+<p>第4步，提取so 文件。<strong>这个过程其实有一点细节是怎么去判断是当前手机的架构的。</strong></p>
+<p>第5步，app 已经拷贝到了<code>data/apk/base.apk</code>，此时知道了包名、文件的路径等。这个时候才开始安装的流程。</p>
+<p>第7-10步，可以放在一起。调用<code>Service</code>去解析apk 信息以及<code>getMinimalPackageInfo</code>这里会返回一些数据，包含很多安装出错的数据。这里的流程是执行<code>DefaultContainerService</code>的一个内部类的<code>getMinimalPackageInfo</code>方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">//解析出安装的路径。DefaultContainerService 中的getMinimalPackageInfo，最后的PackageHelper#resolveInstallLocation</div><div class="line">public static int resolveInstallLocation(Context context, String packageName,</div><div class="line">        int installLocation, long sizeBytes, int installFlags) &#123;</div><div class="line">        ApplicationInfo existingInfo = null;</div><div class="line">    //省略代码...</div><div class="line">    return PackageHelper.RECOMMEND_INSTALL_EPHEMERAL;</div><div class="line">    //省略代码...</div><div class="line">    return PackageHelper.RECOMMEND_INSTALL_INTERNAL;</div><div class="line">    //省略代码...</div><div class="line">    return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;</div><div class="line">    //省略代码...</div><div class="line">    return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE; // 空间不足会返回错误</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>定义的一些安装的错误信息，可以在<code>PackageHelper</code>中找到。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">public static final int RECOMMEND_INSTALL_INTERNAL = 1;</div><div class="line">public static final int RECOMMEND_INSTALL_EXTERNAL = 2;</div><div class="line">public static final int RECOMMEND_INSTALL_EPHEMERAL = 3;</div><div class="line">public static final int RECOMMEND_FAILED_INSUFFICIENT_STORAGE = -1;//空间不足</div><div class="line">public static final int RECOMMEND_FAILED_INVALID_APK = -2;//不合法的apk</div><div class="line">public static final int RECOMMEND_FAILED_INVALID_LOCATION = -3;//不合法的安装路径</div><div class="line">public static final int RECOMMEND_FAILED_ALREADY_EXISTS = -4;//包已经安装了</div><div class="line">public static final int RECOMMEND_MEDIA_UNAVAILABLE = -5;</div><div class="line">public static final int RECOMMEND_FAILED_INVALID_URI = -6;</div><div class="line">public static final int RECOMMEND_FAILED_VERSION_DOWNGRADE = -7;//不能降低包的版本</div></pre></td></tr></table></figure>
+<p>具体看一个比较容易出现的错误<code>RECOMMEND_FAILED_VERSION_DOWNGRADE</code>，代码比较容易看懂。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">//handleStartCopy-&gt;installLocationPolicy-&gt;checkDowngrade</div><div class="line">private static void checkDowngrade(PackageParser.Package before, PackageInfoLite after)</div><div class="line">        throws PackageManagerException &#123;</div><div class="line">    if (after.versionCode &lt; before.mVersionCode) &#123;</div><div class="line">        throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,</div><div class="line">                &quot;Update version code &quot; + after.versionCode + &quot; is older than current &quot;</div><div class="line">                + before.mVersionCode);</div><div class="line">    &#125; else if (after.versionCode == before.mVersionCode) &#123;</div><div class="line">        if (after.baseRevisionCode &lt; before.baseRevisionCode) &#123;</div><div class="line">            throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,</div><div class="line">                    &quot;Update base revision code &quot; + after.baseRevisionCode</div><div class="line">                    + &quot; is older than current &quot; + before.baseRevisionCode);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if (!ArrayUtils.isEmpty(after.splitNames)) &#123;</div><div class="line">            for (int i = 0; i &lt; after.splitNames.length; i++) &#123;</div><div class="line">                final String splitName = after.splitNames[i];</div><div class="line">                final int j = ArrayUtils.indexOf(before.splitNames, splitName);</div><div class="line">                if (j != -1) &#123;</div><div class="line">                    if (after.splitRevisionCodes[i] &lt; before.splitRevisionCodes[j]) &#123;</div><div class="line">                        throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,</div><div class="line">                                &quot;Update split &quot; + splitName + &quot; revision code &quot;</div><div class="line">                                + after.splitRevisionCodes[i] + &quot; is older than current &quot;</div><div class="line">                                + before.splitRevisionCodes[j]);</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第13步，<code>installPackageLI</code>的时候已经过滤错误，这里是开始安装了。<strong>有一个小细节是rename 的时候会出现名称是<code>包名-1</code>或者<code>包名-2</code>。</strong>看下面的代码其实就是在<code>packageName-1</code>和<code>packageName-2</code>之间一直切换。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">//PackageManagerService</div><div class="line">private File getNextCodePath(File targetDir, String packageName) &#123;</div><div class="line">    int suffix = 1;</div><div class="line">    File result;</div><div class="line">    do &#123;</div><div class="line">        result = new File(targetDir, packageName + &quot;-&quot; + suffix);</div><div class="line">        suffix++;</div><div class="line">    &#125; while (result.exists());</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第14步，解析出包信息。这里面就是详细的解析出数据的。这里给出解析<code>activity</code>、<code>receiver</code>、<code>service</code>、<code>provider</code>的逻辑(可以看出<code>activity</code>和<code>receiver</code>其实保存的是同一个对象)。直到这一个步骤完成才真正的解析出了<code>AndroidManifest.xml</code>中的所有信息，并且这里并没有将信息保存在PMS 中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">//PackageParser</div><div class="line">//parsePackage-&gt;parseMonolithicPackage-&gt;parseBaseApk-&gt;parseBaseApkCommon-&gt;parseBaseApplication</div><div class="line">private boolean parseBaseApplication(Package owner, Resources res,</div><div class="line">        XmlResourceParser parser, int flags, String[] outError)&#123;</div><div class="line">    //省略代码...</div><div class="line">    String tagName = parser.getName();</div><div class="line">    if (tagName.equals(&quot;activity&quot;)) &#123; //解析activity</div><div class="line">        Activity a = parseActivity(owner, res, parser, flags, outError, false,</div><div class="line">                owner.baseHardwareAccelerated);</div><div class="line">        if (a == null) &#123;</div><div class="line">            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;</div><div class="line">            return false;</div><div class="line">        &#125;</div><div class="line">        owner.activities.add(a);</div><div class="line">    &#125; else if (tagName.equals(&quot;receiver&quot;)) &#123; //解析receiver</div><div class="line">        Activity a = parseActivity(owner, res, parser, flags, outError, true, false);</div><div class="line">        if (a == null) &#123;</div><div class="line">            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;</div><div class="line">            return false;</div><div class="line">        &#125;</div><div class="line">        owner.receivers.add(a);</div><div class="line">    &#125; else if (tagName.equals(&quot;service&quot;)) &#123;</div><div class="line">        Service s = parseService(owner, res, parser, flags, outError);</div><div class="line">        if (s == null) &#123;</div><div class="line">            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;</div><div class="line">            return false;</div><div class="line">        &#125;</div><div class="line">        owner.services.add(s);</div><div class="line">    &#125; else if (tagName.equals(&quot;provider&quot;)) &#123;</div><div class="line">        Provider p = parseProvider(owner, res, parser, flags, outError);</div><div class="line">        if (p == null) &#123;</div><div class="line">            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;</div><div class="line">            return false;</div><div class="line">        &#125;</div><div class="line">        owner.providers.add(p);</div><div class="line">    &#125;</div><div class="line">    //省略代码...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第17步，会在<code>data/appvmdlxxxxx.tmp/</code>生成oat 文件夹。</p>
+<blockquote>
+<p>ART 推出了预先 (AOT) 编译，可提高应用的性能。在安装时，ART 使用设备自带的 dex2oat 工具来编译应用。</p>
+</blockquote>
+<p>第19步，<code>freezePackageForInstall</code>会将当前安装的包加入到mFrozenPackages。这里前面的逻辑已经说明过，LIF。</p>
+<p>第22步，<code>scanPackageLI</code>会从<code>AndroidManifest.xml</code>中扫描出信息，保存在<code>PMS#mPackages</code>、<code>PMS#mActivities</code>、<code>PMS#mReceivers</code>、<code>PMS#mServices</code>、<code>PMS#mProviders</code>等里面。下面给出的是解析<code>Service</code>和<code>Activity</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">//PackageManagerService</div><div class="line">//installNewPackageLIF-&gt;scanPackageTracedLI-&gt;scanPackageLI-&gt;scanPackageDirtyLI</div><div class="line">private PackageParser.Package scanPackageDirtyLI(PackageParser.Package pkg,</div><div class="line">        final int policyFlags, final int scanFlags, long currentTime, UserHandle user)</div><div class="line">        throws PackageManagerException &#123;</div><div class="line">    //省略代码...</div><div class="line">    N = pkg.services.size();</div><div class="line">    r = null;</div><div class="line">    for (i=0; i&lt;N; i++) &#123;</div><div class="line">        PackageParser.Service s = pkg.services.get(i);</div><div class="line">        s.info.processName = fixProcessName(pkg.applicationInfo.processName,</div><div class="line">                s.info.processName, pkg.applicationInfo.uid);</div><div class="line">        mServices.addService(s);</div><div class="line">        if ((policyFlags&amp;PackageParser.PARSE_CHATTY) != 0) &#123;</div><div class="line">            if (r == null) &#123;</div><div class="line">                r = new StringBuilder(256);</div><div class="line">            &#125; else &#123;</div><div class="line">                r.append(&apos; &apos;);</div><div class="line">            &#125;</div><div class="line">            r.append(s.info.name);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (r != null) &#123;</div><div class="line">        if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, &quot;  Services: &quot; + r);</div><div class="line">    &#125;</div><div class="line">    //省略代码...</div><div class="line">    N = pkg.activities.size();</div><div class="line">    r = null;</div><div class="line">    for (i=0; i&lt;N; i++) &#123;</div><div class="line">        PackageParser.Activity a = pkg.activities.get(i);</div><div class="line">        a.info.processName = fixProcessName(pkg.applicationInfo.processName,</div><div class="line">                a.info.processName, pkg.applicationInfo.uid);</div><div class="line">        mActivities.addActivity(a, &quot;activity&quot;);</div><div class="line">        if ((policyFlags&amp;PackageParser.PARSE_CHATTY) != 0) &#123;</div><div class="line">            if (r == null) &#123;</div><div class="line">                r = new StringBuilder(256);</div><div class="line">            &#125; else &#123;</div><div class="line">                r.append(&apos; &apos;);</div><div class="line">            &#125;</div><div class="line">            r.append(a.info.name);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (r != null) &#123;</div><div class="line">        if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, &quot;  Activities: &quot; + r);</div><div class="line">    &#125;</div><div class="line">    //省略代码...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第23-28步，可以放在一起，主要是生成<code>/data/data/</code>目录下的数据。第26步的<code>createAppData</code>会在<code>data/data</code>目录下生成相应的用户数据(似乎仅仅生成了文件夹<code>cache</code>和<code>code_cache</code>)。第28步的<code>linkNativeLibraryDirectory</code>处理so 文件。到这里完成了<code>data/data</code>中相关信息创建。</p>
+<p>到此就结束了应用apk 的安装过程(执行完<code>installPackageLI</code>后)，此时可以通过<code>adb</code>打开相应的<code>Activity</code>了，但是没有创建桌面图标。</p>
+<p>所以安装的整个逻辑可以总结为：</p>
+<ol>
+<li>将应用apk 拷贝到<code>data/apk</code>目录，以便能够找到代码。</li>
+<li>dex2oat 优化操作。</li>
+<li>解析AndroidManifest.xml 中的信息，然后保存在PMS 中供以后使用。</li>
+<li>生成相应的<code>data/data/包名</code>信息。</li>
+</ol>
+<h3 id="安装后的处理逻辑"><a href="#安装后的处理逻辑" class="headerlink" title="安装后的处理逻辑"></a>安装后的处理逻辑</h3><p>上面安装流程里面的第12步，后续还会处理安装以后的逻辑，最后会调用到<code>PMS#finishPackageInstall</code>，然后会处理到<code>PMS#handlePackagePostInstall</code>。(这里的代码没有跟踪下去了😳)</p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><ol>
+<li>应用安装的入口在哪？应用卸载的入口在哪？卸载的入口可以查看PMS中的deleteXX 或者removeXX 方法。</li>
+<li>apk 的信息安装以后放在哪了。</li>
+<li>安装出错是在哪里提示的。</li>
+<li>应用图标生成的过程在哪？跟<code>android.intent.action.PACKAGE_ADDED</code>这个广播有关系。</li>
+</ol>
+<p><a href="http://blog.csdn.net/u013553529/article/details/61962439" target="_blank" rel="external">PMS 代码理解</a><br><a href="https://www.jianshu.com/p/953475cea991" target="_blank" rel="external">参考1</a><br><a href="http://junshengluo.com/2016/11/30/android-5-%E6%8E%A2%E7%A9%B6%20Android%20%20apk%20%E5%AE%89%E8%A3%85%E8%BF%87%E7%A8%8B/" target="_blank" rel="external">参考2</a><br><a href="http://blog.csdn.net/hdhd588/article/details/6739281" target="_blank" rel="external">参考3</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/framework/" rel="tag"># framework</a>
+          
+            <a href="/tags/PMS/" rel="tag"># PMS</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/31/2017/" rel="next" title="2017">
+                <i class="fa fa-chevron-left"></i> 2017
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/17/AMS之startActivity/" rel="prev" title="AMS之startActivity">
+                AMS之startActivity <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#基础知识"><span class="nav-number">1.</span> <span class="nav-text">基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#两种不同的应用"><span class="nav-number">1.1.</span> <span class="nav-text">两种不同的应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装的方式"><span class="nav-number">1.2.</span> <span class="nav-text">安装的方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PMS-代码注意点"><span class="nav-number">1.3.</span> <span class="nav-text">PMS 代码注意点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#客户端调用安装的代码"><span class="nav-number">1.4.</span> <span class="nav-text">客户端调用安装的代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他"><span class="nav-number">1.5.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装流程"><span class="nav-number">2.</span> <span class="nav-text">安装流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装后的处理逻辑"><span class="nav-number">3.</span> <span class="nav-text">安装后的处理逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">4.</span> <span class="nav-text">问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

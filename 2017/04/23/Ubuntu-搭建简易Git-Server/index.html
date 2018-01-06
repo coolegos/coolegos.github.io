@@ -1,0 +1,726 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="git,server," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="自己的理解：git server就是一个remote 的git仓库。相当于在服务器端创建的一个git仓库，然后客户端从这个仓库获取代码以及推送代码到这个仓库。需求是获取代码，然后做相应的修改再推送代码。即服务器的配置、客户端与服务器的连接方式、服务器端创建仓库、客户端克隆服务器端仓库。">
+<meta name="keywords" content="git,server">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu 搭建简易Git Server">
+<meta property="og:url" content="http://localhost:4000/2017/04/23/Ubuntu-搭建简易Git-Server/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="自己的理解：git server就是一个remote 的git仓库。相当于在服务器端创建的一个git仓库，然后客户端从这个仓库获取代码以及推送代码到这个仓库。需求是获取代码，然后做相应的修改再推送代码。即服务器的配置、客户端与服务器的连接方式、服务器端创建仓库、客户端克隆服务器端仓库。">
+<meta property="og:updated_time" content="2017-04-23T14:28:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ubuntu 搭建简易Git Server">
+<meta name="twitter:description" content="自己的理解：git server就是一个remote 的git仓库。相当于在服务器端创建的一个git仓库，然后客户端从这个仓库获取代码以及推送代码到这个仓库。需求是获取代码，然后做相应的修改再推送代码。即服务器的配置、客户端与服务器的连接方式、服务器端创建仓库、客户端克隆服务器端仓库。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2017/04/23/Ubuntu-搭建简易Git-Server/"/>
+
+
+
+
+
+  <title> Ubuntu 搭建简易Git Server | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/04/23/Ubuntu-搭建简易Git-Server/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Ubuntu 搭建简易Git Server
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-23T22:24:41+08:00">
+                2017-04-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/git/" itemprop="url" rel="index">
+                    <span itemprop="name">git</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>自己的理解：<code>git server</code>就是一个remote 的<code>git</code>仓库。相当于在服务器端创建的一个<code>git</code>仓库，然后客户端从这个仓库获取代码以及推送代码到这个仓库。<br>需求是获取代码，然后做相应的修改再推送代码。即服务器的配置、客户端与服务器的连接方式、服务器端创建仓库、客户端克隆服务器端仓库。<br><a id="more"></a></p>
+<h3 id="服务器的配置"><a href="#服务器的配置" class="headerlink" title="服务器的配置"></a>服务器的配置</h3><p>一般是专门创建一个用户来管理<code>git</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">useradd git  // 在虚拟机上面创建一个名称是git的用户</div></pre></td></tr></table></figure></p>
+<p>现在就可以在查看<code>/home/</code>目录下面是否含有<code>git</code>用户目录，没有可以直接创建一个。现在相当于在服务器上拥有了一个专门用来管理<code>git</code>的用户，目录是<code>/home/git</code>。一般为了安全着想会禁用掉<code>git</code>的<code>shell</code>执行能力。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">vim /etc/passwd // 修改passwd里面git的配置</div></pre></td></tr></table></figure></p>
+<p>改成下面的样式，就是在<code>git</code>用户模式下无法执行<code>shell</code>脚本。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git:x:1002:1002::/home/git:/usr/bin/git-shell</div></pre></td></tr></table></figure></p>
+<p>以上创建了一个没有执行<code>shell</code>脚本能力的<code>git</code>用户，为后面<code>git</code>提供服务。</p>
+<h3 id="客户端和服务器的连接方式"><a href="#客户端和服务器的连接方式" class="headerlink" title="客户端和服务器的连接方式"></a>客户端和服务器的连接方式</h3><p>从<code>Github</code>的使用来说，可以使用<code>http(s)</code>或者<code>ssh</code>协议(还有<code>git</code>协议和本地协议)来处理客户端和服务器的连接。这里只讲讲<code>ssh</code>协议的连接。<br>在<code>/home/git/</code>目录下面创建<code>.ssh</code>目录。并且创建文件<code>authorized_keys</code>。<br>在客户端生成<code>key</code>，保存在用户目录的<code>.ssh</code>目录里面。一般是<code>id_rsa</code>保存私钥，<code>id_rsa.pub</code>保存公钥。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ssh-keygen -t rsa -C &quot;verycoolegos@gmail.com&quot;</div></pre></td></tr></table></figure></p>
+<p>不指定目录的话，现在就可以在用户目录的<code>.ssh</code>目录下面找到<code>id_rsa</code>和<code>id_rsa.pub</code>。<br>最后需要做的是<code>id_rsa.pub</code>的内容写入到上面创建的<code>authorized_keys</code>文件。<br>然后就可以试着连接你的服务器了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ssh git@servername</div></pre></td></tr></table></figure></p>
+<h3 id="服务器端创建仓库"><a href="#服务器端创建仓库" class="headerlink" title="服务器端创建仓库"></a>服务器端创建仓库</h3><p>一般使用<code>git init</code>来创建仓库，但是在服务器上面一般是用<code>git init --bare</code>创建裸仓库（裸仓库相对普通仓库是不含有自己的工作区，即只包含了<code>.git</code>里面的内容）。<code>git init --bare</code>创建裸仓库可以直接<code>push</code>代码。不是裸仓库的话，从其它客户端没办法直接<code>push</code>的，需要设置<code>git config receive.denyCurrentBranch ignore</code>，通过<code>git clone ssh://git@servername:22/sample.git</code>来拉取代码，然后才可以<code>push</code>。<br>在<code>/home/git/</code>目录下面创建裸仓库。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">git init --bare sample.git // 裸仓库一般以.git结尾</div><div class="line">cd sample.git</div><div class="line">ls // 发现就是普通仓库里面的.git目录下面内容</div></pre></td></tr></table></figure></p>
+<h3 id="客户端克隆服务器端仓库"><a href="#客户端克隆服务器端仓库" class="headerlink" title="客户端克隆服务器端仓库"></a>客户端克隆服务器端仓库</h3><p>克隆代码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git clone git@servername:sample.git</div></pre></td></tr></table></figure></p>
+<p>之后的操作就跟在客户端操作普通的<code>git</code>一样了。</p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>上面似乎一切ok，但是如何在服务器得到<code>git</code>的工作目录（源代码），毕竟服务器也是需要<code>git</code>上面的源代码执行的。在服务器中创建一个目录clone 代码就ok 了。那么问题就转化成如何在客户端每次<code>push</code>的时候在服务器的工作目录下<code>git pull</code>最新的代码。这里就需要使用到<code>git</code>的<code>hooks</code>函数了。在<code>/home/git/sample.git/hooks</code>目录下面就有很多个<code>hooks</code>函数，每当git执行到相应的操作的使用就会执行里面的<code>hooks</code>。<br>创建一个<code>post-receive</code>（在客户端推送完成后执行）。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd sample.git/hooks/</div><div class="line">cp post-update.sample post-receive // 创建了一个post-receive，注意这里没有.sample后缀</div></pre></td></tr></table></figure></p>
+<p>现在需要做的是在<code>post-receive</code>执行源代码的更新。将下面内容复制到<code>post-receive</code>文件中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">// 注意这里的操作，不然会报错fatal: Not a git repository: &apos;.&apos;</div><div class="line">// git的hooks里面默认有一些环境变量,会导致无论在哪个语句之后执行git命令都会有一个默认的环境路径</div><div class="line">unset GIT_DIR</div><div class="line"></div><div class="line">if [ ! -d &quot;/home/git/sample&quot; ]; then  // 如果sample 目录不存在的时候才会执行clone 操作</div><div class="line">	cd /home/git</div><div class="line">	git clone /home/git/sample.git sample</div><div class="line">fi</div><div class="line"></div><div class="line">cd /home/git/sample</div><div class="line">git pull // 拉取最新代码</div></pre></td></tr></table></figure></p>
+<p>上面的操作就完成了当客户端<code>push</code>以后服务器会将最新的代码更新到<code>/home/git/sample</code>目录下面。<br>还有可能有一些权限的问题，否则push代码时候会报没写入权限的错。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">chown -R git:git sample.git</div></pre></td></tr></table></figure></p>
+<p><code>chown</code>修改所属用户。<code>chomod</code>修改文件权限。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/git/" rel="tag"># git</a>
+          
+            <a href="/tags/server/" rel="tag"># server</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/06/IPC基础/" rel="next" title="IPC基础">
+                <i class="fa fa-chevron-left"></i> IPC基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/22/Android截屏方法总结/" rel="prev" title="Android截屏方法总结">
+                Android截屏方法总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器的配置"><span class="nav-number">1.</span> <span class="nav-text">服务器的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端和服务器的连接方式"><span class="nav-number">2.</span> <span class="nav-text">客户端和服务器的连接方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器端创建仓库"><span class="nav-number">3.</span> <span class="nav-text">服务器端创建仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端克隆服务器端仓库"><span class="nav-number">4.</span> <span class="nav-text">客户端克隆服务器端仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">5.</span> <span class="nav-text">问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

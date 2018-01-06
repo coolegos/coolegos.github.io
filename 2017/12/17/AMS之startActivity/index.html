@@ -1,0 +1,793 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="framework,AMS," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="趁着周末最后一天的晚上，大概看了startActivity 的总体的流程，目前还非常的不完善，记录下。">
+<meta name="keywords" content="framework,AMS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AMS之startActivity">
+<meta property="og:url" content="http://localhost:4000/2017/12/17/AMS之startActivity/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="趁着周末最后一天的晚上，大概看了startActivity 的总体的流程，目前还非常的不完善，记录下。">
+<meta property="og:image" content="http://localhost:4000/img/AMS%20startActivity进程间通信.png">
+<meta property="og:image" content="http://localhost:4000/img/AMS之startActivity调用端pause.png">
+<meta property="og:image" content="http://localhost:4000/img/AMS之startActivity被调用端launch.png">
+<meta property="og:image" content="http://localhost:4000/img/AMS之startActivity调用端stop.png">
+<meta property="og:image" content="http://localhost:4000/img/AMS_record_relations.jpg">
+<meta property="og:updated_time" content="2017-12-28T15:23:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AMS之startActivity">
+<meta name="twitter:description" content="趁着周末最后一天的晚上，大概看了startActivity 的总体的流程，目前还非常的不完善，记录下。">
+<meta name="twitter:image" content="http://localhost:4000/img/AMS%20startActivity进程间通信.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2017/12/17/AMS之startActivity/"/>
+
+
+
+
+
+  <title> AMS之startActivity | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/12/17/AMS之startActivity/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                AMS之startActivity
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-17T21:35:47+08:00">
+                2017-12-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android-framework/" itemprop="url" rel="index">
+                    <span itemprop="name">android framework</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>趁着周末最后一天的晚上，大概看了startActivity 的总体的流程，目前还非常的不完善，记录下。<a id="more"></a><br>看源码是想要回答以及更好的理解下面6个问题。</p>
+<ol>
+<li>AMS 是用来做什么的。</li>
+<li>Activity 启动的完整流程，如何去寻找需要跳转的Activity 的。</li>
+<li>权限问题是怎么解决的。</li>
+<li>Activity 中的token 是什么。</li>
+<li>具体的task 是怎么工作的。</li>
+<li>知道了AMS 启动Activity 的流程以后可以做什么。</li>
+</ol>
+<p>主要涉及到的类：</p>
+<blockquote>
+<p>android.app.*</p>
+<blockquote>
+<p>Activity<br>Instrumentation<br>ActivityThread<br>ApplicationThread<br>ActivityManagerNative<br>ActivityManagerProxy<br>ApplicationThreadNative<br>ApplicationThreadProxy</p>
+</blockquote>
+<p>com.android.server.am.*</p>
+<blockquote>
+<p>ActivityManagerService<br>ActivityRecord<br>ActivityStarter<br>ActivityStack<br>ActivityStackSupervisor</p>
+</blockquote>
+</blockquote>
+<h3 id="startActivity-流程分析"><a href="#startActivity-流程分析" class="headerlink" title="startActivity 流程分析"></a>startActivity 流程分析</h3><blockquote>
+<p>最开始这个地方分析的比较混乱，所以重新总结了一下(一些疑惑直接写在了时序图里面)。主要是将startActivity 的过程看成了3个过程：调用端pause 过程、被调用端launch 过程、调用端stop 过程。这个过程也是在应用开发中的流程，比如调用端执行onPause 以后才会执行被调用端的onCreate。</p>
+</blockquote>
+<p>里面的分析流程是在同一个应用中打开的流程，所以没有涉及到Application 的创建的过程。</p>
+<h4 id="总体涉及到的进程间通信"><a href="#总体涉及到的进程间通信" class="headerlink" title="总体涉及到的进程间通信"></a>总体涉及到的进程间通信</h4><p>总体涉及到了两次IPC 通信。<br><img src="/img/AMS startActivity进程间通信.png" alt="涉及到的两次IPC"></p>
+<h4 id="调用端pause-过程"><a href="#调用端pause-过程" class="headerlink" title="调用端pause 过程"></a>调用端pause 过程</h4><p><img src="/img/AMS之startActivity调用端pause.png" alt="AMS之startActivity调用端pause"><br>12 里面有一个Binder 进程间通信的知识点。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">//ApplicationThreadProxy</div><div class="line">public final void scheduleStopActivity(IBinder token, boolean showWindow,</div><div class="line">        int configChanges) throws RemoteException &#123;</div><div class="line">    //省略代码...</div><div class="line">    mRemote.transact(SCHEDULE_STOP_ACTIVITY_TRANSACTION, data, null,</div><div class="line">            IBinder.FLAG_ONEWAY);</div><div class="line">    //省略代码...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>Binder</code>进程间通信是阻塞的，但是<code>IBinder.FLAG_ONEWAY</code>可以实现非阻塞，意思是调用<code>scheduleStopActivity</code>以后可以直接执行后面的代码而不用等待进程间通信返回的结果。</p>
+<h4 id="被调用端launch-过程"><a href="#被调用端launch-过程" class="headerlink" title="被调用端launch 过程"></a>被调用端launch 过程</h4><p><img src="/img/AMS之startActivity被调用端launch.png" alt="AMS之startActivity被调用端launch"><br>17<code>performLaunchActivity</code>里，涉及到了<code>Activity</code>的创建完整过程。(注意这里因为是同一个<code>Application</code>的<code>startActivity</code>所以没有涉及到<code>Application#onCreate</code>)</p>
+<h4 id="调用端stop-过程"><a href="#调用端stop-过程" class="headerlink" title="调用端stop 过程"></a>调用端stop 过程</h4><p><img src="/img/AMS之startActivity调用端stop.png" alt="AMS之startActivity调用端stop"><br>这里<code>Idler</code>涉及到了<code>MessageQueue.IdleHandler</code>的一个机制，代表的是在<code>MessageQueue</code>中还有消息需要执行，但是当前时间点没有消息，会执行<code>IdleHandler</code>的消息(相当于是在空闲的时间点执行消息)。</p>
+<h3 id="查找Activity-具体流程"><a href="#查找Activity-具体流程" class="headerlink" title="查找Activity 具体流程"></a>查找Activity 具体流程</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">// ActivityStackSupervisor.java</div><div class="line">ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags) &#123;</div><div class="line">    try &#123;</div><div class="line">        return AppGlobals.getPackageManager().resolveIntent(intent, resolvedType,</div><div class="line">                PackageManager.MATCH_DEFAULT_ONLY | flags</div><div class="line">                | ActivityManagerService.STOCK_PM_FLAGS, userId);</div><div class="line">    &#125; catch (RemoteException e) &#123;</div><div class="line">    &#125;</div><div class="line">    return null;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终<code>AppGlobals.getPackageManager()</code>执行<code>ActivityThread.getPackageManager</code>，得到的是<code>PackageManagerService</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">//PackageManagerService.java</div><div class="line">public ResolveInfo resolveIntent(Intent intent, String resolvedType,</div><div class="line">        int flags, int userId) &#123;</div><div class="line">    try &#123;</div><div class="line">        if (!sUserManager.exists(userId)) return null;</div><div class="line">        flags = updateFlagsForResolve(flags, userId, intent); // 1. 更新flags</div><div class="line">        enforceCrossUserPermission(Binder.getCallingUid(), userId, // 2. 权限处理</div><div class="line">                false /*requireFullPermission*/, false /*checkShell*/, &quot;resolve intent&quot;);</div><div class="line"></div><div class="line">        final List&lt;ResolveInfo&gt; query = queryIntentActivitiesInternal(intent, resolvedType,</div><div class="line">                flags, userId); //3. 查找满足条件的Activity</div><div class="line"></div><div class="line">        final ResolveInfo bestChoice =</div><div class="line">                chooseBestActivity(intent, resolvedType, flags, query, userId); //4. 选择最合适的Activity</div><div class="line">        return bestChoice;</div><div class="line">    &#125; finally &#123;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>主要是看3和4处的代码，<code>queryIntentActivitiesInternal</code>看名称是通过<code>Intent</code>查找满足条件的所有<code>Activity</code>，而<code>chooseBestActivity</code>则是从所有满足条件的<code>Activity</code>中选择最合适的一个。</p>
+<h4 id="queryIntentActivitiesInternal"><a href="#queryIntentActivitiesInternal" class="headerlink" title="queryIntentActivitiesInternal"></a>queryIntentActivitiesInternal</h4><p>首先看<code>queryIntentActivitiesInternal</code>，如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">//PackageManagerService.java</div><div class="line">private @NonNull List&lt;ResolveInfo&gt; queryIntentActivitiesInternal(Intent intent,</div><div class="line">            String resolvedType, int flags, int userId) &#123;</div><div class="line">    // 省略代码</div><div class="line">    if (comp != null) &#123; // 1. comp != null 代表的是只有一个结果</div><div class="line">        final List&lt;ResolveInfo&gt; list = new ArrayList&lt;ResolveInfo&gt;(1);</div><div class="line">        final ActivityInfo ai = getActivityInfo(comp, flags, userId); // 1.1 获取到Activity 的信息</div><div class="line">        if (ai != null) &#123;</div><div class="line">            final ResolveInfo ri = new ResolveInfo(); // 封装成resolveInfo 信息</div><div class="line">            ri.activityInfo = ai;</div><div class="line">            list.add(ri);</div><div class="line">        &#125;</div><div class="line">        return list;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // reader</div><div class="line">    boolean sortResult = false; // 2. comp == null，可能找到多个可以匹配的Activity</div><div class="line">    boolean addEphemeral = false;</div><div class="line">    boolean matchEphemeralPackage = false;</div><div class="line">    List&lt;ResolveInfo&gt; result;</div><div class="line">    final String pkgName = intent.getPackage();</div><div class="line">    synchronized (mPackages) &#123; // mPackages 代表的是手机中所有app 的包信息，是一个ArrayMap，key 是包名，value 是PackageParser.Package</div><div class="line">        if (pkgName == null) &#123;</div><div class="line">            // 省略代码...</div><div class="line"></div><div class="line">            // Check for results in the current profile.</div><div class="line">            result = filterIfNotSystemUser(mActivities.queryIntent(</div><div class="line">                    intent, resolvedType, flags, userId), userId); // 2.1 获取到了匹配的数据</div><div class="line">            // 省略代码...</div><div class="line">        &#125; else &#123;</div><div class="line">            final PackageParser.Package pkg = mPackages.get(pkgName);</div><div class="line">            if (pkg != null) &#123;</div><div class="line">                result = filterIfNotSystemUser(</div><div class="line">                        mActivities.queryIntentForPackage(</div><div class="line">                                intent, resolvedType, flags, pkg.activities, userId), // 2.2 如果设置了package，那么就从那个Package 中去寻找</div><div class="line">                        userId);</div><div class="line">            &#125; else &#123;</div><div class="line">                // 省略代码...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // 省略代码...</div><div class="line">    if (sortResult) &#123;</div><div class="line">        Collections.sort(result, mResolvePrioritySorter); // 最终按照优先级排序</div><div class="line">    &#125;</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>简化了很多代码，主要分成两种情况，如果已经设置了<code>ComponentName</code>(已经知道了包名和打开的<code>Activity</code>)，可以直接找到。看第7行代码就行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//PackageManagerService.java</div><div class="line">public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) &#123;</div><div class="line">    // 省略代码...</div><div class="line">    synchronized (mPackages) &#123;</div><div class="line">        PackageParser.Activity a = mActivities.mActivities.get(component); // ArrayMap 保存着一组&lt;component, Activity&gt;的键值对</div><div class="line">        // 省略代码...</div><div class="line">    &#125;</div><div class="line">    return null;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>直接看第5行代码，通过<code>ComponentName</code>在<code>ArrayMap</code>找到相应的相应的<code>Activity</code>。</p>
+<p>总结：<code>mActivities</code>这个对象保存在<code>PackageManagerService</code>中，里面存储了系统中所有的<code>Activity</code>(键值对保存着<component, activity="">)，在设置了<code>ComponentName</code>的情况下寻找<code>Activity</code>直接使用<code>map.get</code>。</component,></p>
+<p>回到上面的<code>queryIntentActivitiesInternal</code>，在<code>comp == null</code>的情况，首先看到27行，里面直接调用了<code>IntentResolver.queryIntent</code>。在里面会根据<code>resolvedType</code>(与设置的数据有关)、<code>scheme</code>、<code>action</code>、<code>catrgories</code>来处理。在看到34行，通过<code>mPackages</code>已经过滤的数据一次的数据来处理的。</p>
+<p>总结：在<code>ComponentName</code>不为null 的情况下，使用<code>ActivityIntentResolver</code>里面已经保存的数据(例如：mActionToFilter 保存了相应Action 对应的所有的数据Activity 的信息)来查询满足的数据。</p>
+<h4 id="chooseBestActivity"><a href="#chooseBestActivity" class="headerlink" title="chooseBestActivity"></a>chooseBestActivity</h4><p>选择最合适的<code>Activity</code>过程，通过上面的步骤查到了所有满足的<code>Activity</code>，但实际上一次只能打开一个<code>Activity</code>，所以需要去判断，这里已经把分析写在了注释。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">//PackageManagerService.java</div><div class="line">private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,</div><div class="line">        int flags, List&lt;ResolveInfo&gt; query, int userId) &#123;</div><div class="line">    if (query != null) &#123;</div><div class="line">        final int N = query.size();</div><div class="line">        if (N == 1) &#123; // 1. 只有一个的情况，直接返回第一个</div><div class="line">            return query.get(0);</div><div class="line">        &#125; else if (N &gt; 1) &#123;</div><div class="line">            final boolean debug = ((intent.getFlags() &amp; Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);</div><div class="line">            // If there is more than one activity with the same priority,</div><div class="line">            // then let the user decide between them.</div><div class="line">            ResolveInfo r0 = query.get(0);</div><div class="line">            ResolveInfo r1 = query.get(1);</div><div class="line">            // 省略代码</div><div class="line">            if (r0.priority != r1.priority</div><div class="line">                    || r0.preferredOrder != r1.preferredOrder</div><div class="line">                    || r0.isDefault != r1.isDefault) &#123; // 2.第一个和第二个优先级不一样的情况，直接返回第一个</div><div class="line">                return query.get(0);</div><div class="line">            &#125;</div><div class="line">             //省略代码</div><div class="line">            ResolveInfo ri = findPreferredActivity(intent, resolvedType, // 3. 如果已经选择并保存了应该使用哪个Activity 的情况，直接选择优先打开的那个</div><div class="line">                    flags, query, r0.priority, true, false, debug, userId);</div><div class="line">            if (ri != null) &#123;</div><div class="line">                return ri;</div><div class="line">            &#125;</div><div class="line">            ri = new ResolveInfo(mResolveInfo); // 4. 如果都没有，则打开一个选择界面。mResolveInfo 代表的是一个选择的界面</div><div class="line">            ri.activityInfo = new ActivityInfo(ri.activityInfo);</div><div class="line">            ri.activityInfo.labelRes = ResolverActivity.getLabelRes(intent.getAction());</div><div class="line">            // 省略代码</div><div class="line">            return ri;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return null;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>总结：通过<code>Intent</code>查询最终打开的<code>Activity</code>的过程是通过<code>PackageManagerService</code>来完成的。<code>PackageManagerService</code>中的<code>mPackages</code>、<code>mActivities</code>分别表示了系统中<code>Package</code>以及<code>Activity</code>的数据(想要非常清楚的明白这些值是怎么来的还需要去看<code>PackageManagerService</code>的工作原理)。还有一个应用开发的问题是在自定义<code>intent-filter</code>的时候最好是加上<code>&lt;category android:name=&quot;android.intent.category.DEFAULT&quot;/&gt;</code>。</p>
+<h3 id="权限问题"><a href="#权限问题" class="headerlink" title="权限问题"></a>权限问题</h3><p><code>ActivityNotFoundException</code>这个比较容易出现的错误是在<code>Instrumentation#checkStartActivityResult</code>。没有在<code>AndroidManifest</code>中声明<code>Activity</code>。<br>然后就是权限错误了。<code>ActivityStackSupervisor#checkStartAnyActivityPermission</code>有具体的判断逻辑。主要记录下有两点需要注意的地方。</p>
+<ul>
+<li><code>android:exported=&quot;true&quot;</code>可以让其他app 打开自己的<code>Activity</code>。</li>
+<li>如果有必要可以自己声明权限。</li>
+</ul>
+<p>在App1 中声明权限<code>egos.app1.zzz</code>，并设置<code>MainActivity3</code><br>需要权限。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    package=&quot;egos.app1&quot;&gt;</div><div class="line">  &lt;permission</div><div class="line">      android:name=&quot;egos.app1.zzz&quot;/&gt;</div><div class="line">  &lt;application&gt;    </div><div class="line">    &lt;activity</div><div class="line">        android:name=&quot;.MainActivity3&quot;</div><div class="line">        android:exported=&quot;true&quot;</div><div class="line">        android:permission=&quot;egos.app1.zzz&quot;</div><div class="line">        android:theme=&quot;@style/AppTheme.NoActionBar&quot;/&gt;</div><div class="line">  &lt;/application&gt;</div><div class="line">&lt;/manifest&gt;</div></pre></td></tr></table></figure></p>
+<p>在App2 中申请权限，那么在App2 中就可以打开App1 的<code>MainActivity3</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    package=&quot;egos.app2&quot;&gt;</div><div class="line">  &lt;uses-permission android:name=&quot;egos.app1.zzz&quot;/&gt;</div><div class="line">&lt;manifest/&gt;</div></pre></td></tr></table></figure>
+<p>实际的操作中通常设置<code>android:protectionLevel=&quot;signature&quot;</code>，以及会在两个App 中都声明permission(只在一个App 中声明，可能导致没有声明的App 先安装的话找不到这个权限，没办法注册)。</p>
+<h3 id="token-是什么"><a href="#token-是什么" class="headerlink" title="token 是什么"></a>token 是什么</h3><h4 id="token-创建的地方"><a href="#token-创建的地方" class="headerlink" title="token 创建的地方"></a>token 创建的地方</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">//ActivityStarter#startActivityLocked</div><div class="line">ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,</div><div class="line">        intent, resolvedType, aInfo, mService.mConfiguration, resultRecord, resultWho,</div><div class="line">        requestCode, componentSpecified, voiceSession != null, mSupervisor, container,</div><div class="line">        options, sourceRecord);</div></pre></td></tr></table></figure>
+<p><code>Token</code>是<code>ActivityRecord</code>的内部类，在里面创建的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//ActivityRecord 的构造函数中</div><div class="line">appToken = new Token(this, service);</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//Token 的定义</div><div class="line">static class Token extends IApplicationToken.Stub</div></pre></td></tr></table></figure>
+<p>所以到这里，token 代表的是<code>Activityecord$Token</code>的对象，也是一个<code>Binder</code>对象。<code>Token</code>中主要保存的是所处的<code>Activityecord</code>信息以及对应的<code>ActivityManagerService</code>的信息。</p>
+<h4 id="token-使用的地方"><a href="#token-使用的地方" class="headerlink" title="token 使用的地方"></a>token 使用的地方</h4><p>token 到底是什么还是需要看使用的地方，再回到最开始调用<code>Instrumentation#execStartActivity</code>的地方。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">//Instrumentation#execStartActivity</div><div class="line">int result = ActivityManagerNative.getDefault()</div><div class="line">    .startActivity(whoThread, who.getBasePackageName(), intent,</div><div class="line">            intent.resolveTypeIfNeeded(who.getContentResolver()),</div><div class="line">            token, target != null ? target.mEmbeddedID : null,</div><div class="line">            requestCode, 0, null, options);</div></pre></td></tr></table></figure>
+<p>token 被传递进去了。(仔细看上面<code>startActivity</code>的地方其实就已经觉得很奇怪了，调用的时候都不知道到底是哪个<code>Activity</code>发起的<code>startActivity</code>，其实这就是token 的作用)<br>继续跟进代码，<code>ActivityManagerProxy#startActivity</code>，然后<code>ActivityManagerNative#onTransact</code>，再到<code>ActivityMAnagerService#startActivity</code>。跟着上面的时序图跑，最终在<code>ActivityStarter#startActivityLocked</code>找到了Token 的使用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//ActivityStarter#startActivityLocked</div><div class="line">sourceRecord = mSupervisor.isInAnyStackLocked(resultTo);</div></pre></td></tr></table></figure>
+<p>即通过token 拿到了调用端的<code>Activity</code>的相关信息。<br>总结：正如token 字面意思一样，代表的是<code>Activity</code>的标识。里面记录了<code>Activity</code>的相关信息，在IPC 的时候可以通过Token 找到一个对应的<code>Activity</code>的信息。</p>
+<h3 id="任务栈的工作原理"><a href="#任务栈的工作原理" class="headerlink" title="任务栈的工作原理"></a>任务栈的工作原理</h3><p>任务栈的用处(个人小总结)：</p>
+<ul>
+<li>回到上一个页面：最基本的back 键回到上一个界面。</li>
+<li>方便复用：比如singleTask。</li>
+<li>方便回收内存：内存不够的时候优先回收看不见的<code>Activity</code>。</li>
+</ul>
+<p>可以通过<code>adb shell dumpsys activity activities</code>入手。具体的流程是<code>ActivityManagerService#dumpActivitiesLocked</code>，到<code>ActivityStackSupervisor#dumpActivitiesLocked</code>，再到<code>ActivityStack#dumpActivitiesLocked</code>，再到<code>TaskRecord#dump</code>，最后<code>ActivityRecord#dump</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div></pre></td><td class="code"><pre><div class="line">ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)</div><div class="line">Display #0 (activities from top to bottom):</div><div class="line">  Stack #0:</div><div class="line">  mFullscreen=true</div><div class="line">  mBounds=null</div><div class="line">    Task id #496</div><div class="line">    mFullscreen=true</div><div class="line">    mBounds=null</div><div class="line">    mMinWidth=-1</div><div class="line">    mMinHeight=-1</div><div class="line">    mLastNonFullscreenBounds=null</div><div class="line">    * TaskRecord&#123;de235a2 #496 I=com.google.android.apps.nexuslauncher/.NexusLauncherActivity U=0 StackId=0 sz=1&#125;</div><div class="line">      userId=0 effectiveUid=u0a14 mCallingUid=0 mUserSetupComplete=true mCallingPackage=null</div><div class="line">      intent=&#123;act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity&#125;</div><div class="line">      realActivity=com.google.android.apps.nexuslauncher/.NexusLauncherActivity</div><div class="line">      autoRemoveRecents=false isPersistable=true numFullscreen=1 taskType=1 mTaskToReturnTo=1</div><div class="line">      rootWasReset=false mNeverRelinquishIdentity=true mReuseTask=false mLockTaskAuth=LOCK_TASK_AUTH_PINNABLE</div><div class="line">      Activities=[ActivityRecord&#123;5608242 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t496&#125;]</div><div class="line">      askedCompatMode=false inRecents=true isAvailable=true</div><div class="line">      lastThumbnail=null lastThumbnailFile=/data/system_ce/0/recent_images/496_task_thumbnail.png</div><div class="line">      stackId=0</div><div class="line">      hasBeenVisible=true mResizeMode=RESIZE_MODE_RESIZEABLE isResizeable=false firstActiveTime=1513676204884 lastActiveTime=1513676204884 (inactive for 29s)</div><div class="line">      * Hist #0: ActivityRecord&#123;5608242 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t496&#125;</div><div class="line">          packageName=com.google.android.apps.nexuslauncher processName=com.google.android.apps.nexuslauncher</div><div class="line">          launchedFromUid=0 launchedFromPackage=null userId=0</div><div class="line">          app=ProcessRecord&#123;dd45228 2110:com.google.android.apps.nexuslauncher/u0a14&#125;</div><div class="line">          Intent &#123; act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity &#125;</div><div class="line">          frontOfTask=true task=TaskRecord&#123;de235a2 #496 I=com.google.android.apps.nexuslauncher/.NexusLauncherActivity U=0 StackId=0 sz=1&#125;</div><div class="line">          taskAffinity=null</div><div class="line">          realActivity=com.google.android.apps.nexuslauncher/.NexusLauncherActivity</div><div class="line">          baseDir=/system/priv-app/NexusLauncherPrebuilt/NexusLauncherPrebuilt.apk</div><div class="line">          dataDir=/data/user/0/com.google.android.apps.nexuslauncher</div><div class="line">          stateNotNeeded=true componentSpecified=false mActivityType=1</div><div class="line">          compat=&#123;480dpi&#125; labelRes=0x7f0c0076 icon=0x7f030000 theme=0x7f120001</div><div class="line">          config=&#123;1.0 310mcc260mnc [zh_CN_#Hans,en_US] ldltr sw360dp w360dp h568dp 480dpi nrml port finger -keyb/v/h -nav/h s.7&#125;</div><div class="line">          taskConfigOverride=&#123;1.0 ?mcc?mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/?&#125;</div><div class="line">          taskDescription: iconFilename=null label=&quot;null&quot; color=fff5f5f5</div><div class="line">          launchFailed=false launchCount=1 lastLaunchTime=-29s757ms</div><div class="line">          haveState=false icicle=null</div><div class="line">          state=RESUMED stopped=false delayedResume=false finishing=false</div><div class="line">          keysPaused=false inHistory=true visible=true sleeping=false idle=true mStartingWindowState=STARTING_WINDOW_NOT_SHOWN</div><div class="line">          fullscreen=true noDisplay=false immersive=false launchMode=2</div><div class="line">          frozenBeforeDestroy=false forceNewConfig=false</div><div class="line">          mActivityType=HOME_ACTIVITY_TYPE</div><div class="line">          waitingVisible=false nowVisible=true lastVisibleTime=-29s20ms</div><div class="line">          connections=[ConnectionRecord&#123;3856a7d u0 CR IMP WACT com.google.android.googlequicksearchbox/com.google.android.apps.gsa.nowoverlayservice.DrawerOverlayService:@33068d4&#125;]</div><div class="line">          resizeMode=RESIZE_MODE_RESIZEABLE</div><div class="line"></div><div class="line">    Running activities (most recent first):</div><div class="line">      TaskRecord&#123;de235a2 #496 I=com.google.android.apps.nexuslauncher/.NexusLauncherActivity U=0 StackId=0 sz=1&#125;</div><div class="line">        Run #0: ActivityRecord&#123;5608242 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t496&#125;</div><div class="line"></div><div class="line">    mResumedActivity: ActivityRecord&#123;5608242 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t496&#125;</div><div class="line"></div><div class="line">  mFocusedActivity: ActivityRecord&#123;5608242 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t496&#125;</div><div class="line">  mFocusedStack=ActivityStack&#123;2f46233 stackId=0, 1 tasks&#125; mLastFocusedStack=ActivityStack&#123;2f46233 stackId=0, 1 tasks&#125;</div><div class="line">  mSleepTimeout=false</div><div class="line">  mCurTaskIdForUser=&#123;0=496&#125;</div><div class="line">  mUserStackInFront=&#123;&#125;</div><div class="line">  mActivityContainers=&#123;0=ActivtyContainer&#123;0&#125;A&#125;</div><div class="line">  mLockTaskModeState=NONE mLockTaskPackages (userId:packages)=</div><div class="line">    0:[]</div><div class="line"> mLockTaskModeTasks[]</div></pre></td></tr></table></figure>
+<p>根据dump 的文件一层层看下去，<code>Display #</code>代表的是一个<code>ActivityStackSupervisor#ActivityDisplay</code>，<code>Stack #</code>代表的是一个<code>ActivityStack</code>，<code>Task id #</code>代表的是一个<code>TaskRecord</code>，最后<code>Hist #</code>代表的是一个<code>ActivityRecord</code>。这里附上一张网上的图，来源<a href="http://gityuan.com/2017/06/11/activity_record/" target="_blank" rel="external">四大组件之ActivityRecord</a><img src="/img/AMS_record_relations.jpg" alt="Stack组成图"><br>做应用开发主要是需要能够从这个dump 里面发现自己的问题，所以比较重要的是<code>TaskRecord</code>和<code>ActivityRecord</code>。<code>TaskRecord</code>代表的是常说的任务栈，<code>ActivityRecord</code>则是任务栈中的某个Activity。<br>最后再看看应用开发中比较特殊的singleTask 和singleInstance。singleTask 代表的是如果在一个<code>TaskRecord</code>里面创建一个<code>ActivityRecord</code>的实例时候发现这个<code>TaskRecord</code>已经有了这个实例那么就会直接使用这个<code>TaskRecord</code>里面的实例，不再创建新的<code>ActivityRecord</code>。singleInstance 则代表的更强的意思，一个singleTask 的实例会单独的保存在一个<code>TaskRecord</code>中。</p>
+<p>总结：任务栈的内容在应用开发过程中是一个比较重要的内容，比如app 的主页一般都是需要设置成singleTask 的。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>写完以后发现自己分析的还是非常的粗糙(特别是对比网上大牛的博客)，但是觉得自己的目的达到了，站在应用开发的角度，去寻找了几个之前没有找到答案的问题。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/framework/" rel="tag"># framework</a>
+          
+            <a href="/tags/AMS/" rel="tag"># AMS</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/28/PMS之apk安装流程/" rel="next" title="PMS之apk安装流程">
+                <i class="fa fa-chevron-left"></i> PMS之apk安装流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/09/https-以及https-在Android-中的使用/" rel="prev" title="https 以及https 在Android 中的使用">
+                https 以及https 在Android 中的使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#startActivity-流程分析"><span class="nav-number">1.</span> <span class="nav-text">startActivity 流程分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#总体涉及到的进程间通信"><span class="nav-number">1.1.</span> <span class="nav-text">总体涉及到的进程间通信</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#调用端pause-过程"><span class="nav-number">1.2.</span> <span class="nav-text">调用端pause 过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#被调用端launch-过程"><span class="nav-number">1.3.</span> <span class="nav-text">被调用端launch 过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#调用端stop-过程"><span class="nav-number">1.4.</span> <span class="nav-text">调用端stop 过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查找Activity-具体流程"><span class="nav-number">2.</span> <span class="nav-text">查找Activity 具体流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#queryIntentActivitiesInternal"><span class="nav-number">2.1.</span> <span class="nav-text">queryIntentActivitiesInternal</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#chooseBestActivity"><span class="nav-number">2.2.</span> <span class="nav-text">chooseBestActivity</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#权限问题"><span class="nav-number">3.</span> <span class="nav-text">权限问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#token-是什么"><span class="nav-number">4.</span> <span class="nav-text">token 是什么</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#token-创建的地方"><span class="nav-number">4.1.</span> <span class="nav-text">token 创建的地方</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#token-使用的地方"><span class="nav-number">4.2.</span> <span class="nav-text">token 使用的地方</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#任务栈的工作原理"><span class="nav-number">5.</span> <span class="nav-text">任务栈的工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,768 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="https," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="http 是明文传输的，被攻击者截获以后会出现一些问题。客户端可能访问的是一个攻击者的服务端(被劫持)，导致客户数据泄漏。服务端接收的是一个攻击者的客户端，可能导致带宽损失、数据被修改等等。对于安全级别比较高的应用仅仅的http 已经不在适用了。">
+<meta name="keywords" content="https">
+<meta property="og:type" content="article">
+<meta property="og:title" content="https 以及https 在Android 中的使用">
+<meta property="og:url" content="http://localhost:4000/2017/12/09/https-以及https-在Android-中的使用/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="http 是明文传输的，被攻击者截获以后会出现一些问题。客户端可能访问的是一个攻击者的服务端(被劫持)，导致客户数据泄漏。服务端接收的是一个攻击者的客户端，可能导致带宽损失、数据被修改等等。对于安全级别比较高的应用仅仅的http 已经不在适用了。">
+<meta property="og:image" content="http://localhost:4000/img/https_1.png">
+<meta property="og:image" content="http://localhost:4000/img/https_2.png">
+<meta property="og:image" content="http://localhost:4000/img/https_3.png">
+<meta property="og:image" content="http://localhost:4000/img/https_4.png">
+<meta property="og:image" content="http://localhost:4000/img/https_5.png">
+<meta property="og:image" content="http://localhost:4000/img/https_6.png">
+<meta property="og:image" content="http://localhost:4000/img/https_7.png">
+<meta property="og:image" content="http://localhost:4000/img/https_8.png">
+<meta property="og:image" content="http://localhost:4000/img/https_9.JPG">
+<meta property="og:updated_time" content="2017-12-09T05:37:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="https 以及https 在Android 中的使用">
+<meta name="twitter:description" content="http 是明文传输的，被攻击者截获以后会出现一些问题。客户端可能访问的是一个攻击者的服务端(被劫持)，导致客户数据泄漏。服务端接收的是一个攻击者的客户端，可能导致带宽损失、数据被修改等等。对于安全级别比较高的应用仅仅的http 已经不在适用了。">
+<meta name="twitter:image" content="http://localhost:4000/img/https_1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2017/12/09/https-以及https-在Android-中的使用/"/>
+
+
+
+
+
+  <title> https 以及https 在Android 中的使用 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/12/09/https-以及https-在Android-中的使用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                https 以及https 在Android 中的使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-09T11:19:41+08:00">
+                2017-12-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/协议/" itemprop="url" rel="index">
+                    <span itemprop="name">协议</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>http 是明文传输的，被攻击者截获以后会出现一些问题。客户端可能访问的是一个攻击者的服务端(被劫持)，导致客户数据泄漏。服务端接收的是一个攻击者的客户端，可能导致带宽损失、数据被修改等等。对于安全级别比较高的应用仅仅的http 已经不在适用了。<a id="more"></a><br>解决办法是加密：通信加密(使用ssl 或者tls)，内容加密(http 报文加密)。<br>与ssl 组合的http 称为https。本文介绍一些https 的知识(https 如何做到安全的)，以及https 在Android 端的使用。</p>
+<h3 id="加密技术使https-安全"><a href="#加密技术使https-安全" class="headerlink" title="加密技术使https 安全"></a>加密技术使https 安全</h3><p>介绍两种常见的密码学中的加密技术。</p>
+<h4 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h4><p>加解密使用同一个密钥。优点：速度比较快(相对非对称加密)。缺点：没有办法安全的传输密钥。</p>
+<h4 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h4><p>使用公钥加密，然后使用私钥解密。优点：公钥是直接公开，而私钥不需要传输，安全。缺点：无法验证公钥的正确性。</p>
+<h4 id="证书认证机构-CA"><a href="#证书认证机构-CA" class="headerlink" title="证书认证机构(CA)"></a>证书认证机构(CA)</h4><p>为了解决非对称加密无法验证公钥的正确性的问题，会使用第三方权威机构来认证公钥的正确性。流程如下：</p>
+<blockquote>
+<ol>
+<li>服务器运营人员用‘服务器公钥’向CA请求证书。</li>
+<li>CA用私钥对‘服务器公钥’加密得到‘证书’，然后给服务器运营人员颁布‘证书’。</li>
+<li>客户端请求服务器时会使用CA公钥对‘证书’校验(这里可以验证’证书’的前提是CA公钥是正确的，CA公钥一般随着浏览器的发布植入到浏览器，安全)获取‘服务器公钥’。</li>
+<li>后续使用‘服务器公钥’对数据加密，服务器使用‘服务器私钥’进行解密。</li>
+</ol>
+</blockquote>
+<p>https 使用非对称加密来传递通信使用的密钥，使用对称加密来通信。流程如下：</p>
+<blockquote>
+<ol>
+<li>客户端使用‘服务器公钥’(通过CA 认证)加密‘对称加密的密钥’给服务器。</li>
+<li>服务器使用‘服务器私钥’解密得到‘对称加密的密钥’</li>
+<li>后续使用‘对称加密的密钥’来通信</li>
+</ol>
+</blockquote>
+<p>总结：使用CA 认证证书来保证‘服务器公钥’的正确性，使用非对称加密传递对称加密的密钥来保证对称加密的安全(数据传输的安全)。</p>
+<h3 id="抓包分析"><a href="#抓包分析" class="headerlink" title="抓包分析"></a>抓包分析</h3><h4 id="tcp-三次握手"><a href="#tcp-三次握手" class="headerlink" title="tcp 三次握手"></a>tcp 三次握手</h4><p><img src="/img/https_1.png" alt="三次握手"></p>
+<h4 id="ssl-握手"><a href="#ssl-握手" class="headerlink" title="ssl 握手"></a>ssl 握手</h4><p>ssl 握手的过程主要分为两部分：获取服务端证书和传递随机生成的密钥用来后续加密通信。<br><img src="/img/https_2.png" alt="ssl 握手"><br><img src="/img/https_3.png" alt="ssl 握手"><br><img src="/img/https_4.png" alt="ssl 握手"><br>上面三个图是获取服务端证书的过程。流程如下：</p>
+<blockquote>
+<ol>
+<li>客户端Client Hello</li>
+<li>服务端Server Hello，Certificate，Server Key Exchange，Server Hello Done</li>
+</ol>
+</blockquote>
+<p>总结：相当于是客户端通过Client Hello 告诉服务端即将进行ssl 通信，服务端验证能够进行ssl 通信，返回Server Hello 给客户端。然后将证书发送给客户端，最终发送Server Hello Done 代表第一个过程结束。这个过程的安全是通过CA，所以是安全的。</p>
+<p><img src="/img/https_5.png" alt="ssl 握手"><br>上面是传递随机密钥的过程。流程如下：</p>
+<blockquote>
+<ol>
+<li>客户端发送Client Key Exchange 来传递即将用来通信的密钥(该密钥被上面第一个步骤的服务器公钥加密，被称为Pre-master secret)。随后传递Change Cipher Spec 和Encrypted Handshake Message 来告诉服务器即将使用Pre-master secret 来加密。</li>
+<li>服务端回复Change Cipher Spec 和Encrypted Handshake Message 可以使用Pre-master secret 加密来通信了。(这里的Session Ticket 不了解，但是不影响后面的分析)</li>
+</ol>
+</blockquote>
+<p>总结： 通过服务端的公钥，安全的传递通信使用密钥。</p>
+<h4 id="通信"><a href="#通信" class="headerlink" title="通信"></a>通信</h4><p><img src="/img/https_6.png" alt="通信"><br><img src="/img/https_7.png" alt="通信"><br><img src="/img/https_8.png" alt="通信"><br>最下面代表的是客户端发送给服务端的一个报文，数据是加密的。</p>
+<h4 id="tcp-四次分手"><a href="#tcp-四次分手" class="headerlink" title="tcp 四次分手"></a>tcp 四次分手</h4><p>这里没有抓到报文就不展开了，一般需要在通信结束以后过一会儿才能抓到FIN 报文。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>整个过程没有明文传递任何客户端和服务端的数据，所以是安全的。</p>
+<p>图解http中https 通信流程：<br><img src="/img/https_9.JPG" alt="图解http中https 通信流程"></p>
+<h3 id="app-如何避免被抓包"><a href="#app-如何避免被抓包" class="headerlink" title="app 如何避免被抓包"></a>app 如何避免被抓包</h3><p>大部分app 的数据非常简单就被客户端Fiddler 或者charles。Fiddler 或者charles 代理的原理相当于是一个中间人的身份。客户端访问charles，把charles 当成服务端。charles 再访问最终服务器，服务器当charles 为客户端。<br>目前分析到的Android 端两种比较方便的方法(后面会写代码实现下)：使用https 或者Android 端判断有没有连接代理。</p>
+<h3 id="Android-访问https-的方法"><a href="#Android-访问https-的方法" class="headerlink" title="Android 访问https 的方法"></a>Android 访问https 的方法</h3><p>下面代码用来访问一个自签名的网站，主要是3个实现：trustNothing 无法访问<code>Trust anchor for certification path not found.</code>。trustAll 信任所有证书，可以访问，并且可以被抓包。trustOnly 信任唯一证书，无法被charles 抓包。还有一个实现isWifiProxy 可以用来判断有没有使用代理，控制是否请求数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div></pre></td><td class="code"><pre><div class="line">public class HttpsActivity extends AppCompatActivity &#123;</div><div class="line"></div><div class="line">  private final static String TAG = &quot;HttpsActivity&quot;;</div><div class="line"></div><div class="line">  @Override protected void onCreate(@Nullable Bundle savedInstanceState) &#123;</div><div class="line">    super.onCreate(savedInstanceState);</div><div class="line"></div><div class="line">    setContentView(R.layout.activity_https);</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  private void copyInputStreamToOutputStream(InputStream inputStream, PrintStream out)</div><div class="line">      throws IOException &#123;</div><div class="line">    byte[] buffer = new byte[1024];</div><div class="line">    int c = 0;</div><div class="line">    while ((c = inputStream.read(buffer)) != -1) &#123;</div><div class="line">      out.write(buffer, 0, c);</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  public void trustNothing(View view) &#123;</div><div class="line">    // 使用默认情况，无法访问自签名网站</div><div class="line">    new Thread() &#123;</div><div class="line">      @Override public void run() &#123;</div><div class="line">        try &#123;</div><div class="line">          //URL url = new URL(&quot;https://www.baidu.com/&quot;);</div><div class="line">          URL url = new URL(&quot;https://kyfw.12306.cn/otn/&quot;);</div><div class="line">          HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();</div><div class="line">          InputStream in = urlConnection.getInputStream();</div><div class="line">          copyInputStreamToOutputStream(in, System.out);</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">          e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125;.start();</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  public void trustAll(View view) &#123;</div><div class="line">    // 方案1，信任所有的证书</div><div class="line">    new Thread() &#123;</div><div class="line">      @Override public void run() &#123;</div><div class="line">        try &#123;</div><div class="line">          // Create an SSLContext that uses our TrustManager</div><div class="line">          SSLContext context = SSLContext.getInstance(&quot;TLS&quot;);</div><div class="line">          context.init(null, new TrustManager[] &#123;</div><div class="line">              new X509TrustManager() &#123;</div><div class="line">                @Override public void checkClientTrusted(X509Certificate[] chain, String authType)</div><div class="line">                    throws CertificateException &#123;</div><div class="line"></div><div class="line">                &#125;</div><div class="line"></div><div class="line">                @Override public void checkServerTrusted(X509Certificate[] chain, String authType)</div><div class="line">                    throws CertificateException &#123;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                @Override public X509Certificate[] getAcceptedIssuers() &#123;</div><div class="line">                  return new X509Certificate[0];</div><div class="line">                &#125;</div><div class="line">              &#125;</div><div class="line">          &#125;, null);</div><div class="line"></div><div class="line">          URL url = new URL(&quot;https://kyfw.12306.cn/otn/&quot;);</div><div class="line">          HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();</div><div class="line">          SSLSocketFactory sslSocketFactory = context.getSocketFactory();</div><div class="line">          urlConnection.setSSLSocketFactory(sslSocketFactory);</div><div class="line">          urlConnection.setHostnameVerifier(new HostnameVerifier() &#123;</div><div class="line">            @Override public boolean verify(String hostname, SSLSession session) &#123;</div><div class="line">              return true;</div><div class="line">            &#125;</div><div class="line">          &#125;);</div><div class="line">          InputStream in = urlConnection.getInputStream();</div><div class="line">          copyInputStreamToOutputStream(in, System.out);</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">          e.printStackTrace();</div><div class="line">        &#125; catch (NoSuchAlgorithmException e) &#123;</div><div class="line">          e.printStackTrace();</div><div class="line">        &#125; catch (KeyManagementException e) &#123;</div><div class="line">          e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125;.start();</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  public void trustOnly(View view) &#123;</div><div class="line">    // 方案2，信任单独的证书，使用Fiddler 抓包的话就看不到了</div><div class="line">    new Thread() &#123;</div><div class="line">      @Override public void run() &#123;</div><div class="line">        super.run();</div><div class="line">        try &#123;</div><div class="line">          CertificateFactory cf = CertificateFactory.getInstance(&quot;X.509&quot;);</div><div class="line">          // srca.cer 打包在 asset 中</div><div class="line">          InputStream caInput = new BufferedInputStream(getAssets().open(&quot;srca.cer&quot;));</div><div class="line">          Certificate ca;</div><div class="line">          try &#123;</div><div class="line">            // 1. 获取到证书</div><div class="line">            ca = cf.generateCertificate(caInput);</div><div class="line">            ((X509Certificate) ca).checkValidity();</div><div class="line">            Log.e(TAG, &quot;ca=&quot; + ((X509Certificate) ca).getSubjectDN());</div><div class="line">            Log.e(TAG, &quot;key=&quot; + ca.getPublicKey());</div><div class="line">          &#125; finally &#123;</div><div class="line">            caInput.close();</div><div class="line">          &#125;</div><div class="line"></div><div class="line">          // Create a KeyStore containing our trusted CAs</div><div class="line">          KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());</div><div class="line">          keyStore.load(null, null);</div><div class="line">          // 2. 通过KeyStore 加载证书</div><div class="line">          keyStore.setCertificateEntry(&quot;ca&quot;, ca);</div><div class="line"></div><div class="line">          // Create a TrustManager that trusts the CAs in our KeyStore</div><div class="line">          TrustManagerFactory trustManagerFactory =</div><div class="line">              TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());</div><div class="line">          trustManagerFactory.init(keyStore);</div><div class="line"></div><div class="line">          // Create an SSLContext that uses our TrustManager</div><div class="line">          SSLContext sslContext = SSLContext.getInstance(&quot;TLS&quot;);</div><div class="line">          sslContext.init(null, trustManagerFactory.getTrustManagers(), null);</div><div class="line"></div><div class="line">          URL url = new URL(&quot;https://kyfw.12306.cn/otn/&quot;);</div><div class="line">          HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();</div><div class="line">          // 3. 设置SSL</div><div class="line">          urlConnection.setSSLSocketFactory(sslContext.getSocketFactory());</div><div class="line">          InputStream inputStream = urlConnection.getInputStream();</div><div class="line">          copyInputStreamToOutputStream(inputStream, System.out);</div><div class="line">        &#125; catch (MalformedURLException e) &#123;</div><div class="line">          e.printStackTrace();</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">          e.printStackTrace();</div><div class="line">        &#125; catch (Exception e) &#123;</div><div class="line">          e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125;.start();</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  /**</div><div class="line">   * 判断有没有连接代理，这个可以用来控制如果连着代理就不访问服务器</div><div class="line">   */</div><div class="line">  private boolean isWifiProxy() &#123;</div><div class="line">    final boolean IS_ICS_OR_LATER = Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.ICE_CREAM_SANDWICH;</div><div class="line">    String proxyAddress;</div><div class="line">    int proxyPort;</div><div class="line">    if (IS_ICS_OR_LATER) &#123;</div><div class="line">      proxyAddress = System.getProperty(&quot;http.proxyHost&quot;);</div><div class="line">      String portStr = System.getProperty(&quot;http.proxyPort&quot;);</div><div class="line">      proxyPort = Integer.parseInt((portStr != null ? portStr : &quot;-1&quot;));</div><div class="line">    &#125; else &#123;</div><div class="line">      proxyAddress = android.net.Proxy.getHost(this);</div><div class="line">      proxyPort = android.net.Proxy.getPort(this);</div><div class="line">    &#125;</div><div class="line">    return (!TextUtils.isEmpty(proxyAddress)) &amp;&amp; (proxyPort != -1);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="相关工具"><a href="#相关工具" class="headerlink" title="相关工具"></a>相关工具</h3><p>tPacketcapture.apk 以及wireshark</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://blog.csdn.net/lmj623565791/article/details/48129405" target="_blank" rel="external">Android Https相关完全解析 当OkHttp遇到Https</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/https/" rel="tag"># https</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/17/AMS之startActivity/" rel="next" title="AMS之startActivity">
+                <i class="fa fa-chevron-left"></i> AMS之startActivity
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/02/属性动画源码分析/" rel="prev" title="属性动画源码分析">
+                属性动画源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#加密技术使https-安全"><span class="nav-number">1.</span> <span class="nav-text">加密技术使https 安全</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#对称加密"><span class="nav-number">1.1.</span> <span class="nav-text">对称加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非对称加密"><span class="nav-number">1.2.</span> <span class="nav-text">非对称加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#证书认证机构-CA"><span class="nav-number">1.3.</span> <span class="nav-text">证书认证机构(CA)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#抓包分析"><span class="nav-number">2.</span> <span class="nav-text">抓包分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-三次握手"><span class="nav-number">2.1.</span> <span class="nav-text">tcp 三次握手</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ssl-握手"><span class="nav-number">2.2.</span> <span class="nav-text">ssl 握手</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通信"><span class="nav-number">2.3.</span> <span class="nav-text">通信</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-四次分手"><span class="nav-number">2.4.</span> <span class="nav-text">tcp 四次分手</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">2.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#app-如何避免被抓包"><span class="nav-number">3.</span> <span class="nav-text">app 如何避免被抓包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-访问https-的方法"><span class="nav-number">4.</span> <span class="nav-text">Android 访问https 的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#相关工具"><span class="nav-number">5.</span> <span class="nav-text">相关工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

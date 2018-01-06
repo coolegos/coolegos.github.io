@@ -1,0 +1,809 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="framework,WMS,Window," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="adb shell dumpsys window和adb shell dumpsys window windows可以用来dump 相应的Window信息。">
+<meta name="keywords" content="framework,WMS,Window">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WMS之addView流程">
+<meta property="og:url" content="http://localhost:4000/2018/01/04/WMS之addView流程/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="adb shell dumpsys window和adb shell dumpsys window windows可以用来dump 相应的Window信息。">
+<meta property="og:image" content="http://localhost:4000/img/WMS中addView流程.png">
+<meta property="og:image" content="http://localhost:4000/img/WMSaddView_uml.png">
+<meta property="og:updated_time" content="2018-01-04T16:26:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WMS之addView流程">
+<meta name="twitter:description" content="adb shell dumpsys window和adb shell dumpsys window windows可以用来dump 相应的Window信息。">
+<meta name="twitter:image" content="http://localhost:4000/img/WMS中addView流程.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2018/01/04/WMS之addView流程/"/>
+
+
+
+
+
+  <title> WMS之addView流程 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2018/01/04/WMS之addView流程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                WMS之addView流程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-04T23:03:17+08:00">
+                2018-01-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android-framework/" itemprop="url" rel="index">
+                    <span itemprop="name">android framework</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>adb shell dumpsys window</code>和<code>adb shell dumpsys window windows</code>可以用来dump 相应的<code>Window</code>信息。<a id="more"></a></p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>读WMS 代码的时候，或许会想回答下面的几个问题(问题的回答不在本文💨)。</p>
+<ol>
+<li><code>Window</code>出错的提示</li>
+<li>常用的状态栏修改的理想方式</li>
+<li><code>Window</code>属性的设置是怎么起作用的</li>
+<li>如何比较好的处理<code>Dialog</code>、<code>PopupWindow</code>。为什么<code>Dialog</code>不能使用<code>ApplicationContext</code></li>
+<li><code>Window</code>到底是什么，系统是怎么去识别一个<code>Window</code>的？多个<code>Window</code>重叠的时候是怎么展示的？层级关系是怎么解决的？像mac os、Windows(微软)都是有窗口的概念</li>
+<li><code>Window</code>的展示区域是怎么计算的</li>
+</ol>
+<h3 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h3><p>这里整体的流程是<code>startActivity</code>以后的操作。这里为了流程更加的清晰(更加简单😄)，所以对打开的<code>Activity</code>设置<code>&lt;item name=&quot;android:windowDisablePreview&quot;&gt;true&lt;/item&gt;</code>取消了startWindow。</p>
+<p>先画一个整体的时序图。<br><img src="/img/WMS中addView流程.png" alt="WMS中addView流程"></p>
+<p>第2步，方法参数是int</p>
+<p>第3步，执行以后会生成<code>mDecor</code>(代表的是顶层的<code>Window</code>中的顶层<code>View</code>)和<code>mContentParent</code>(代表的是<code>R.id.content</code>中的内容)。最后调用<code>mLayoutInflater.inflate(layoutResID, mContentParent);</code>将设置的<code>layoutResID</code>加载进<code>mContentParent</code>。</p>
+<p>第4步，<code>generateDecor</code>生成的是<code>DecorView</code>。</p>
+<p>第5步，<code>generateLayout</code>生成的是<code>R.id.content</code>节点的<code>View</code>。这里会去获取<code>Window</code>的属性。<strong><code>aosp/frameworks/base/core/res/res/value/attrs.xml</code>中定义了Window 的属性，而Window 的属性则是设置的Window 的主题</strong></p>
+<p>总结：上面3-6步过程结束以后就相当于创建完<code>PhoneWindow</code>以及构造完里面的<code>View</code>(此时还没有加入到<code>Window</code>)。</p>
+<blockquote>
+<p>这里介绍一个类<code>android.view.Display</code>。代表的是展示的逻辑大小(相当于是一个虚拟的大小)，有两种不同的描述。</p>
+<ol>
+<li>应用显示：代表的是除了系统装饰(statusBar、navigationBar等)以后的展示。</li>
+<li>实际显示：代表的是包含了系统装饰的展示。</li>
+</ol>
+<p>但是实际的物理展示大小跟<code>Display</code>代表的意思不一样，<code>Display</code>可能会比设备的屏幕要小。</p>
+</blockquote>
+<p>第7步，<code>WindowManagerImpl#addView</code>是<code>Activity#makeVisible</code>调用的。</p>
+<p>第8步，<code>adjustLayoutParamsForSubWindow</code>不是每次都执行。比较重要的是会赋值token。</p>
+<p>第9步，<code>addView</code>，首先<code>WindowManagerGlobal</code>是一个单例。看代码10、11、12行会将<code>View</code>、<code>ViewRootImpl</code>、<code>WindowManager.LayoutParams</code>分别保存在<code>WindowManagerGlobal</code>3个<code>ArrayList</code>中。由于<code>WindowManagerGlobal</code>是一个单例，所以在一个进程中所有<code>Window</code>的信息都会保存在这3个<code>ArrayList</code>中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">public void addView(View view, ViewGroup.LayoutParams params,</div><div class="line">        Display display, Window parentWindow) &#123;</div><div class="line">    //省略代码...</div><div class="line">    ViewRootImpl root;</div><div class="line">    View panelParentView = null;</div><div class="line">    synchronized (mLock) &#123;</div><div class="line">        //省略代码...</div><div class="line">        root = new ViewRootImpl(view.getContext(), display);</div><div class="line">        view.setLayoutParams(wparams);</div><div class="line">        mViews.add(view);</div><div class="line">        mRoots.add(root);</div><div class="line">        mParams.add(wparams);</div><div class="line">    &#125;</div><div class="line">    // do this last because it fires off messages to start doing things</div><div class="line">    try &#123;</div><div class="line">        root.setView(view, wparams, panelParentView);</div><div class="line">    &#125; catch (RuntimeException e) &#123;</div><div class="line">        //省略代码...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第11步，<code>com.android.server.wm.Session</code>，是通过进程间调用以后在服务端的处理。此时客户端挂起。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">//IWindowSession.aidl 中的定义</div><div class="line">int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,</div><div class="line">        in int viewVisibility, in int layerStackId, out Rect outContentInsets,</div><div class="line">        out Rect outStableInsets, out Rect outOutsets, out InputChannel outInputChannel);</div></pre></td></tr></table></figure>
+<blockquote>
+<p><code>com.android.server.wm.Session</code>代表的是什么，仅仅是用来跟WMS 交互吗？这里看相关代码的时对<code>Session</code>很迷糊，<code>Session</code>是IPC 的服务端，而每一个客户端的<code>ViewRootImpl</code>都有一个<code>IWindowSession$Stub$Proxy</code>，客户端和WMS 不直接进行IPC 通信，而是客户端与<code>Session</code>通信，<code>Session</code>直接与WMS 交互。</p>
+</blockquote>
+<p>第12步，<code>WindowManagerService#addWindow</code>，这个方法比较复杂，后面会分成几个步骤分析。</p>
+<blockquote>
+<p>这里有一些迷惑的内容：<code>ActivityRecord$Token</code>、<code>WindowToken</code>、<code>AppWindowToken</code>、<code>WindowState</code>。</p>
+<ul>
+<li><code>ActivityRecord$Token</code>是<code>ActivityManagerService</code>标识的一个<code>Activity</code>。(即服务端表示的一个客户端的<code>Activity</code>)</li>
+<li><code>WindowState</code>是<code>WindowManagerService</code>标识的一个<code>Window</code>。(<code>Window</code>在客户端是一个抽象的概念，在服务端使用<code>WindowState</code>表示)</li>
+<li><code>WindowToken</code>和<code>AppWindowToken</code>：一个<code>WindowToken</code>里面保存了一个<code>IBinder</code>对应的所有<code>WindowState</code>信息(比如一个<code>Activity</code>和里面的<code>Dialog</code>对应的是同一个<code>WindowToken</code>)。<code>AppWindowToken</code>是继承<code>WindowToken</code>，代表记录的是一个<code>ActivityRecord$Token</code>对应的所有的<code>WindowState</code>信息。不是用来表示一个<code>Window</code>的标识的。</li>
+</ul>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">HashMap&lt;IBinder, WindowState&gt; mWindowMap</div><div class="line">HashMap&lt;IBinder, WindowToken&gt; mTokenMap</div></pre></td></tr></table></figure>
+<p>上面是<code>ActivityManagerService</code>中的两个重要的成员变量。</p>
+<ul>
+<li><code>mWindowMap</code>的key 对应的是<code>ViewRootImpl$W</code>(直接在system_process 进程做<code>setView</code>操作)或<code>IWindow$Stub$Proxy</code>(整个过程<code>setView</code>中从客户端传递过来的<code>ViewRootImpl$W</code>对象)</li>
+<li><code>mTokenMap</code>的key 对应的则是<code>ActvityRecord$Token</code>(这里是一个<code>IBinder</code>对象，不一定都是<code>ActvityRecord$Token</code>，对<code>Activity</code>来讲就是一个<code>ActvityRecord$Token</code>；对<code>PopupWindow</code>来讲是<code>ViewRootImpl$W</code>)。</li>
+</ul>
+<p>第13步，<code>checkAddPermission</code>权限检查。</p>
+<p>第15步，<code>addWindowToListInOrderLocked</code>是将<code>WindowState</code>加入到WMS 中的流程：涉及到<code>Window</code>层级计算。<strong>打开一个<code>Activity</code>的时候有可能会执行两次<code>addWindowToListInOrderLocked</code>，原因是打开<code>Activity</code>的时默认有一个预览界面的，不过这里的流程是手动去掉了startWindow。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">//ActivityManagerSevice</div><div class="line">private void addWindowToListInOrderLocked(final WindowState win, boolean addToToken) &#123; //win 代表的是需要加入的Window，新打开Activity 的时候addToToken 是true</div><div class="line">    // 省略代码...</div><div class="line">    if (win.mAttachedWindow == null) &#123; //应用Window 的mAttachedWindow 为null</div><div class="line">        final WindowToken token = win.mToken; //获取到token</div><div class="line">        int tokenWindowsPos = 0;</div><div class="line">        if (token.appWindowToken != null) &#123;//对于Activity 来说，这里appWindowToken != null 成立</div><div class="line">            tokenWindowsPos = addAppWindowToListLocked(win);//1.</div><div class="line">        &#125; else &#123;</div><div class="line">            addFreeWindowToListLocked(win);</div><div class="line">        &#125;</div><div class="line">        if (addToToken) &#123;//这里为true，所以会把数据WindowState 加入到指定的位置tokenWindowsPos</div><div class="line">            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, &quot;Adding &quot; + win + &quot; to &quot; + token);</div><div class="line">            token.windows.add(tokenWindowsPos, win);//2.</div><div class="line">        &#125;</div><div class="line">    &#125; else &#123;</div><div class="line">        addAttachedWindowToListLocked(win, addToToken);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    final AppWindowToken appToken = win.mAppToken;</div><div class="line">    if (appToken != null) &#123;//因为是Activity，所以这里appToken != null成立</div><div class="line">        if (addToToken) &#123;//addToken 成立</div><div class="line">            appToken.addWindow(win);//3.</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>主要有3个步骤：</p>
+<ol>
+<li>第8行的<code>addAppWindowToListLocked</code>会计算出position，后面会分析。</li>
+<li>第14行将当前的<code>WindowState</code>加入到指定的位置(tokenWindowsPos)。(这里可以举一个例子，一般新<code>Activity</code>的时候tokenWindowsPos 为0，而在<code>Activity</code>中打开<code>Dailog</code>的时候tokenWindowsPos 为1)</li>
+<li>第23行，因为是<code>Activity</code>，所以还需要将<code>WindowState</code>加入到<code>AppWindowToken</code>中。</li>
+</ol>
+<blockquote>
+<p>这里的流程只是分析了<code>startActivity</code>的，但是这里还有几个关键的判断需要注意下。第4行<code>win.mAttachedWindow</code>不为null 代表添加进来的是子<code>Window</code>会直接执行到<code>addAttachedWindowToListLocked</code>代表的是添加子<code>Window</code>。第10行<code>addFreeWindowToListLocked</code>则代表添加的是系统<code>Window</code>。(这里的逻辑可以分别使用<code>PopupWindow</code>和<code>Toast</code>来分析)</p>
+</blockquote>
+<p>第16步，<code>addAppWindowToListLocked</code>是将应用<code>Window</code>(常见的是<code>Activity</code>和<code>Dialog</code>)加入到<code>DisplayContent#mWindows</code>(按照z-order 进行排序的)的流程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div></pre></td><td class="code"><pre><div class="line">//WindowManagerService 中加入应用Window 的流程(注意这里强调是加入应用Window 的流程)</div><div class="line">private int addAppWindowToListLocked(final WindowState win) &#123;</div><div class="line">    final DisplayContent displayContent = win.getDisplayContent(); //displayContent 相当于展示的界面信息(里面有多少个WindowState 等等)</div><div class="line">    final IWindow client = win.mClient; //对应的客户端</div><div class="line">    final WindowToken token = win.mToken;</div><div class="line">    final WindowList windows = displayContent.getWindowList(); //获取到的是当前展示屏幕的所有Window。</div><div class="line">    WindowList tokenWindowList = getTokenWindowsOnDisplay(token, displayContent); //获取某个token 对应的WindowList</div><div class="line">    int tokenWindowsPos = 0;</div><div class="line">    if (!tokenWindowList.isEmpty()) &#123; //打开Activity 的时候这里没有值。</div><div class="line">        return addAppWindowToTokenListLocked(win, token, windows, tokenWindowList); //这里展开了预览界面之后打开Activity 或则打开的是Dialog 会执行这里</div><div class="line">    &#125;</div><div class="line">    // 省略代码...</div><div class="line">    WindowState pos = null;</div><div class="line">    final ArrayList&lt;Task&gt; tasks = displayContent.getTasks(); //这里的Task 和TaskRecord 比较类似。在Activity 的启动流程中就会将相应的信息加入到Task 中</div><div class="line">    int taskNdx;</div><div class="line">    int tokenNdx = -1;</div><div class="line">    for (taskNdx = tasks.size() - 1; taskNdx &gt;= 0; --taskNdx) &#123; //1.现在需要找到一个参考的WindowState，将win 插入到参考点后面或者前面</div><div class="line">        AppTokenList tokens = tasks.get(taskNdx).mAppTokens; //找到对应的Task(其实相当于是Application)，然后再找到是否有一致的Token(相当于是Window)</div><div class="line">        for (tokenNdx = tokens.size() - 1; tokenNdx &gt;= 0; --tokenNdx) &#123; //tokens 里面记录的数据不是最终展示的WindowList</div><div class="line">            final AppWindowToken t = tokens.get(tokenNdx); //找到相应的Token</div><div class="line">            if (t == token) &#123; //从Task 里面遍历找里面的Token，获取到的Token 相同，相当于找到了Token 和Task 的值。</div><div class="line">                --tokenNdx; //减1代表的是参考WindowState对应的WindowState</div><div class="line">                if (tokenNdx &lt; 0) &#123; //小于0代表的是这个Task 已经结束，应该跳到上一个Task 寻找</div><div class="line">                    --taskNdx; //taskNdx减1导致可能跳到上一个Task 里面</div><div class="line">                    if (taskNdx &gt;= 0) &#123;</div><div class="line">                        tokenNdx = tasks.get(taskNdx).mAppTokens.size() - 1;//tokenNdx&lt; 0的情况下，没办法计算出应该加入到哪一个里面，所以计算出当前token 所在Token 的值</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">                break;</div><div class="line">            &#125;</div><div class="line">            //省略代码...</div><div class="line">        &#125;</div><div class="line">        if (tokenNdx &gt;= 0) &#123;</div><div class="line">            // early exit</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    //省略代码...</div><div class="line"></div><div class="line">    // Continue looking down until we find the first</div><div class="line">    // token that has windows on this display.</div><div class="line">    for ( ; taskNdx &gt;= 0; --taskNdx) &#123; //2.上面已经计算出了对应的是taskNdx 和tokenNdx，然后这里计算出来的就是taskNdx 和tokenNdx 对应的WindowState。以后的值需要根据这个WindowState 来计算</div><div class="line">        AppTokenList tokens = tasks.get(taskNdx).mAppTokens;</div><div class="line">        for ( ; tokenNdx &gt;= 0; --tokenNdx) &#123;</div><div class="line">            final AppWindowToken t = tokens.get(tokenNdx);</div><div class="line">            tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);</div><div class="line">            final int NW = tokenWindowList.size();</div><div class="line">            if (NW &gt; 0) &#123;</div><div class="line">                pos = tokenWindowList.get(NW-1);</div><div class="line">                break;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (tokenNdx &gt;= 0) &#123;</div><div class="line">            // found</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (pos != null) &#123;</div><div class="line">        // Move in front of any windows attached to this</div><div class="line">        // one.</div><div class="line">        WindowToken atoken = mTokenMap.get(pos.mClient.asBinder());</div><div class="line">        if (atoken != null) &#123;</div><div class="line">            final int NC = atoken.windows.size();</div><div class="line">            if (NC &gt; 0) &#123;</div><div class="line">                WindowState top = atoken.windows.get(NC-1);</div><div class="line">                if (top.mSubLayer &gt;= 0) &#123;</div><div class="line">                    pos = top;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        placeWindowAfter(pos, win); //3.直接将windowState 加入进去。</div><div class="line">        return tokenWindowsPos;</div><div class="line">    &#125;</div><div class="line">    //省略代码...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>主要有3个步骤：</p>
+<ol>
+<li>第17行开始的两个循环遍历，是用来查找将要加入的<code>WindowState</code>的参考的<code>WindowState</code>所在的Task 以及所对应的Token。(上面的代码注释的比较详细，但是还是总结一下，这里的每个<code>Activity</code>会分到不同的<code>Task</code>，每个<code>Task</code>里面也包含了很多的<code>Token</code>，会从后向前遍历<code>Task</code>寻找，对每一个<code>Task</code>里面的<code>Token</code>也是从后向前遍历，这样最终找到的餐参考值可能是当前<code>WindowState</code>对应的<code>Task</code>的上一个<code>Task</code>)</li>
+<li>第42行开始的两个循环遍历，计算参考的<code>WindowState</code>。(这里比较关键的是每次都尽量取下面的值，第49行)</li>
+<li>第73行将<code>WindowState</code>加入进去。</li>
+</ol>
+<blockquote>
+<p>第3行的<code>DisplayContent</code>和第14行的<code>Task</code>，需要解释一下。<code>DisplayContent</code>记录的是一个显示屏里的内容(比如<code>DisplayContent#mWindows</code>记录的是屏幕中的所有<code>WindowState</code>)。<code>Task</code>比较类似<code>TaskRecord</code>。</p>
+</blockquote>
+<p>第17步，<code>addAppWindowToTokenListLocked</code>一般是已经加入然后这里是实际加入的<code>Activity</code>(<code>startActivity</code>先展示预览界面然后才展示<code>Activity</code>或者是打开<code>Dialog</code>的流程)。实现的功能和第16步是一样的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">//WindowManagerService</div><div class="line">private int addAppWindowToTokenListLocked(WindowState win, WindowToken token,</div><div class="line">        WindowList windows, WindowList tokenWindowList) &#123; //win代表的是加入的Window，windows 代表当前屏展示的Window 列表，tokenWindowList 则是当前WindowToken 对应的Window 列表</div><div class="line">    int tokenWindowsPos;</div><div class="line">    //省略代码...</div><div class="line">    if (win.mAttrs.type == TYPE_BASE_APPLICATION) &#123; // 代表的是Activity</div><div class="line">        // Base windows go behind everything else.</div><div class="line">        WindowState lowestWindow = tokenWindowList.get(0); //计算出tokenWindowList 的最上面那个lowestWindow</div><div class="line">        placeWindowBefore(lowestWindow, win); // 将win 放在lowestWindow 的前面</div><div class="line">        tokenWindowsPos = indexOfWinInWindowList(lowestWindow, token.windows); //计算出lowestWindow 在tokenWindowList 中的位置</div><div class="line">    &#125; else &#123; //这里大部分就是Dialog 了</div><div class="line">        AppWindowToken atoken = win.mAppToken;</div><div class="line">        final int windowListPos = tokenWindowList.size();</div><div class="line">        WindowState lastWindow = tokenWindowList.get(windowListPos - 1);</div><div class="line">        if (atoken != null &amp;&amp; lastWindow == atoken.startingWindow) &#123;</div><div class="line">            placeWindowBefore(lastWindow, win);</div><div class="line">            tokenWindowsPos = indexOfWinInWindowList(lastWindow, token.windows);</div><div class="line">        &#125; else &#123;</div><div class="line">            int newIdx = findIdxBasedOnAppTokens(win);</div><div class="line">            //省略代码...</div><div class="line">            windows.add(newIdx + 1, win);</div><div class="line">            if (newIdx &lt; 0) &#123;</div><div class="line">                // No window from token found on win&apos;s display.</div><div class="line">                tokenWindowsPos = 0;</div><div class="line">            &#125; else &#123;</div><div class="line">                tokenWindowsPos = indexOfWinInWindowList(</div><div class="line">                        windows.get(newIdx), token.windows) + 1;</div><div class="line">            &#125;</div><div class="line">            mWindowsChanged = true;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return tokenWindowsPos;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>主要分2种情况：</p>
+<ol>
+<li>第6行，代表的是<code>Activity</code>。</li>
+<li>第11行，代表的是<code>Dialog</code>。</li>
+</ol>
+<p>总结：第15-17是关键步骤，主要是将需要展示<code>Window</code>加入到<code>WindowManagerService</code>的过程。完成以后所有的<code>Window</code>会按照z-order 升序保存在<code>DisplayContent#mWindows</code>中。</p>
+<p>第19步，<code>getInsetHintLw</code>计算展示区域的大小。计算出来的值都是Inset(边衬区)，里面的值实际上是距离展示区域的上下左右的值。<strong>这里计算出来的值可能跟最终实际展示的数据关系不大。</strong></p>
+<p>第20步，<code>assignLayersLocked</code>计算出<code>WindowState</code>的layer，用于最终<code>Window</code>的展示层级。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">//WindowLayersController</div><div class="line">final void assignLayersLocked(WindowList windows) &#123; //用来计算Window 的展示层级。这里的输入已经按照z-order 排序了</div><div class="line">    //省略代码...</div><div class="line">    int curBaseLayer = 0;</div><div class="line">    int curLayer = 0;</div><div class="line">    boolean anyLayerChanged = false;</div><div class="line">    for (int i = 0, windowCount = windows.size(); i &lt; windowCount; i++) &#123;</div><div class="line">        final WindowState w = windows.get(i);</div><div class="line">        boolean layerChanged = false;</div><div class="line"></div><div class="line">        int oldLayer = w.mLayer;</div><div class="line">        if (w.mBaseLayer == curBaseLayer || w.mIsImWindow || (i &gt; 0 &amp;&amp; w.mIsWallpaper)) &#123; //1.如果是相同类型、或者是输入法Window、或者是墙纸Window(并且i&gt;0)</div><div class="line">            curLayer += WINDOW_LAYER_MULTIPLIER; //如果满足条件只是+5</div><div class="line">        &#125; else &#123; //2.</div><div class="line">            curBaseLayer = curLayer = w.mBaseLayer;</div><div class="line">        &#125;</div><div class="line">        assignAnimLayer(w, curLayer); //3.给w 分配layer，mLayer 赋值</div><div class="line"></div><div class="line">        // TODO: Preserved old behavior of code here but not sure comparing</div><div class="line">        // oldLayer to mAnimLayer and mLayer makes sense...though the</div><div class="line">        // worst case would be unintentionalp layer reassignment.</div><div class="line">        if (w.mLayer != oldLayer || w.mWinAnimator.mAnimLayer != oldLayer) &#123;</div><div class="line">            layerChanged = true;</div><div class="line">            anyLayerChanged = true;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if (w.mAppToken != null) &#123;</div><div class="line">            mHighestApplicationLayer = Math.max(mHighestApplicationLayer,</div><div class="line">                    w.mWinAnimator.mAnimLayer);</div><div class="line">        &#125;</div><div class="line">        collectSpecialWindows(w);</div><div class="line"></div><div class="line">        if (layerChanged) &#123;</div><div class="line">            w.scheduleAnimationIfDimming();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    //省略代码...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以重点看看第12行判断语句，看第一个判断逻辑<code>w.mBaseLayer == curBaseLayer</code>，意思是当前的baseLayer 和上一个<code>WindowState</code>相同的时候就在上一个<code>WindowState#mLayer</code>的基础上+5，否则就会重新一次新的<code>WindowState#mLayer</code>计算。</p>
+<p>总结：到此为止完成了<code>Activity#setContentView</code>的第一个流程。从代码的逻辑上看，是将WMS 中的<code>mWindowMap</code>的数据更新到<code>DisplayContent#mWindows</code>中，同时计算了<code>DisplayContent#mWindows</code>的layer 的值。此时对系统(WMS)来说，已经知道了展示<code>WindowState</code>以及每一个<code>WindowState</code>的层级关系。(后续的逻辑就是需要将这些<code>WindowState</code>绘制出来了)</p>
+<h3 id="代码总结"><a href="#代码总结" class="headerlink" title="代码总结"></a>代码总结</h3><ol>
+<li>PhoneWindow：在应用层代表的一个Window</li>
+<li>WindowState：在WMS 代表的是一个Window</li>
+<li>DisplayContent：代表显示屏幕的信息</li>
+<li>Task：WMS 里面中的一个Task 的概念，Task 对应的id 还与Activity 的TaskRecord 对应的信息是一致的。主要是用来计算</li>
+<li>Session：上面有介绍</li>
+<li>WindowToken、AppWindowToke：上面有介绍</li>
+</ol>
+<p><img src="/img/WMSaddView_uml.png" alt="WMS addView uml简图"></p>
+<p>入口是<code>WindowManagerervice</code>。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://blog.csdn.net/luoshengyang/article/details/8462738" target="_blank" rel="external">还是老罗分析的棒</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/framework/" rel="tag"># framework</a>
+          
+            <a href="/tags/WMS/" rel="tag"># WMS</a>
+          
+            <a href="/tags/Window/" rel="tag"># Window</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/31/2017/" rel="prev" title="2017">
+                2017 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程分析"><span class="nav-number">2.</span> <span class="nav-text">流程分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码总结"><span class="nav-number">3.</span> <span class="nav-text">代码总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

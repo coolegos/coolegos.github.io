@@ -1,0 +1,738 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="android,截屏," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近研究了一些Android的截屏方法，做一个总结。 图片剪裁方法使用View.getDrawingCache()得到Bitmap。非常简单但是只能截图本应用的图片，并且没办法控制截图的范围。对Bitmap进行截屏。可以方便的操作截取大小，但是需要提前截取整个屏幕，然后再处理生成的Bitmap。截取屏幕流程：打开一个新的Window全屏展示，上面包含一个CropView-&amp;gt;操作CropVie">
+<meta name="keywords" content="android,截屏">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android截屏方法总结">
+<meta property="og:url" content="http://localhost:4000/2017/04/22/Android截屏方法总结/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="最近研究了一些Android的截屏方法，做一个总结。 图片剪裁方法使用View.getDrawingCache()得到Bitmap。非常简单但是只能截图本应用的图片，并且没办法控制截图的范围。对Bitmap进行截屏。可以方便的操作截取大小，但是需要提前截取整个屏幕，然后再处理生成的Bitmap。截取屏幕流程：打开一个新的Window全屏展示，上面包含一个CropView-&amp;gt;操作CropVie">
+<meta property="og:updated_time" content="2017-04-22T14:32:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android截屏方法总结">
+<meta name="twitter:description" content="最近研究了一些Android的截屏方法，做一个总结。 图片剪裁方法使用View.getDrawingCache()得到Bitmap。非常简单但是只能截图本应用的图片，并且没办法控制截图的范围。对Bitmap进行截屏。可以方便的操作截取大小，但是需要提前截取整个屏幕，然后再处理生成的Bitmap。截取屏幕流程：打开一个新的Window全屏展示，上面包含一个CropView-&amp;gt;操作CropVie">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2017/04/22/Android截屏方法总结/"/>
+
+
+
+
+
+  <title> Android截屏方法总结 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/04/22/Android截屏方法总结/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android截屏方法总结
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-22T22:16:18+08:00">
+                2017-04-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android/" itemprop="url" rel="index">
+                    <span itemprop="name">android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近研究了一些<code>Android</code>的截屏方法，做一个总结。</p>
+<h3 id="图片剪裁方法"><a href="#图片剪裁方法" class="headerlink" title="图片剪裁方法"></a>图片剪裁方法</h3><h4 id="使用View-getDrawingCache-得到Bitmap。非常简单但是只能截图本应用的图片，并且没办法控制截图的范围。"><a href="#使用View-getDrawingCache-得到Bitmap。非常简单但是只能截图本应用的图片，并且没办法控制截图的范围。" class="headerlink" title="使用View.getDrawingCache()得到Bitmap。非常简单但是只能截图本应用的图片，并且没办法控制截图的范围。"></a>使用<code>View.getDrawingCache()</code>得到<code>Bitmap</code>。非常简单但是只能截图本应用的图片，并且没办法控制截图的范围。</h4><h4 id="对Bitmap进行截屏。可以方便的操作截取大小，但是需要提前截取整个屏幕，然后再处理生成的Bitmap。截取屏幕流程：打开一个新的Window全屏展示，上面包含一个CropView-gt-操作CropView选择区域-gt-根据选择区域截取Bitmap。"><a href="#对Bitmap进行截屏。可以方便的操作截取大小，但是需要提前截取整个屏幕，然后再处理生成的Bitmap。截取屏幕流程：打开一个新的Window全屏展示，上面包含一个CropView-gt-操作CropView选择区域-gt-根据选择区域截取Bitmap。" class="headerlink" title="对Bitmap进行截屏。可以方便的操作截取大小，但是需要提前截取整个屏幕，然后再处理生成的Bitmap。截取屏幕流程：打开一个新的Window全屏展示，上面包含一个CropView-&gt;操作CropView选择区域-&gt;根据选择区域截取Bitmap。"></a>对<code>Bitmap</code>进行截屏。可以方便的操作截取大小，但是需要提前截取整个屏幕，然后再处理生成的<code>Bitmap</code>。截取屏幕流程：打开一个新的<code>Window</code>全屏展示，上面包含一个<code>CropView</code>-&gt;操作<code>CropView</code>选择区域-&gt;根据选择区域截取<code>Bitmap</code>。</h4><a id="more"></a>
+<h5 id="代码调用"><a href="#代码调用" class="headerlink" title="代码调用"></a>代码调用</h5><p>一般需求用来从相册选择或者从相册发送图片。<br>(1).选择图片。打开系统选择图片的<code>Activity</code>并设置相应的参数。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">// 打开选择的Activity.</div><div class="line">private void selectPic()&#123;</div><div class="line">    Intent intent = new Intent(&quot;android.intent.action.PICK&quot;);</div><div class="line">    intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, &quot;image/*&quot;);</div><div class="line">    startActivityForResult(intent, REQUEST_PICK_IMG);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>(2).截切图片。选择图片成功(<code>onActivityResult</code>)以后，设置相应参数开始裁剪图片。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">// 截取图片</div><div class="line">public void cutImage(Uri uri)&#123;</div><div class="line">    try &#123;</div><div class="line">        Intent intent = new Intent(&quot;com.android.camera.action.CROP&quot;);</div><div class="line">        intent.setDataAndType(uri, &quot;image/*&quot;);</div><div class="line">        intent.putExtra(&quot;crop&quot;, &quot;true&quot;);</div><div class="line">        intent.putExtra(&quot;aspectX&quot;, 1);</div><div class="line">        intent.putExtra(&quot;aspectY&quot;, 1);</div><div class="line">        intent.putExtra(&quot;outputX&quot;, width);</div><div class="line">        intent.putExtra(&quot;outputY&quot;, height);</div><div class="line">        // 不返回bitmap，全使用uri来传递，防止图片使用内存太大</div><div class="line">        intent.putExtra(&quot;return-data&quot;, false);</div><div class="line">        intent.putExtra(&quot;output&quot;, outputUri);</div><div class="line">        intent.putExtra(&quot;outputFormat&quot;, Bitmap.CompressFormat.JPEG.toString());</div><div class="line">        intent.putExtra(&quot;scale&quot;, true);</div><div class="line">        intent.putExtra(&quot;scaleUpIfNeeded&quot;, true);</div><div class="line">        intent.putExtra(&quot;noFaceDetection&quot;, true);</div><div class="line">        startActivityForResult(intent, REQUEST_CUT_IMG);</div><div class="line">    &#125;</div><div class="line">    catch (Exception e) &#123;</div><div class="line">        Log.e(&quot;Test&quot;, &quot;com.android.camera.action.CROP error&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>(3).<code>onActivityResult</code>处理裁剪图片成功以后回调。</p>
+<h5 id="流程分析-基于api25"><a href="#流程分析-基于api25" class="headerlink" title="流程分析(基于api25)"></a>流程分析(基于<code>api25</code>)</h5><p>系统从相册打开图片，然后截取图片。源码在<code>com.android.gallery3d</code>包下，<code>com.android.gallery3d</code>是一个单独的应用(进程)。<br>(1).打开相册<code>com.android.gallery3d/.app.GalleryActivity</code>，选择图片，略过。<br>(2).打开截图界面<code>com.android.gallery3d/.filtershow.crop.CropActivity</code>。<br>(3).执行<code>BitmapIOTask.doInBackground</code>，对<code>sourceUri</code>进行操作，保存在<code>dstUri</code>中。<br>(4).执行<code>CropActivity.getCroppedImage</code>进行截图。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">protected static Bitmap getCroppedImage(Bitmap image, RectF cropBounds, RectF photoBounds) &#123;</div><div class="line">    // cropBounds：截取大小。photoBounds：图片大小。</div><div class="line">    RectF imageBounds = new RectF(0, 0, image.getWidth(), image.getHeight());</div><div class="line">    RectF crop = CropMath.getScaledCropBounds(cropBounds, photoBounds, imageBounds);</div><div class="line">    if (crop == null) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line">    Rect intCrop = new Rect();</div><div class="line">    crop.roundOut(intCrop);</div><div class="line">    </div><div class="line">    // 相当于直接对Bitmap 进行截取。</div><div class="line">    return Bitmap.createBitmap(image, intCrop.left, intCrop.top, intCrop.width(),</div><div class="line">            intCrop.height());</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="api21以上使用MediaProjectionManager，MediaProjection，VirtualDisplay，ImageReader。"><a href="#api21以上使用MediaProjectionManager，MediaProjection，VirtualDisplay，ImageReader。" class="headerlink" title="api21以上使用MediaProjectionManager，MediaProjection，VirtualDisplay，ImageReader。"></a><code>api21</code>以上使用<code>MediaProjectionManager</code>，<code>MediaProjection</code>，<code>VirtualDisplay</code>，<code>ImageReader</code>。</h4><h5 id="代码调用-1"><a href="#代码调用-1" class="headerlink" title="代码调用"></a>代码调用</h5><p>(1).申请权限<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">private void requestCapturePermission() &#123;</div><div class="line">    MediaProjectionManager mediaProjectionManager = (MediaProjectionManager)</div><div class="line">            getSystemService(Context.MEDIA_PROJECTION_SERVICE);</div><div class="line">    startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(),</div><div class="line">            REQUEST_MEDIA_PROJECTION);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>获取权限以后，获取<code>MediaProjection</code>对象。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">MediaProjection mMediaProjection;</div><div class="line">protected void onActivityResult(int requestCode, int resultCode, Intent data) &#123;</div><div class="line">    switch (requestCode) &#123;</div><div class="line">        case REQUEST_MEDIA_PROJECTION:</div><div class="line">            mMediaProjection = ((MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE))</div><div class="line">                .getMediaProjection(Activity.RESULT_OK, data);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>(2).获取屏幕内容<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// 获取屏幕内容</div><div class="line">VirtualDisplay mVirtualDisplay;</div><div class="line">private void virtualDisplay() &#123;</div><div class="line">    mVirtualDisplay = mMediaProjection.createVirtualDisplay(&quot;screen-mirror&quot;,</div><div class="line">            mScreenWidth, mScreenHeight, mScreenDensity,</div><div class="line">            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,</div><div class="line">            mImageReader.getSurface(), null, null);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>(3).截图，<code>android.media.Image</code>可以拿到相应的<code>Bitmap</code>信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">ImageReader.OnImageAvailableListener() &#123;</div><div class="line">    // 每当生成一个新的Image 的时候都会回调onImageAvailable</div><div class="line">    @Override</div><div class="line">    public void onImageAvailable(ImageReader reader) &#123;</div><div class="line">        if (reader == null) &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        // 最终会调用native方法</div><div class="line">        Image image = reader.acquireLatestImage();</div><div class="line">        if (image == null) &#123;</div><div class="line">            startScreenShot();</div><div class="line">        &#125; else &#123;</div><div class="line">            if (mCropView != null) &#123;</div><div class="line">                int width = image.getWidth();</div><div class="line">                int height = image.getHeight();</div><div class="line">                final Image.Plane[] planes = image.getPlanes();</div><div class="line">                final ByteBuffer buffer = planes[0].getBuffer();</div><div class="line">                int pixelStride = planes[0].getPixelStride();</div><div class="line">                int rowStride = planes[0].getRowStride();</div><div class="line">                int rowPadding = rowStride - pixelStride * width;</div><div class="line">                Bitmap bitmap = Bitmap.createBitmap(width + (pixelStride == 0 ? 0 : rowPadding / pixelStride), height, Bitmap.Config.ARGB_8888);</div><div class="line">                // 最终生成了Bitmap保存了图片</div><div class="line">                bitmap.copyPixelsFromBuffer(buffer);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if (image != null) &#123;</div><div class="line">            // 注意需要调用close</div><div class="line">            image.close();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 防止多次回调onImageAvailable</div><div class="line">        reader.close();</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;, mMainHandler);</div></pre></td></tr></table></figure>
+<h4 id="利用ddmlib-DDMS的ddmlib-jar-截屏。"><a href="#利用ddmlib-DDMS的ddmlib-jar-截屏。" class="headerlink" title="利用ddmlib(DDMS的ddmlib.jar)截屏。"></a>利用<code>ddmlib</code>(<code>DDMS的ddmlib.jar</code>)截屏。</h4><h5 id="代码调用-2"><a href="#代码调用-2" class="headerlink" title="代码调用"></a>代码调用</h5><p>(1).创建<code>Java</code>工程，并导入<code>ddmlib.jar</code>，<code>ddms.jar</code>和<code>ddmuilib.jar</code>。在<code>Android SDK</code>的<code>tools/lib</code>目录下面。<br>(2).直接完整代码了，注意<code>getDevice</code>中的<code>createBridge</code>需要改成自己电脑<code>adb</code>的路径。<code>takeScreenshot</code>中保存的路径需要设置成自己的路径。<code>main</code>中调用的<code>getDevice</code>需要改成自己手机的id。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div></pre></td><td class="code"><pre><div class="line">public class MyClass &#123;</div><div class="line"></div><div class="line">    private static void waitDeviceList(AndroidDebugBridge bridge) &#123;</div><div class="line">        int count = 0;</div><div class="line">        while (bridge.hasInitialDeviceList() == false) &#123;</div><div class="line">            try &#123;</div><div class="line">                Thread.sleep(100); // 如果没有获得设备列表，则等待</div><div class="line">                count++;</div><div class="line">            &#125; catch (InterruptedException e) &#123;</div><div class="line">            &#125;</div><div class="line">            if (count &gt; 300) &#123;</div><div class="line">                // 设定时间超过300×100 ms的时候为连接超时</div><div class="line">                System.err.print(&quot;Time out&quot;);</div><div class="line">                break;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 连接device</div><div class="line">     */</div><div class="line">    private static IDevice getDevice(String id) &#123;</div><div class="line">        AndroidDebugBridge.init(false);  // 需要初始化 false</div><div class="line">        AndroidDebugBridge bridge = AndroidDebugBridge</div><div class="line">                .createBridge(&quot;/Users/Egos/Library/Android/sdk/platform-tools/adb&quot;, false);</div><div class="line">        waitDeviceList(bridge);</div><div class="line">        IDevice devices[] = bridge.getDevices();</div><div class="line"></div><div class="line">        for (IDevice onlinedeivce : devices) &#123;</div><div class="line">            if (onlinedeivce.getSerialNumber().equals(id))</div><div class="line">                return onlinedeivce;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 截取屏幕</div><div class="line">     */</div><div class="line">    private static void takeScreenshot(IDevice device) &#123;</div><div class="line">        try &#123;</div><div class="line">            RawImage rawScreen = device.getScreenshot();</div><div class="line">            if (rawScreen != null) &#123;</div><div class="line">                int width = rawScreen.width;</div><div class="line">                int height = rawScreen.height;</div><div class="line">                BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);</div><div class="line">                int index = 0;</div><div class="line">                int indexInc = rawScreen.bpp &gt;&gt; 3;</div><div class="line">                for (int y = 0; y &lt; rawScreen.height; y++) &#123;</div><div class="line">                    for (int x = 0; x &lt; rawScreen.width; x++, index += indexInc) &#123;</div><div class="line">                        int value = rawScreen.getARGB(index);</div><div class="line">                        image.setRGB(x, y, value);</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">                ImageIO.write(image, &quot;PNG&quot;, new File(&quot;/Users/Egos/Downloads/test.png&quot;));</div><div class="line">            &#125;</div><div class="line">        &#125; catch (Exception e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    public static void main(String[] args) &#123;</div><div class="line">        IDevice device = getDevice(&quot;03f37b9af0c746f4&quot;);</div><div class="line">        takeScreenshot(device);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="adb-shell-screencap-p-filepath。使用adb截图保存在手机上面，没有具体分析调用流程。"><a href="#adb-shell-screencap-p-filepath。使用adb截图保存在手机上面，没有具体分析调用流程。" class="headerlink" title="adb shell screencap -p filepath。使用adb截图保存在手机上面，没有具体分析调用流程。"></a><code>adb shell screencap -p filepath</code>。使用adb截图保存在手机上面，没有具体分析调用流程。</h4><h4 id="执行adb-shell-input-keyevent-120，相当于调用的系统截屏（手机组合键截图）。"><a href="#执行adb-shell-input-keyevent-120，相当于调用的系统截屏（手机组合键截图）。" class="headerlink" title="执行adb shell input keyevent 120，相当于调用的系统截屏（手机组合键截图）。"></a>执行<code>adb shell input keyevent 120</code>，相当于调用的系统截屏（手机组合键截图）。</h4><h5 id="流程分析-基于api25-1"><a href="#流程分析-基于api25-1" class="headerlink" title="流程分析(基于api25)"></a>流程分析(基于<code>api25</code>)</h5><p>(1).按下组合键以后，执行到<code>PhoneWindowManager.interceptKeyBeforeDispatching()</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">// PhoneWindowManager.java</div><div class="line">public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags) &#123;</div><div class="line">    // 省略代码</div><div class="line">    else if (keyCode == KeyEvent.KEYCODE_S &amp;&amp; event.isMetaPressed()</div><div class="line">            &amp;&amp; event.isCtrlPressed()) &#123;</div><div class="line">        if (down &amp;&amp; repeatCount == 0) &#123;</div><div class="line">            int type = event.isShiftPressed() ? TAKE_SCREENSHOT_SELECTED_REGION</div><div class="line">                    : TAKE_SCREENSHOT_FULLSCREEN;</div><div class="line">            mScreenshotRunnable.setScreenshotType(type);</div><div class="line">            mHandler.post(mScreenshotRunnable);</div><div class="line">            return -1;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 省略代码</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>(2).执行到<code>PhoneWindowManager.ScreenshotRunnable.run()</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">// PhoneWindowManager.java</div><div class="line">private class ScreenshotRunnable implements Runnable &#123;</div><div class="line">    private int mScreenshotType = TAKE_SCREENSHOT_FULLSCREEN;</div><div class="line">    public void setScreenshotType(int screenshotType) &#123;</div><div class="line">        mScreenshotType = screenshotType;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void run() &#123;</div><div class="line">        takeScreenshot(mScreenshotType);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>(3).执行到<code>takeScreenshot</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">// PhoneWindowManager.java</div><div class="line">private void takeScreenshot(final int screenshotType) &#123;</div><div class="line">    // SYSUI_SCREENSHOT_SERVICE = &quot;com.android.systemui.screenshot.TakeScreenshotService&quot;</div><div class="line">    final ComponentName serviceComponent = new ComponentName(SYSUI_PACKAGE,</div><div class="line">            SYSUI_SCREENSHOT_SERVICE); </div><div class="line">    // 省略代码</div><div class="line">    final Intent serviceIntent = new Intent();</div><div class="line">    serviceIntent.setComponent(serviceComponent);</div><div class="line">    ServiceConnection conn = new ServiceConnection() &#123;</div><div class="line">        // 省略代码</div><div class="line">    &#125;           </div><div class="line">    if (mContext.bindServiceAsUser(serviceIntent, conn,</div><div class="line">            Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,</div><div class="line">            UserHandle.CURRENT)) &#123;</div><div class="line">        mScreenshotConnection = conn;</div><div class="line">        mHandler.postDelayed(mScreenshotTimeout, 10000);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>(4).<code>com.android.systemui.screenshot.TakeScreenshotService</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">private Handler mHandler = new Handler() &#123;</div><div class="line">    @Override</div><div class="line">    public void handleMessage(Message msg) &#123;</div><div class="line">        final Messenger callback = msg.replyTo;</div><div class="line">        // 省略代码</div><div class="line">        if (mScreenshot == null) &#123;</div><div class="line">            mScreenshot = new GlobalScreenshot(TakeScreenshotService.this);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        switch (msg.what) &#123;</div><div class="line">            // 截取全屏</div><div class="line">            case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:</div><div class="line">                mScreenshot.takeScreenshot(finisher, msg.arg1 &gt; 0, msg.arg2 &gt; 0);</div><div class="line">                break;</div><div class="line">            // 截取指定区域    </div><div class="line">            case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:</div><div class="line">                mScreenshot.takeScreenshotPartial(finisher, msg.arg1 &gt; 0, msg.arg2 &gt; 0);</div><div class="line">                break;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>(5).截取全屏或者指定区域最后都是执行到了同一个逻辑。分析全屏截取。执行<code>mScreenshot.takeScreenshot</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// GlobalScreenshot.java</div><div class="line">void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible) &#123;</div><div class="line">    mDisplay.getRealMetrics(mDisplayMetrics);</div><div class="line">    // 全屏就是 (0,0) -&gt; (width,height)</div><div class="line">    takeScreenshot(finisher, statusBarVisible, navBarVisible, 0, 0, mDisplayMetrics.widthPixels,</div><div class="line">            mDisplayMetrics.heightPixels);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>(6).<code>GlobalScreenshot.takeScreenshot</code>，截取选择区域也是这个方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">// GlobalScreenshot.java</div><div class="line">void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible,</div><div class="line">            int x, int y, int width, int height) &#123;</div><div class="line"></div><div class="line">    // 省略代码</div><div class="line">    // 截取代码获取了Bitmap。</div><div class="line">    mScreenBitmap = SurfaceControl.screenshot((int) dims[0], (int) dims[1]);</div><div class="line">    // 截屏失败</div><div class="line">    if (mScreenBitmap == null) &#123;</div><div class="line">        notifyScreenshotError(mContext, mNotificationManager,</div><div class="line">                R.string.screenshot_failed_to_capture_text);</div><div class="line">        finisher.run();</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 省略代码</div><div class="line">    // Start the post-screenshot animation</div><div class="line">    startAnimation(finisher, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,</div><div class="line">            statusBarVisible, navBarVisible);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>(7).<code>SurfaceControl.screenshot</code>，<code>SurfaceControl</code>是<code>hide</code>的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// SurfaceControl.java</div><div class="line">public static Bitmap screenshot(int width, int height) &#123;</div><div class="line">    IBinder displayToken = SurfaceControl.getBuiltInDisplay(</div><div class="line">            SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);</div><div class="line">    // 调用native代码截图</div><div class="line">    return nativeScreenshot(displayToken, new Rect(), width, height, 0, 0, true,</div><div class="line">            false, Surface.ROTATION_0);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><p>截屏功能<code>native</code>层通过<code>framebuffer</code>来实现的（<strong>这里可能不是很准确</strong>）。帧缓冲（<code>framebuffer</code>）是<code>Linux</code>为显示设备提供的一个接口，把显存抽象后的一种设备，他允许上层应用程序在图形模式下直接对显示缓冲区进行读写操作。<code>Android</code>系统是基于<code>Linux</code>内核的，所以也存在<code>framebuffer</code>这个设备，我们要实现截屏的话只要能获取到<code>framebuffer</code>中的数据，然后把数据转换成图片就可以了，<code>Android</code>中的<code>framebuffer</code>数据是存放在 <code>/dev/graphics/fb0</code>文件中的，所以我们只需要来获取这个文件的数据就可以得到当前屏幕的内容。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在自身应用中截取一个<code>View</code>比较简单。但是去截取任意界面任意大小，就需要比较大的权限，可能需要<code>root</code>手机。直接使用<code>android.view.SurfaceControl</code>反射处理。需要使用到系统的<code>uid``android:sharedUserId=&quot;android.uid.systemui&quot;</code>。<code>api21</code>以后系统开放了截图的接口，可以直接使用(自己的使用的时候碰到过问题)。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://blog.csdn.net/jingxia2008/article/details/42774791" target="_blank" rel="external">为什么 Android 截屏需要 root 权限</a><br><a href="http://blog.csdn.net/woshinia/article/details/11520403" target="_blank" rel="external">截屏方法总结</a><br><a href="http://blog.csdn.net/eclipsexys/article/details/51316423" target="_blank" rel="external">ddmlib使用入门</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/android/" rel="tag"># android</a>
+          
+            <a href="/tags/截屏/" rel="tag"># 截屏</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/23/Ubuntu-搭建简易Git-Server/" rel="next" title="Ubuntu 搭建简易Git Server">
+                <i class="fa fa-chevron-left"></i> Ubuntu 搭建简易Git Server
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/12/全面了解Window2/" rel="prev" title="全面了解Window">
+                全面了解Window <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#图片剪裁方法"><span class="nav-number">1.</span> <span class="nav-text">图片剪裁方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用View-getDrawingCache-得到Bitmap。非常简单但是只能截图本应用的图片，并且没办法控制截图的范围。"><span class="nav-number">1.1.</span> <span class="nav-text">使用View.getDrawingCache()得到Bitmap。非常简单但是只能截图本应用的图片，并且没办法控制截图的范围。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#对Bitmap进行截屏。可以方便的操作截取大小，但是需要提前截取整个屏幕，然后再处理生成的Bitmap。截取屏幕流程：打开一个新的Window全屏展示，上面包含一个CropView-gt-操作CropView选择区域-gt-根据选择区域截取Bitmap。"><span class="nav-number">1.2.</span> <span class="nav-text">对Bitmap进行截屏。可以方便的操作截取大小，但是需要提前截取整个屏幕，然后再处理生成的Bitmap。截取屏幕流程：打开一个新的Window全屏展示，上面包含一个CropView->操作CropView选择区域->根据选择区域截取Bitmap。</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#代码调用"><span class="nav-number">1.2.1.</span> <span class="nav-text">代码调用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#流程分析-基于api25"><span class="nav-number">1.2.2.</span> <span class="nav-text">流程分析(基于api25)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#api21以上使用MediaProjectionManager，MediaProjection，VirtualDisplay，ImageReader。"><span class="nav-number">1.3.</span> <span class="nav-text">api21以上使用MediaProjectionManager，MediaProjection，VirtualDisplay，ImageReader。</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#代码调用-1"><span class="nav-number">1.3.1.</span> <span class="nav-text">代码调用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#利用ddmlib-DDMS的ddmlib-jar-截屏。"><span class="nav-number">1.4.</span> <span class="nav-text">利用ddmlib(DDMS的ddmlib.jar)截屏。</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#代码调用-2"><span class="nav-number">1.4.1.</span> <span class="nav-text">代码调用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#adb-shell-screencap-p-filepath。使用adb截图保存在手机上面，没有具体分析调用流程。"><span class="nav-number">1.5.</span> <span class="nav-text">adb shell screencap -p filepath。使用adb截图保存在手机上面，没有具体分析调用流程。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#执行adb-shell-input-keyevent-120，相当于调用的系统截屏（手机组合键截图）。"><span class="nav-number">1.6.</span> <span class="nav-text">执行adb shell input keyevent 120，相当于调用的系统截屏（手机组合键截图）。</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#流程分析-基于api25-1"><span class="nav-number">1.6.1.</span> <span class="nav-text">流程分析(基于api25)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#扩展"><span class="nav-number">2.</span> <span class="nav-text">扩展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

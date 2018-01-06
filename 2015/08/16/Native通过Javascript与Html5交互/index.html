@@ -1,0 +1,749 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="h5 交互," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="本文分为四个部分，分别为：  WebView的使用 html5 加载Javascript 的过程 Native 与html5 的交互方法 使用js sdk 的优势以及劣势  所有的内容都是新手性质的，特别是前面两个内容是因为自己没有使用过WebView以及不太了解html5 加载Javascript 的原因，所以大家会的可以自己跳过看后面。写博客为的是记录自己工作学习过程中的一些问题，所以可能有很">
+<meta name="keywords" content="h5 交互">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Native通过Javascript与Html5交互">
+<meta property="og:url" content="http://localhost:4000/2015/08/16/Native通过Javascript与Html5交互/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="本文分为四个部分，分别为：  WebView的使用 html5 加载Javascript 的过程 Native 与html5 的交互方法 使用js sdk 的优势以及劣势  所有的内容都是新手性质的，特别是前面两个内容是因为自己没有使用过WebView以及不太了解html5 加载Javascript 的原因，所以大家会的可以自己跳过看后面。写博客为的是记录自己工作学习过程中的一些问题，所以可能有很">
+<meta property="og:updated_time" content="2017-12-09T14:14:50.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Native通过Javascript与Html5交互">
+<meta name="twitter:description" content="本文分为四个部分，分别为：  WebView的使用 html5 加载Javascript 的过程 Native 与html5 的交互方法 使用js sdk 的优势以及劣势  所有的内容都是新手性质的，特别是前面两个内容是因为自己没有使用过WebView以及不太了解html5 加载Javascript 的原因，所以大家会的可以自己跳过看后面。写博客为的是记录自己工作学习过程中的一些问题，所以可能有很">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2015/08/16/Native通过Javascript与Html5交互/"/>
+
+
+
+
+
+  <title> Native通过Javascript与Html5交互 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2015/08/16/Native通过Javascript与Html5交互/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Native通过Javascript与Html5交互
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-08-16T14:49:00+08:00">
+                2015-08-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android/" itemprop="url" rel="index">
+                    <span itemprop="name">android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文分为四个部分，分别为：</p>
+<ul>
+<li><code>WebView</code>的使用</li>
+<li>html5 加载Javascript 的过程</li>
+<li>Native 与html5 的交互方法</li>
+<li>使用js sdk 的优势以及劣势</li>
+</ul>
+<p>所有的内容都是新手性质的，特别是前面两个内容是因为自己没有使用过<code>WebView</code>以及不太了解html5 加载Javascript 的原因，所以大家会的可以自己跳过看后面。写博客为的是记录自己工作学习过程中的一些问题，所以可能有很多只是自己的想法，可能有很多的错误，希望大家发现能指出来。</p>
+<a id="more"></a>
+<h3 id="WebView的使用"><a href="#WebView的使用" class="headerlink" title="WebView的使用"></a><code>WebView</code>的使用</h3><p><code>WebView</code>是Android 中的一个类，主要是用来承载网页的信息。<code>WebView</code>中比较重要的信息有三个类：<code>WebChromeClient</code>、<code>WebViewClient</code>和<code>WebSettings</code>。</p>
+<h4 id="1-WebChromeClient：辅助WebView处理Javascript-的对话框，加载进度条，网站图标，网站title-等等。"><a href="#1-WebChromeClient：辅助WebView处理Javascript-的对话框，加载进度条，网站图标，网站title-等等。" class="headerlink" title="1.WebChromeClient：辅助WebView处理Javascript 的对话框，加载进度条，网站图标，网站title 等等。"></a>1.WebChromeClient：辅助<code>WebView</code>处理Javascript 的对话框，加载进度条，网站图标，网站title 等等。</h4><blockquote>
+<p>(1) onProgressChanged(WebView view,int newProgress)，通知现在的html加载的进度。<br>(2) onReceivedTitle(WebView view,String title)，通知现在的title。<br>(3) onReceivedIcon(WebView view,Bitmap icon)，通知现在的icon图标。<br>(4) onReceivedTouchIconUrl(WebView view, String url,boolean precomposed)，通知现在的icon的url。<br>(5) onJsPrompt(WebView iew,String url,String message,String defaultValue,JsPromptResult result)，html通过js调用prompt的时候就会调用这个函数。<br>(6) onJsAlert(WebView view,String url,String message,JsResult result)， html通过js调用alert的时候就会调用这个函数。<br>(7) onJsConfirm(WebView view, String url, String message,JsResult result)，html通过js调用confirm的时候就会调用。<br>(8) …</p>
+</blockquote>
+<h4 id="2-WebViewClient：帮助WebView处理各种通知、请求事件等等。"><a href="#2-WebViewClient：帮助WebView处理各种通知、请求事件等等。" class="headerlink" title="2.WebViewClient：帮助WebView处理各种通知、请求事件等等。"></a>2.<code>WebViewClient</code>：帮助<code>WebView</code>处理各种通知、请求事件等等。</h4><blockquote>
+<p>(1) shouldOverrideUrlLoading(WebView  view,String url)，当点击html中的含有具有跳转信息的内容时都会回调这个函数，告诉跳转的url。<br>(2) onPageStart(WebView view,String url,Bitmap favicon)，当webview开始加载html的时候就会回调这个函数。<br>(3) onPageFinish(WebView view,String  url)，当webview加载完html的时候就会回调这个函数。<br>(4) …</p>
+</blockquote>
+<h4 id="3-WebSettings：用来设置WebView的一些属性。"><a href="#3-WebSettings：用来设置WebView的一些属性。" class="headerlink" title="3.WebSettings：用来设置WebView的一些属性。"></a>3.<code>WebSettings</code>：用来设置<code>WebView</code>的一些属性。</h4><blockquote>
+<p>(1) setJavaScriptEnable(boolean flag)，是否支持javascript<br>(2) setSupportZoom(boolean support)，是否支持缩放。<br>(3) …</p>
+</blockquote>
+<h4 id="4-重要的方法"><a href="#4-重要的方法" class="headerlink" title="4.重要的方法"></a>4.重要的方法</h4><blockquote>
+<p>(1) loadUrl(String url)，加载一个url的信息到WebView。<br>(2) loadUrl(String url,Map&lt; String,String&gt; additionalHttpHeader)，加载一个url，并且带上一些url。<br>(3) loadData(String data, String mimeType, String encoding)，用来给WebView加载数据。<br>(4) loadDataWithBaseURL(String baseUrl, String data,String mimeType, String encoding, String historyUrl)，用来给WebView加载数据。<br>(5) addJavascriptInterface(Object object,String name)，将定义了回调方法的对象object注入到webview中，这个时候webview中就可以通过name来调用native中的方法。</p>
+</blockquote>
+<h3 id="html5-加载Javascript-的过程"><a href="#html5-加载Javascript-的过程" class="headerlink" title="html5 加载Javascript 的过程"></a>html5 加载Javascript 的过程</h3><p>在学会了使用<code>WebView</code>以后还需要适当的了解一下Javascript 代码是如何加载到html5 中的，难道仅仅是script 标签就能将js 的代码加载吗？显然不是。html5 加载的时候是从上往下加载的，如果碰到js 的代码或者碰到js 的标签，会通过Javascript 解释引擎加载进来，Javascript 解释引擎是浏览器的一部分。当Javascript 代码执行的时候，会将相应的部分在渲染一次。</p>
+<h3 id="Native-与html5-的交互方法"><a href="#Native-与html5-的交互方法" class="headerlink" title="Native 与html5 的交互方法"></a>Native 与html5 的交互方法</h3><p>在大概的了解了<code>WebView</code>的时候，以及html5 的相关的知识以后就可以来看看如何的让Native 与html5 的交互（现在很多的Native 应用都会嵌套一些html5 的页面在里面，方便一些业务方面的）。</p>
+<h4 id="Native-跳转到html5-的方式"><a href="#Native-跳转到html5-的方式" class="headerlink" title="Native 跳转到html5 的方式"></a>Native 跳转到html5 的方式</h4><p>只有一种就是通过load的方式,上面介绍<code>WebView</code>时候时的loadUrl、loadData和loadDataWithBaseURL 都能在Native 中加载html5 的界面。这里面也可以只加载部分分Javascript 的代码。</p>
+<h4 id="html5-跳转到Native-的方式"><a href="#html5-跳转到Native-的方式" class="headerlink" title="html5 跳转到Native 的方式"></a>html5 跳转到Native 的方式</h4><h5 id="不使用js-sdk时的交互"><a href="#不使用js-sdk时的交互" class="headerlink" title="不使用js sdk时的交互"></a>不使用js sdk时的交互</h5><p>(1)shouldOverrideUrlLoading，当点击WebView中承载过类似href的某个界面的时候。就会回调这个方法。将需要处理的逻辑写在shouldOverrideUrlLoading里面就行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">webview.setWebViewClient(new WebViewClient()&#123;</div><div class="line">	@Override</div><div class="line">	public boolean shouldOverrideUrlLoading(WebView view, String url) &#123;</div><div class="line">		return super.shouldOverrideUrlLoading(view, url);</div><div class="line">		// doSomething</div><div class="line">	&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<p>(2)onJsPrompt()，onJsAlert()和onJsConfirm()，在html中设置prompt()，alert()，confirm()，点击的时候就会回调到这些方法中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">	&lt;body&gt;</div><div class="line">		&lt;a href=&quot;javascript:prompt()&quot;&gt;hello&lt;/a&gt;</div><div class="line">		&lt;a href=&quot;javascript:alert()&quot;&gt;haha&lt;/a&gt;</div><div class="line">		&lt;a href=&quot;javascript:confirm()&quot;&gt;gala&lt;/a&gt;</div><div class="line">	&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
+<p>当分别点击的时候就会回调到Native中。分别在里面做处理就行 。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">webview.setWebChromeClient(new WebChromeClient()&#123;</div><div class="line">	@Override</div><div class="line">	public boolean onJsPrompt(WebView view, String url, String message,</div><div class="line">			String defaultValue, JsPromptResult result) &#123;</div><div class="line">		// doSomething</div><div class="line">		return super.onJsPrompt(view, url, message, defaultValue, result);</div><div class="line">	&#125;</div><div class="line">	@Override</div><div class="line">	public boolean onJsAlert(WebView view, String url, String message,</div><div class="line">					JsResult result) &#123;</div><div class="line">		// doSomething</div><div class="line">		return super.onJsAlert(view, url, message, result);</div><div class="line">	&#125;</div><div class="line">	@Override</div><div class="line">	public boolean onJsConfirm(WebView view, String url,</div><div class="line">					String message, JsResult result) &#123;</div><div class="line">		// doSomething</div><div class="line">		return super.onJsConfirm(view, url, message, result);</div><div class="line">	&#125;				</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<h5 id="使用js-sdk时的交互"><a href="#使用js-sdk时的交互" class="headerlink" title="使用js sdk时的交互"></a>使用js sdk时的交互</h5><p>通过前面介绍WebView的时候，可以通过addJavascriptInterface，将Native 端的方法注入到<code>WebView</code>中，这样就可以通过一个name 在html 中调用native。<br>将<code>Object</code>注入到<code>WebView</code>，标识符号是egos。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">webview.addJavascriptInterface(new Object()&#123;</div><div class="line">	@JavascriptInterface</div><div class="line">	public void hello(String name)&#123;</div><div class="line">		Toast.makeText(WebViewTest.this, name, Toast.LENGTH_SHORT).show();</div><div class="line">	&#125;</div><div class="line">&#125;, &quot;egos&quot;);</div></pre></td></tr></table></figure>
+<p>在html中使用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;</div><div class="line">&lt;html&gt;</div><div class="line">	&lt;head&gt;</div><div class="line">	&lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">	function test()&#123;</div><div class="line">		if(egos)&#123;</div><div class="line">			egos.hello(&quot;egos&quot;);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	&lt;/script&gt;</div><div class="line">	&lt;/head&gt;</div><div class="line">	&lt;body&gt;</div><div class="line">		&lt;button onclick=&quot;javascript:test()&quot;&gt;hello&lt;/button&gt;</div><div class="line">		&lt;a href=&quot;javascript:test()&quot;&gt;hello&lt;/a&gt;</div><div class="line">	&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
+<p>点击以后就会弹出Toast。</p>
+<h3 id="使用js-sdk的优势以及劣势"><a href="#使用js-sdk的优势以及劣势" class="headerlink" title="使用js sdk的优势以及劣势"></a>使用js sdk的优势以及劣势</h3><p>优势</p>
+<ol>
+<li>对Javascript 代码单独的书写，方便项目的开发和维护。</li>
+<li>方便应用的更新，<code>WebView</code>的更新只需要后台的更新就行不需要移动端还做处理。</li>
+</ol>
+<p>劣势</p>
+<p>使用addJavascriptInterface 在Android 17以下会有一个漏洞，使用起来不安全。在上面的代码中会发现hello(String name)上面加了一个@JavascriptInterface，这个是在Android 17以后处理这个漏洞的方法。在Android 17以后，想要安全的处理这个漏洞，肯定是不能再使用addJavascriptInterface 这个方法，现在可以使用的是前面的showOverrideUrlLoading，或者是通过onJsPrompt，onJsAlert和onJsConfirm这些方法。上面都有介绍。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/h5-交互/" rel="tag"># h5 交互</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/08/24/Native和H5两种情况的头像上传/" rel="next" title="Native和H5两种情况的头像上传">
+                <i class="fa fa-chevron-left"></i> Native和H5两种情况的头像上传
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#WebView的使用"><span class="nav-number">1.</span> <span class="nav-text">WebView的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-WebChromeClient：辅助WebView处理Javascript-的对话框，加载进度条，网站图标，网站title-等等。"><span class="nav-number">1.1.</span> <span class="nav-text">1.WebChromeClient：辅助WebView处理Javascript 的对话框，加载进度条，网站图标，网站title 等等。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-WebViewClient：帮助WebView处理各种通知、请求事件等等。"><span class="nav-number">1.2.</span> <span class="nav-text">2.WebViewClient：帮助WebView处理各种通知、请求事件等等。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-WebSettings：用来设置WebView的一些属性。"><span class="nav-number">1.3.</span> <span class="nav-text">3.WebSettings：用来设置WebView的一些属性。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-重要的方法"><span class="nav-number">1.4.</span> <span class="nav-text">4.重要的方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#html5-加载Javascript-的过程"><span class="nav-number">2.</span> <span class="nav-text">html5 加载Javascript 的过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Native-与html5-的交互方法"><span class="nav-number">3.</span> <span class="nav-text">Native 与html5 的交互方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Native-跳转到html5-的方式"><span class="nav-number">3.1.</span> <span class="nav-text">Native 跳转到html5 的方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#html5-跳转到Native-的方式"><span class="nav-number">3.2.</span> <span class="nav-text">html5 跳转到Native 的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#不使用js-sdk时的交互"><span class="nav-number">3.2.1.</span> <span class="nav-text">不使用js sdk时的交互</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用js-sdk时的交互"><span class="nav-number">3.2.2.</span> <span class="nav-text">使用js sdk时的交互</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用js-sdk的优势以及劣势"><span class="nav-number">4.</span> <span class="nav-text">使用js sdk的优势以及劣势</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

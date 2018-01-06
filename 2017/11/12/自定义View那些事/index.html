@@ -1,0 +1,765 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="自定义View," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近与朋友聊天，朋友吐槽说去面试的时候自定义View方面的问题问了好久，我说不是很正常吗，最基本的。 把好久之前学Android 自定义View整理了一下。顺便写了一个demo。 稍微总结了一下四个点：   布局与绘制、基本回调方法、熟练使用View的api 事件分发 动画 细节">
+<meta name="keywords" content="自定义View">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自定义View那些事">
+<meta property="og:url" content="http://localhost:4000/2017/11/12/自定义View那些事/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="最近与朋友聊天，朋友吐槽说去面试的时候自定义View方面的问题问了好久，我说不是很正常吗，最基本的。 把好久之前学Android 自定义View整理了一下。顺便写了一个demo。 稍微总结了一下四个点：   布局与绘制、基本回调方法、熟练使用View的api 事件分发 动画 细节">
+<meta property="og:image" content="http://localhost:4000/img/view_measure.png">
+<meta property="og:updated_time" content="2017-11-12T13:57:39.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自定义View那些事">
+<meta name="twitter:description" content="最近与朋友聊天，朋友吐槽说去面试的时候自定义View方面的问题问了好久，我说不是很正常吗，最基本的。 把好久之前学Android 自定义View整理了一下。顺便写了一个demo。 稍微总结了一下四个点：   布局与绘制、基本回调方法、熟练使用View的api 事件分发 动画 细节">
+<meta name="twitter:image" content="http://localhost:4000/img/view_measure.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2017/11/12/自定义View那些事/"/>
+
+
+
+
+
+  <title> 自定义View那些事 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/11/12/自定义View那些事/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                自定义View那些事
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-12T21:40:19+08:00">
+                2017-11-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android/" itemprop="url" rel="index">
+                    <span itemprop="name">android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近与朋友聊天，朋友吐槽说去面试的时候自定义<code>View</code>方面的问题问了好久，我说不是很正常吗，最基本的。 把好久之前学Android 自定义<code>View</code>整理了一下。顺便写了一个demo。</p>
+<p>稍微总结了一下四个点：</p>
+<blockquote>
+<ol>
+<li>布局与绘制、基本回调方法、熟练使用<code>View</code>的api</li>
+<li>事件分发</li>
+<li>动画</li>
+<li>细节</li>
+</ol>
+</blockquote>
+<a id="more"></a>
+<h3 id="布局与绘制、基本回调、熟练使用View的api"><a href="#布局与绘制、基本回调、熟练使用View的api" class="headerlink" title="布局与绘制、基本回调、熟练使用View的api"></a>布局与绘制、基本回调、熟练使用<code>View</code>的api</h3><p>需要做到的是<code>measure</code>、<code>layout</code>、<code>draw</code>方法的熟练掌握，这就需要掌握<code>View</code>的绘制流程逻辑。熟悉常用的回调方法。熟悉常用<code>View</code>的api。</p>
+<h4 id="measure"><a href="#measure" class="headerlink" title="measure"></a><code>measure</code></h4><p>用来测量<code>View</code>的大小，流程是<code>DecorView</code>-&gt;<code>ViewGroup</code>-&gt;<code>View</code>。<strong>自定义ViewGroup的时候需要确保所有可见<code>View</code>调用了measure。</strong>里面有一些细节知识，比如注意<code>View</code>的Padding 值。</p>
+<p>有两个关键的地方需要掌握：<code>DecorView</code>的测量和普通<code>View</code>的测量。</p>
+<p><code>DecorView</code>(根<code>View</code>)的测量，可以参考<code>ViewRootImpl.measureHierarchy</code>和<code>ViewRootImpl.getRootMeasureSpec</code>。可以看到<code>getRootMeasureSpec</code>中计算<code>DecorView</code>高度是根据<code>DecorView</code>设置的大小和window 的大小。这里是判断<code>DecorView</code>设置大小之后才计算的，与测量普通的<code>View</code>(非<code>DecorView</code>)是不一样的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">private static int getRootMeasureSpec(int windowSize, int rootDimension) &#123;</div><div class="line">  int measureSpec;</div><div class="line">  switch (rootDimension) &#123;</div><div class="line">    case ViewGroup.LayoutParams.MATCH_PARENT:</div><div class="line">      // Window can&apos;t resize. Force root view to be windowSize.</div><div class="line">      measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.EXACTLY);</div><div class="line">      break;</div><div class="line">    case ViewGroup.LayoutParams.WRAP_CONTENT:</div><div class="line">      // Window can resize. Set max size for root view.</div><div class="line">      measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.AT_MOST);</div><div class="line">      break;</div><div class="line">    default:</div><div class="line">      // Window wants to be an exact size. Force root view to be that size.</div><div class="line">      measureSpec = MeasureSpec.makeMeasureSpec(rootDimension, MeasureSpec.EXACTLY);</div><div class="line">      break;</div><div class="line">  &#125;</div><div class="line">  return measureSpec;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>普通<code>View</code>的测量，可以参考<code>ViewGroup.getChildMeasureSpec</code>。<code>View</code>的大小主要根据<code>ViewGroup</code>的<code>MeasureSpec</code>和设置的大小决定的。这里就不贴代码了。</p>
+<p><img src="/img/view_measure.png" alt=""></p>
+<h4 id="layout过程"><a href="#layout过程" class="headerlink" title="layout过程"></a><code>layout</code>过程</h4><p><code>layout</code>用来确定<code>View</code>(主要是在自定义<code>ViewGroup</code>时的子<code>View</code>)的位置，流程也是<code>DecorView</code>-&gt;<code>ViewGroup</code>-&gt;<code>View</code>。可以查看demo 中的<code>onLayout</code>用来设置各个子<code>View</code>的位置。</p>
+<h4 id="draw过程"><a href="#draw过程" class="headerlink" title="draw过程"></a><code>draw</code>过程</h4><p>重点需要知道绘制的顺序。</p>
+<blockquote>
+<ol>
+<li>Draw the background</li>
+<li>If necessary, save the canvas’ layers to prepare for fading</li>
+<li>Draw view’s content</li>
+<li>Draw children</li>
+<li>If necessary, draw the fading edges and restore layers</li>
+<li>Draw decorations (scrollbars for instance)</li>
+</ol>
+</blockquote>
+<h4 id="常用的回调方法"><a href="#常用的回调方法" class="headerlink" title="常用的回调方法"></a>常用的回调方法</h4><blockquote>
+<p>onAttachedToWindow</p>
+<p>onDetachedFromWindow</p>
+<p>onFinishInflate</p>
+<p>…</p>
+</blockquote>
+<p>数量掌握每一个回调里面应该处理什么内容。</p>
+<h4 id="常用View的api"><a href="#常用View的api" class="headerlink" title="常用View的api"></a>常用<code>View</code>的api</h4><blockquote>
+<p>scrollBy</p>
+<p>scrollTo</p>
+<p>invalidate</p>
+<p>requestLayout</p>
+<p>…</p>
+</blockquote>
+<p>还有demo 中的<code>bringToFront</code>。对<code>View</code>的api熟悉可以在很多时候为自己节约很多时间。</p>
+<h3 id="事件分发"><a href="#事件分发" class="headerlink" title="事件分发"></a>事件分发</h3><p>基本的事件分发的流程是<code>Activity</code>-&gt;<code>ViewGroup</code>-&gt;<code>View</code>。伪代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public boolean dispatchTouchEvent(MotionEvent ev) &#123;</div><div class="line">  boolean result;</div><div class="line">  if (onInterceptTouchEvent(ev))&#123;</div><div class="line">    result = onTouchEvent(ev);</div><div class="line">  &#125; else &#123;</div><div class="line">    result = child.dispatchTouchEvent(ev);</div><div class="line">  &#125;</div><div class="line">  return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>处理事件分发时一个需要注意的是滑动冲突的问题，这里就需要熟练地掌握事件分发的流程。可以参考Demo 中的一个滑动冲突问题，<code>DragScrollView</code>中是一个<code>DragView</code>，当长按选中一个item 的时候就会拦截<code>DragScrollView</code>的滚动事件，解决的办法是在<code>DragView</code>的<code>dispatchTouchEvent</code>调用<code>getParent().requestDisallowInterceptTouchEvent(true)</code>拦截了<code>DragScrollView</code>的事件。</p>
+<h3 id="动画"><a href="#动画" class="headerlink" title="动画"></a>动画</h3><p>动画目前有两种主要的实现：<code>View</code>动画和属性动画(5.0以后的过渡动画这里没有考虑)。需要熟练的掌握不同动画的原理，在不同的需求中可以做出比较好的选择。demo 中使用到的是<code>View</code>动画。</p>
+<h3 id="细节"><a href="#细节" class="headerlink" title="细节"></a>细节</h3><p>主要是交互、适配等等。</p>
+<h4 id="save-amp-amp-restore"><a href="#save-amp-amp-restore" class="headerlink" title="save &amp;&amp; restore"></a>save &amp;&amp; restore</h4><p>主要关注的是<code>onSaveInstanceState</code>和<code>onRestoreInstanceState</code>。流程是：<code>Activity</code>-&gt;<code>ViewGroup</code>-&gt;<code>View</code>(这里去掉了<code>Fragment</code>)</p>
+<p>在demo 中，用户排序完一个顺序以后，后台处理其他事情然后<code>Activity</code>被回收了，再回来发现需要重新排序，这样肯定不好。可以参考demo(demo 里面处理的是<code>Activity</code>)。</p>
+<h3 id="交互"><a href="#交互" class="headerlink" title="交互"></a>交互</h3><p>android 中的长按一般代表什么操作；双击应该怎么处理；是向左还是向右滑动等等。比如demo 中长按给了用户一个震动的反馈。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/自定义View/" rel="tag"># 自定义View</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/02/属性动画源码分析/" rel="next" title="属性动画源码分析">
+                <i class="fa fa-chevron-left"></i> 属性动画源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/11/三方sdk接入问题/" rel="prev" title="三方sdk接入问题">
+                三方sdk接入问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#布局与绘制、基本回调、熟练使用View的api"><span class="nav-number">1.</span> <span class="nav-text">布局与绘制、基本回调、熟练使用View的api</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#measure"><span class="nav-number">1.1.</span> <span class="nav-text">measure</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#layout过程"><span class="nav-number">1.2.</span> <span class="nav-text">layout过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#draw过程"><span class="nav-number">1.3.</span> <span class="nav-text">draw过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#常用的回调方法"><span class="nav-number">1.4.</span> <span class="nav-text">常用的回调方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#常用View的api"><span class="nav-number">1.5.</span> <span class="nav-text">常用View的api</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事件分发"><span class="nav-number">2.</span> <span class="nav-text">事件分发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动画"><span class="nav-number">3.</span> <span class="nav-text">动画</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#细节"><span class="nav-number">4.</span> <span class="nav-text">细节</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#save-amp-amp-restore"><span class="nav-number">4.1.</span> <span class="nav-text">save && restore</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#交互"><span class="nav-number">5.</span> <span class="nav-text">交互</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

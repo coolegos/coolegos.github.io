@@ -1,0 +1,787 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="android,window," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前置知识 Window是什么？Window是一个组件，View是由Window呈现出来的。Window实际上就是管理着View，对Window的操作最终都会转化成对View的操作。 经常使用的Window：Activity、Dialog、PopupWindow、Toast等。系统中常见的Window：StatusBar、NavigationBar、InputMethod(软键盘)等。StatusB">
+<meta name="keywords" content="android,window">
+<meta property="og:type" content="article">
+<meta property="og:title" content="全面了解Window">
+<meta property="og:url" content="http://localhost:4000/2017/04/12/全面了解Window2/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="前置知识 Window是什么？Window是一个组件，View是由Window呈现出来的。Window实际上就是管理着View，对Window的操作最终都会转化成对View的操作。 经常使用的Window：Activity、Dialog、PopupWindow、Toast等。系统中常见的Window：StatusBar、NavigationBar、InputMethod(软键盘)等。StatusB">
+<meta property="og:image" content="http://localhost:4000/img/window1.png">
+<meta property="og:updated_time" content="2017-11-11T14:44:16.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="全面了解Window">
+<meta name="twitter:description" content="前置知识 Window是什么？Window是一个组件，View是由Window呈现出来的。Window实际上就是管理着View，对Window的操作最终都会转化成对View的操作。 经常使用的Window：Activity、Dialog、PopupWindow、Toast等。系统中常见的Window：StatusBar、NavigationBar、InputMethod(软键盘)等。StatusB">
+<meta name="twitter:image" content="http://localhost:4000/img/window1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2017/04/12/全面了解Window2/"/>
+
+
+
+
+
+  <title> 全面了解Window | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/04/12/全面了解Window2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                全面了解Window
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-12T21:49:32+08:00">
+                2017-04-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android/" itemprop="url" rel="index">
+                    <span itemprop="name">android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h3><ol>
+<li><code>Window</code>是什么？<code>Window</code>是一个组件，<code>View</code>是由<code>Window</code>呈现出来的。<code>Window</code>实际上就是管理着<code>View</code>，对<code>Window</code>的操作最终都会转化成对<code>View</code>的操作。</li>
+<li>经常使用的<code>Window</code>：<code>Activity</code>、<code>Dialog</code>、<code>PopupWindow</code>、<code>Toast</code>等。系统中常见的<code>Window</code>：<code>StatusBar</code>、<code>NavigationBar</code>、<code>InputMethod</code>(软键盘)等。<strong><code>StatusBar</code>、<code>NavigationBar</code>等是在单独的进程中使用的。</strong></li>
+</ol>
+<a id="more"></a>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>1.<code>WindowManager.LayoutParam</code>(继承<code>ViewGroup.LayoutParams</code>)类很重要，<code>flags</code>，<code>type</code> 等等。</p>
+<p><code>type</code>，相当于Window 的类型，主要分为3大类。</p>
+<ul>
+<li>1-99对应应用Window（token 必须设置为Activity 的token，即Context需要设置为Activity）。Activity 中的Window 对应的type 是<code>TYPE_BASE_APPLICATION</code>，<code>Dialog</code>默认的是<code>TYPE_APPLICATION</code>，<code>WindowManager.LayoutParams</code>默认构造函对应的type也是<code>TYPE_APPLICATION</code>。</li>
+<li>1000-1999对应子Window。PopupWindow 默认是<code>TYPE_APPLICATION_PANEL</code>。</li>
+<li>2000-2999 对应的是系统Window。<code>Toast</code>对应<code>TYPE_TOAST</code>,<code>StatusBar</code>对应<code>TYPE_STATUS_BAR</code>，<code>NavigationBar</code>对应<code>TYPE_NAVIGATION_BAR</code>，键盘对应着”TYPE_INPUT_METHOD”。</li>
+</ul>
+<p><code>flags</code>，各种不一样属性，控制Window 的一些特殊显示。</p>
+<p>2.<code>Dialog</code>和<code>PopupWindow</code>的异同。</p>
+<ul>
+<li><code>Dialog</code> 和<code>PopupWindoow</code> 都会在一个新的<code>Window</code>中展示。</li>
+<li><code>Dialog</code>不能使用<code>ApplicationContext</code>，上面就可以知道<code>Dailog</code>是应用<code>Window</code>，只能使用<code>Activity</code>。</li>
+<li><code>PopupWindow</code>不能在<code>Activity.onCreate</code>中创建。<code>PopupWindow</code>默认是一个子<code>Window</code>，需要在<code>Activity</code>创建以后使用。</li>
+<li><code>PopupWindow</code>一定需要设置<code>width</code>和<code>height</code>，默认是0。</li>
+<li><code>Dialog</code>是创建了一个<code>PhoneWindow</code>然后获取的<code>DecorView</code>，所有默认有Title，而<code>PopupWindow</code>没有。</li>
+<li><code>PopupWindow</code>默认不会响应Back键，可以设置<code>popupWindow.setFocusable(true);</code>。</li>
+<li>通过<code>Activity</code>来管理<code>Dialog</code>的时候，<code>Activity.mManagedDialogs</code>，当<code>Activity</code>后台销毁的时候再次进入可以恢复（参考<code>Dialog.onSaveInstanceState</code>、<code>Dialog.onRestoreInstanceState</code>）。而<code>PopupWindow</code>没有恢复机制。</li>
+</ul>
+<p>至于网上很多说<code>PopupWindow</code>是阻塞式的而<code>Dialog</code>是非阻塞式的，是非常误解人的。<a href="http://blog.csdn.net/zhengxiaoyao0716/article/details/48768407" target="_blank" rel="external">关于坑爹的PopupWindow的“阻塞”争议问题：Android没有真正的“阻塞式”对话框</a></p>
+<p>3.<code>Toast</code>展示以后可以将Toast点击的事件传递到下面的View，<code>Dialog</code>以及<code>Popupindow</code>都不行，跟<code>WindowManager.LayoutParams.flags</code>有关。</p>
+<p>4.<code>Activity</code>设置<code>windowSoftInputMode</code>属性的时候，会对<code>Activity</code>的<code>Window</code>有一些影响。</p>
+<p>5.一个App 中有多少个<code>Window</code>？应该是某个状态下<code>Window</code>的个数，<code>Activity</code>+<code>Dialog</code>+<code>PopupWindow</code>+<code>Toast</code>+<code>WindowManage.addView</code>。</p>
+<h3 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h3><p><code>WindowManager</code>继承<code>ViewManager</code>，基本的操作如下。操作的实际上是<code>View</code>。<code>WindowManagerImpl</code>保存着一族对应的<code>mViews</code>、<code>mRoots</code>、<code>mParams</code>。对于每一个展示的<code>Window</code>实际上对应着<code>mViews[k]</code>、<code>mRoots[k]</code>、<code>mParams[k]</code>。具体可以看后面的流程分析。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// ViewManager.java</div><div class="line">public void addView(View view, ViewGroup.LayoutParams params);</div><div class="line">public void updateViewLayout(View view, ViewGroup.LayoutParams params);</div><div class="line">public void removeView(View view);</div></pre></td></tr></table></figure>
+<h3 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h3><h4 id="Window-setStatusBarColor流程-api-21以上-。"><a href="#Window-setStatusBarColor流程-api-21以上-。" class="headerlink" title="Window.setStatusBarColor流程(api 21以上)。"></a><code>Window.setStatusBarColor</code>流程(api 21以上)。</h4><p><strong><code>StatusBar</code>、<code>NavigationBar</code>都是一个View展示在最上面和最下面？？</strong></p>
+<p>1.Window.setStatusBarColor`。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">// PhoneWindow.java</div><div class="line">@Override</div><div class="line">public void setStatusBarColor(int color) &#123;</div><div class="line">    mStatusBarColor = color;</div><div class="line">    mForcedStatusBarColor = true;</div><div class="line">    if (mDecor != null) &#123;</div><div class="line">        // 直接调用到了DecorView.updateColorViews()</div><div class="line">        mDecor.updateColorViews(null, false /* animate */);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>2.<code>DecorView.updateColorViews</code>。从代码中看就是修改了<code>mNavigationColorViewState</code>和<code>mStatusColorViewState</code>里面包含的<code>View</code>的<code>backgroundColor</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">// DecorView.java</div><div class="line">private WindowInsets updateColorViews(WindowInsets insets, boolean animate) &#123;</div><div class="line">    // insets null  animate false</div><div class="line">    WindowManager.LayoutParams attrs = getAttributes();</div><div class="line">    // 获取系统状态栏的显示属性</div><div class="line">    int sysUiVisibility = attrs.systemUiVisibility | getWindowSystemUiVisibility();</div><div class="line">    if (!mIsFloating &amp;&amp; ActivityManager.isHighEndGfx()) &#123;</div><div class="line">        boolean disallowAnimate = !isLaidOut();</div><div class="line">        disallowAnimate |= ((mLastWindowFlags ^ attrs.flags)</div><div class="line">                &amp; FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;</div><div class="line">        mLastWindowFlags = attrs.flags;</div><div class="line">        if (insets != null) &#123;</div><div class="line">            // 省略相关代码</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 这里相当于是横竖屏判断</div><div class="line">        boolean navBarToRightEdge = mLastBottomInset == 0 &amp;&amp; mLastRightInset &gt; 0;</div><div class="line">        int navBarSize = navBarToRightEdge ? mLastRightInset : mLastBottomInset;</div><div class="line">        // 更新Navigation</div><div class="line">        updateColorViewInt(mNavigationColorViewState, sysUiVisibility, mNavigationBarColor,</div><div class="line">                navBarSize, navBarToRightEdge, 0 /* rightInset */,</div><div class="line">                animate &amp;&amp; !disallowAnimate);</div><div class="line"></div><div class="line">        boolean statusBarNeedsRightInset = navBarToRightEdge</div><div class="line">                &amp;&amp; mNavigationColorViewState.present;</div><div class="line">        int statusBarRightInset = statusBarNeedsRightInset ? mLastRightInset : 0;</div><div class="line">        // 更新Status</div><div class="line">        updateColorViewInt(mStatusColorViewState, sysUiVisibility, mStatusBarColor,</div><div class="line">                mLastTopInset, false /* matchVertical */, statusBarRightInset,</div><div class="line">                animate &amp;&amp; !disallowAnimate);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 省略代码</div><div class="line">    return insets;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>3.<code>DecorView.updateColorViewInt</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line">// DecorView.java</div><div class="line">private void updateColorViewInt(final ColorViewState state, int sysUiVis, int color,</div><div class="line">    int size, boolean verticalBar, int rightMargin, boolean animate, boolean force) &#123;</div><div class="line">    // animate false</div><div class="line">    state.present = (sysUiVis &amp; state.systemUiHideFlag) == 0</div><div class="line">            &amp;&amp; (mWindow.getAttributes().flags &amp; state.hideWindowFlag) == 0</div><div class="line">            &amp;&amp; ((mWindow.getAttributes().flags &amp; FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0</div><div class="line">                || force);</div><div class="line">    boolean show = state.present</div><div class="line">            &amp;&amp; (color &amp; Color.BLACK) != 0</div><div class="line">            &amp;&amp; ((mWindow.getAttributes().flags &amp; state.translucentFlag) == 0  || force);</div><div class="line">    boolean showView = show &amp;&amp; !isResizing() &amp;&amp; size &gt; 0;</div><div class="line"></div><div class="line">    boolean visibilityChanged = false;</div><div class="line">    View view = state.view;</div><div class="line"></div><div class="line">    int resolvedHeight = verticalBar ? LayoutParams.MATCH_PARENT : size;</div><div class="line">    int resolvedWidth = verticalBar ? size : LayoutParams.MATCH_PARENT;</div><div class="line">    // 横屏和竖屏展示的为位置不一样，分别对应着设置的horizontalGravity和verticalGravity</div><div class="line">    int resolvedGravity = verticalBar ? state.horizontalGravity : state.verticalGravity;</div><div class="line"></div><div class="line">    if (view == null) &#123;</div><div class="line">        if (showView) &#123;</div><div class="line">            // 为空会创建。相当于创建了Navigation 和Status View</div><div class="line">            // 即改变StatusBar/NavigationBar 实际上是改变了一个View 的颜色</div><div class="line">            state.view = view = new View(mContext);</div><div class="line">            view.setBackgroundColor(color);</div><div class="line">            view.setTransitionName(state.transitionName);</div><div class="line">            view.setId(state.id);</div><div class="line">            visibilityChanged = true;</div><div class="line">            view.setVisibility(INVISIBLE);</div><div class="line">            state.targetVisibility = VISIBLE;</div><div class="line"></div><div class="line">            LayoutParams lp = new LayoutParams(resolvedWidth, resolvedHeight,</div><div class="line">                    resolvedGravity);</div><div class="line">            lp.rightMargin = rightMargin;</div><div class="line">            addView(view, lp);</div><div class="line">            updateColorViewTranslations();</div><div class="line">        &#125;</div><div class="line">    &#125; else &#123;</div><div class="line">        int vis = showView ? VISIBLE : INVISIBLE;</div><div class="line">        visibilityChanged = state.targetVisibility != vis;</div><div class="line">        state.targetVisibility = vis;</div><div class="line">        LayoutParams lp = (LayoutParams) view.getLayoutParams();</div><div class="line">        if (lp.height != resolvedHeight || lp.width != resolvedWidth</div><div class="line">                || lp.gravity != resolvedGravity || lp.rightMargin != rightMargin) &#123;</div><div class="line">            lp.height = resolvedHeight;</div><div class="line">            lp.width = resolvedWidth;</div><div class="line">            lp.gravity = resolvedGravity;</div><div class="line">            lp.rightMargin = rightMargin;</div><div class="line">            view.setLayoutParams(lp);</div><div class="line">        &#125;</div><div class="line">        if (showView) &#123;</div><div class="line">            view.setBackgroundColor(color);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // 省略颜色修改无关代码</div><div class="line">    state.visible = show;</div><div class="line">    state.color = color;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从<code>setStatusBarColor</code>(api 21以上)这个流程可以分析出来，<code>Activity</code>中<code>DecoeView</code>的<code>StatusBar</code>和<code>NavigationBar</code>对应的是一个普通的<code>View</code>(系统中的<code>StatusBar</code>和<code>NavigationBar</code>都对应着一个<code>Window</code>，<code>StatusBar</code>中展示的电量、wifi等都是<code>Window</code>中的<code>View</code>，<code>NavigationBar</code>中展示的返回键、Home键等也是<code>Window</code>中的<code>View</code>)。可以通过反射改变<code>StatusBar</code>颜色和大小来验证(看源码也行的)<code>DecoeView</code>对应着的是普通的<code>View</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line">* 利用反射来设置StatusBar(DecorView中对应的StatusBar)颜色和高度(需要api21 以上)</div><div class="line">*/</div><div class="line">public void changeStatusBarColor2(View view) &#123;</div><div class="line">    // reflect 改变</div><div class="line">    try &#123;</div><div class="line">        Field field = getWindow().getDecorView().getClass().getDeclaredField(&quot;mStatusColorViewState&quot;);</div><div class="line">        field.setAccessible(true);</div><div class="line">        Object object = field.get(getWindow().getDecorView());</div><div class="line">        Field objectField = object.getClass().getDeclaredField(&quot;view&quot;);</div><div class="line">        objectField.setAccessible(true);</div><div class="line">        View view1 = (View) objectField.get(object);</div><div class="line">        Log.e(&quot;ChangeStatusBarColor&quot;, &quot;status bar height = &quot; + view1.getHeight());</div><div class="line">        view1.setBackgroundColor(0xffff0000);</div><div class="line">        ViewGroup.LayoutParams params =  view1.getLayoutParams();</div><div class="line">        params.height = 200;</div><div class="line">        view1.setLayoutParams(params);</div><div class="line">    &#125; catch (Exception e) &#123;</div><div class="line">        e.printStackTrace();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="WindowManager-addView-流程。"><a href="#WindowManager-addView-流程。" class="headerlink" title="WindowManager.addView()流程。"></a><code>WindowManager.addView()</code>流程。</h4><p>1.执行到<code>WindowManagerImpl.addView()</code>（<code>WindowManagerImpl</code>继承<code>WindowManager</code>）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// WindowManagerImpl.java</div><div class="line">@Override</div><div class="line">public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) &#123;</div><div class="line">    applyDefaultToken(params);</div><div class="line">    // 在Activity 中调用的话，这里的mParentWindow 就会是Activity 中的Window。</div><div class="line">    mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>2.执行到<code>WindowManagerGlobal.addView()</code> 方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">// WindowManagerGlobal.java</div><div class="line">public void addView(View view, ViewGroup.LayoutParams params,</div><div class="line">        Display display, Window parentWindow) &#123;</div><div class="line">    if (view == null) &#123;</div><div class="line">        throw new IllegalArgumentException(&quot;view must not be null&quot;);</div><div class="line">    &#125;</div><div class="line">    if (display == null) &#123;</div><div class="line">        throw new IllegalArgumentException(&quot;display must not be null&quot;);</div><div class="line">    &#125;</div><div class="line">    if (!(params instanceof WindowManager.LayoutParams)) &#123;</div><div class="line">        throw new IllegalArgumentException(&quot;Params must be WindowManager.LayoutParams&quot;);</div><div class="line">    &#125;</div><div class="line">    final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;</div><div class="line">    ... // 省略很多代码</div><div class="line">    ViewRootImpl root;</div><div class="line">    synchronized (mLock) &#123;</div><div class="line">        ... // 省略很多代码</div><div class="line">        root = new ViewRootImpl(view.getContext(), display);</div><div class="line">        view.setLayoutParams(wparams);</div><div class="line">        mViews.add(view); // 在mViews中增加了需要add 的View</div><div class="line">        mRoots.add(root); // 在mRoots 中增加新的ViewRootImpl</div><div class="line">        mParams.add(wparams); // mParams 中增加新的WindowManager.LayoutParams</div><div class="line">    &#125;</div><div class="line">    try &#123;</div><div class="line">        root.setView(view, wparams, panelParentView);</div><div class="line">    &#125; catch (RuntimeException e) &#123;</div><div class="line">        synchronized (mLock) &#123;</div><div class="line">            final int index = findViewLocked(view, false);</div><div class="line">            if (index &gt;= 0) &#123;</div><div class="line">                removeViewLocked(index, true);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    throw e;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>一个<code>WindowManager</code>中对应着一系列的<code>mViews</code>、<code>mRoots</code>、<code>mParams</code>，也就是<code>WindowManager</code>管理着多个<code>Window</code>，每一个<code>Window</code>都对应着<code>mViews[k]</code>、<code>mRoots[k]</code>、<code>mParams[k]</code>。</strong>如下所示。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">// WindowManagerGlobal.java</div><div class="line">private final ArrayList&lt;View&gt; mViews = new ArrayList&lt;View&gt;();</div><div class="line">private final ArrayList&lt;ViewRootImpl&gt; mRoots = new ArrayList&lt;ViewRootImpl&gt;();</div><div class="line">private final ArrayList&lt;WindowManager.LayoutParams&gt; mParams =</div><div class="line">        new ArrayList&lt;WindowManager.LayoutParams&gt;();</div></pre></td></tr></table></figure>
+<p>3.执行到<code>ViewRootImpl.setView()</code>方法。<code>ViewRootImpl</code>相当于<code>View</code>和<code>ViewManager</code>之间的桥梁。里面的代码比较的长，会执行到<code>ViewRootImpl.requestLayout()</code>。</p>
+<p>4.执行到<code>ViewRootImpl.requestLayout()</code>方法以及<code>mWindowSession.addToDisplay</code>，其中<code>ViewRootImpl.requestLayout()</code>会接着执行到了<code>ViewRootImpl.scheduleTraversals()</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">// ViewRootImpl.java</div><div class="line">void scheduleTraversals() &#123;</div><div class="line">    if (!mTraversalScheduled) &#123;</div><div class="line">        mTraversalScheduled = true;</div><div class="line">        mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();</div><div class="line">        // 这里通过mChoreographer.postCallback，最后相当于通过Handler发送了一个消息</div><div class="line">        //最后会执行到mTraversalRunnable的run</div><div class="line">        mChoreographer.postCallback(</div><div class="line">                Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);</div><div class="line">        if (!mUnbufferedInputDispatch) &#123;</div><div class="line">            scheduleConsumeBatchedInput();</div><div class="line">        &#125;</div><div class="line">        notifyRendererOfFramePending();</div><div class="line">        pokeDrawLockIfNeeded();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>5.执行到<code>TraversalRunnable.run()</code>，最后执行到了<code>ViewRootImpl.doTraversal()</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">// ViewRootImpl.java</div><div class="line">void doTraversal() &#123;</div><div class="line">    if (mTraversalScheduled) &#123;</div><div class="line">        mTraversalScheduled = false;</div><div class="line">        mHandler.getLooper().getQueue().removeSyncBarrier(mTraversalBarrier);</div><div class="line">        if (mProfile) &#123;</div><div class="line">            Debug.startMethodTracing(&quot;ViewAncestor&quot;);</div><div class="line">        &#125;</div><div class="line">        performTraversals();</div><div class="line">        if (mProfile) &#123;</div><div class="line">            Debug.stopMethodTracing();</div><div class="line">            mProfile = false;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>6.执行到<code>ViewRootImpl.performTraversals()</code>。计算希望的大小，<br>判断是否是第一次，判断视图是否修改(例如：内容区域)，判断Window 是否需要调整大小，判断是否改变了View 的可见性。最后会执行到<code>ViewRootImpl.performMeasure()</code> 、<code>ViewRootImpl.performLayout()</code>、<code>ViewRootImpl.performDraw()</code></p>
+<p>7.<code>ViewRootImpl.performMeasure()</code>会调用<code>View.measure</code>对View进行测量；<code>ViewRootImpl.performLayout()</code>会调用<code>View.layout</code>对View进行布局。<code>ViewRootImpl.performDraw()</code>会调用<code>ViewRootImpl.draw</code>，然后会调用到<code>ViewRootImpl.drawSoftware</code>，最后就会调用到<code>View.draw</code>。这一系列的操作完成以后就会相当于展示创建了一个View，大小、位置以及视图也完全处理完毕。</p>
+<p>8.第4步中执行到<code>ViewRootImpl.requestLayout()</code>以后的过程已经分析完毕，相当于是对View 进行了测量、布局以及绘制。接下来执行<code>mWindowSession.addToDisplay</code>。<code>mWindowSession</code>对应的是一个<code>IWindowSession.aidl</code>，Java 层实现的类是<code>com.android.server.wm.Session</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,</div><div class="line">        int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets,</div><div class="line">    Rect outOutsets, InputChannel outInputChannel) &#123;</div><div class="line">    // mService 对应的是WindowManagerService </div><div class="line">    return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,</div><div class="line">            outContentInsets, outStableInsets, outOutsets, outInputChannel);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>9.执行<code>WindowManagerService.addWindow</code>。这里就是<code>Window</code>的添加等，没有细看。</p>
+<p>总结：通过<code>WindowManager</code>对<code>Window</code>的操作实际上就是对里面<code>View</code>的操作，展示的也是里面<code>View</code>的信息。</p>
+<h4 id="WindowManager-removeView-流程。"><a href="#WindowManager-removeView-流程。" class="headerlink" title="WindowManager.removeView()流程。"></a><code>WindowManager.removeView()</code>流程。</h4><p><strong>这里有一个问题需要考虑一下，通过<code>Activity.getWindowManager().removeView(View view)</code>，这里removeView的参数是什么？</strong>是<code>Activity中设置的</code>View<code>中的一个子</code>View`吗？</p>
+<p><code>addView</code>第2步就有说明，这个<code>View</code>其实是一个整体的<code>View</code>，不是某个<code>View</code>中的子<code>View</code>，<strong>而是一个Window 中展示的View。</strong></p>
+<p>1.直接看到<code>WindowManagerGlobal.removeView()</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">// WindowManagerGlobal.java</div><div class="line">public void removeView(View view, boolean immediate) &#123;</div><div class="line">    if (view == null) &#123;</div><div class="line">        throw new IllegalArgumentException(&quot;view must not be null&quot;);</div><div class="line">    &#125;</div><div class="line">    synchronized (mLock) &#123;</div><div class="line">        // 获取到view 对应的index，默认是-1</div><div class="line">        int index = findViewLocked(view, true);</div><div class="line">        View curView = mRoots.get(index).getView();</div><div class="line">        removeViewLocked(index, immediate);</div><div class="line">        if (curView == view) &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        throw new IllegalStateException(&quot;Calling with view &quot; + view</div><div class="line">                + &quot; but the ViewAncestor is attached to &quot; + curView);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>2.执行<code>WindowManagerGlobal.removeViewLocked</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">// WindowManagerGlobal.java</div><div class="line">private void removeViewLocked(int index, boolean immediate) &#123;</div><div class="line">    ViewRootImpl root = mRoots.get(index);</div><div class="line">    View view = root.getView();</div><div class="line">    if (view != null) &#123;</div><div class="line">        InputMethodManager imm = InputMethodManager.getInstance();</div><div class="line">        // 执行remove 操作。</div><div class="line">        if (imm != null) &#123;</div><div class="line">            imm.windowDismissed(mViews.get(index).getWindowToken());</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // 执行die 操作。</div><div class="line">    boolean deferred = root.die(immediate);</div><div class="line">    if (view != null) &#123;</div><div class="line">        view.assignParent(null);</div><div class="line">        if (deferred) &#123;</div><div class="line">            // 将View 加入到mDyingViews 中。</div><div class="line">            mDyingViews.add(view);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>总结：<code>removeView</code>也是对<code>View</code>的操作。</p>
+<h4 id="PopupWindow显示流程"><a href="#PopupWindow显示流程" class="headerlink" title="PopupWindow显示流程"></a><code>PopupWindow</code>显示流程</h4><p><code>showAsDropDown(View anchor)</code>/<code>showAtLocation(View parent, int gravity, int x, int y)</code> 到 <code>preparePopup(WindowManager.LayoutParams p)</code>，最后<code>invokePopup(WindowManager.LayoutParams p)</code>，这里不再分析。</p>
+<h4 id="Dialog显示流程"><a href="#Dialog显示流程" class="headerlink" title="Dialog显示流程"></a><code>Dialog</code>显示流程</h4><p><code>show()</code>，这里不再分析。 </p>
+<h3 id="其它内容"><a href="#其它内容" class="headerlink" title="其它内容"></a>其它内容</h3><p>1.<code>查看当前Window的信息</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Egos-MacBook-Pro:~ Egos$ adb shell dumpsys window windows | grep -E &apos;mCurrentFocus&apos;</div><div class="line">  // Activity 对应的当前Window 信息</div><div class="line">  mCurrentFocus=Window&#123;1cd90da2 u0 com.egos.samples/com.egos.samples.window.WindowActivity&#125;</div><div class="line">  Egos-MacBook-Pro:~ Egos$ adb shell dumpsys window windows | grep -E &apos;mCurrentFocus&apos;</div><div class="line">  // Activity 打开PopupWindow(使用Dialog 的时候效果也是一样的)之后对应的当前Window 信息</div><div class="line">  mCurrentFocus=Window&#123;1ad2aefa u0 com.egos.samples/com.egos.samples.window.WindowActivity&#125;</div></pre></td></tr></table></figure>
+<p>2.<code>adb shell dumpsys window</code> 查看当前所有的<code>Window</code>信息，包括<code>Window</code>的大小、位置。下面一个例子，拿中<code>Window #3</code> 来展示<code>mAttrs</code>就展示了大小，<code>mHasSurface</code>展示了起始位置。<strong>WindownManage.LayoutParams.mTitle 对应了名称。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Window #3 Window&#123;914ba56 u0 com.egos.samples/com.egos.samples.window.WindowActivity&#125;:</div><div class="line">mDisplayId=0 stackId=1 mSession=Session&#123;b853937 2930:u0a10102&#125; mClient=android.os.BinderProxy@4d81c71</div><div class="line">mOwnerUid=10102 mShowToOwnerOnly=true package=com.egos.samples appop=NONE</div><div class="line">mAttrs=WM.LayoutParams&#123;(0,0)(200x200) sim=#20 ty=2 fl=#0&#125;</div><div class="line">Requested w=200 h=200 mLayoutSeq=152</div><div class="line">mHasSurface=true mShownPosition=[440,824] isReadyForDisplay()=true hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">WindowStateAnimator&#123;31dbad7 com.egos.samples/com.egos.samples.window.WindowActivity&#125;:</div><div class="line">  Surface: shown=true layer=21015 alpha=1.0 rect=(440.0,824.0) 200.0 x 200.0</div></pre></td></tr></table></figure>
+<p>一个详细的例子。下面总共有9个<code>Window(0,1,..8)</code>，可以看到<code>NavigationBar</code>，<code>StatusBar</code>(<code>StatusBarWindowManager</code>管理着<code>StatusBar Window</code>的)等其实都是<code>Window</code>。也非常好验证，将<code>StatusBar</code>向下滑动唤出全屏的通知栏，执行<code>adb shell dumpsys window</code>会发现StatusBar 变成了全屏(从<code>mAttrs</code>可以看出)。</p>
+<p>PS：<code>PhoneStatusBar.java</code>控制着<code>StatusBar</code>和<code>NavigationBar</code>。详情可以查看源码<code>frameworks.base.packages.SystemUI</code>包下面的代码，包含了<code>StatusBar</code>、<code>NavigationBar</code>、截屏<code>Window</code>、锁屏<code>Window</code>等。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div></pre></td><td class="code"><pre><div class="line">Egos-MacBook-Pro:aosp Egos$ adb shell dumpsys window</div><div class="line">//.. 这里省略了很多信息，下面总共有9个Window(0,1,..8)</div><div class="line">WINDOW MANAGER WINDOWS (dumpsys window windows)</div><div class="line">  Window #8 Window&#123;c65e61c u0 NavigationBar&#125;:</div><div class="line">    mDisplayId=0 stackId=0 mSession=Session&#123;39b4687 2046:u0a10023&#125; mClient=android.os.BinderProxy@d23238f</div><div class="line">    mOwnerUid=10023 mShowToOwnerOnly=false package=com.android.systemui appop=NONE</div><div class="line">    mAttrs=WM.LayoutParams&#123;(0,0)(fillxfill) sim=#20 ty=2019 fl=#1840068 fmt=-3&#125;</div><div class="line">    Requested w=1080 h=144 mLayoutSeq=271</div><div class="line">    mHasSurface=true mShownPosition=[0,1776] isReadyForDisplay()=true hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">    WindowStateAnimator&#123;4b5dd83 NavigationBar&#125;:</div><div class="line">      mAnimating=false mLocalAnimating=false mAnimationIsEntrance=true mAnimation=null mStackClip=1</div><div class="line">      Surface: shown=true layer=211000 alpha=1.0 rect=(0.0,1776.0) 1080.0 x 144.0</div><div class="line">  Window #7 Window&#123;6fa7c9a u0 StatusBar&#125;:</div><div class="line">    mDisplayId=0 stackId=0 mSession=Session&#123;39b4687 2046:u0a10023&#125; mClient=android.os.BinderProxy@4f62d45</div><div class="line">    mOwnerUid=10023 mShowToOwnerOnly=false package=com.android.systemui appop=NONE</div><div class="line">    mAttrs=WM.LayoutParams&#123;(0,0)(fillx72) gr=#30 sim=#10 ty=2000 fl=#81840048 fmt=-3 vsysui=0x600&#125;</div><div class="line">    Requested w=1080 h=72 mLayoutSeq=271</div><div class="line">    mHasSurface=true mShownPosition=[0,0] isReadyForDisplay()=true hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">    WindowStateAnimator&#123;83a4c32 StatusBar&#125;:</div><div class="line">      mAnimating=false mLocalAnimating=false mAnimationIsEntrance=true mAnimation=null mStackClip=1</div><div class="line">      Surface: shown=true layer=161000 alpha=1.0 rect=(0.0,0.0) 1080.0 x 72.0</div><div class="line">  Window #6 Window&#123;7cba79f u0 KeyguardScrim&#125;:</div><div class="line">    mDisplayId=0 stackId=0 mSession=Session&#123;ddf9b54 1962:1000&#125; mClient=android.view.ViewRootImpl$W@2c300ec</div><div class="line">    mOwnerUid=1000 mShowToOwnerOnly=false package=android appop=NONE</div><div class="line">    mAttrs=WM.LayoutParams&#123;(0,0)(fillxfill) sim=#10 ty=2029 fl=#1110900 pfl=0x1 fmt=-3 or=5 vsysui=0x3610000&#125;</div><div class="line">    Requested w=1080 h=1776 mLayoutSeq=58</div><div class="line">    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">    WindowStateAnimator&#123;b8b9c3d KeyguardScrim&#125;:</div><div class="line">    mLastFreezeDuration=+2m59s819ms</div><div class="line">  Window #5 Window&#123;401d23f u0 AssistPreviewPanel&#125;:</div><div class="line">    mDisplayId=0 stackId=0 mSession=Session&#123;39b4687 2046:u0a10023&#125; mClient=android.os.BinderProxy@eb66e5e</div><div class="line">    mOwnerUid=10023 mShowToOwnerOnly=true package=com.android.systemui appop=NONE</div><div class="line">    mAttrs=WM.LayoutParams&#123;(0,0)(fillx750) gr=#800053 sim=#31 ty=2033 fl=#1000118 fmt=-3 vsysui=0x700&#125;</div><div class="line">    Requested w=0 h=0 mLayoutSeq=57</div><div class="line">    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">    WindowStateAnimator&#123;10d4994 AssistPreviewPanel&#125;:</div><div class="line">      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0</div><div class="line">  Window #4 Window&#123;7af7b99 u0 DockedStackDivider&#125;:</div><div class="line">    mDisplayId=0 stackId=0 mSession=Session&#123;39b4687 2046:u0a10023&#125; mClient=android.os.BinderProxy@ab9dce0</div><div class="line">    mOwnerUid=10023 mShowToOwnerOnly=false package=com.android.systemui appop=NONE</div><div class="line">    mAttrs=WM.LayoutParams&#123;(0,0)(fillx144) sim=#20 ty=2034 fl=#21840028 pfl=0x40 fmt=-3 vsysui=0x700&#125;</div><div class="line">    Requested w=1080 h=144 mLayoutSeq=271</div><div class="line">    mPolicyVisibility=false mPolicyVisibilityAfterAnim=false mAppOpVisibility=true mAttachedHidden=false</div><div class="line">    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">    WindowStateAnimator&#123;d3489e7 DockedStackDivider&#125;:</div><div class="line">      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0</div><div class="line">  Window #3 Window&#123;699ad0c u0 com.egos.samples/com.egos.samples.toast.ToastActivity&#125;:</div><div class="line">    mDisplayId=0 stackId=1 mSession=Session&#123;153e999 3360:u0a10102&#125; mClient=android.os.BinderProxy@e9ef03f</div><div class="line">    mOwnerUid=10102 mShowToOwnerOnly=true package=com.egos.samples appop=NONE</div><div class="line">    mAttrs=WM.LayoutParams&#123;(0,0)(fillxfill) sim=#120 ty=1 fl=#81810100 pfl=0x20000 wanim=0x1030465 vsysui=0x600 needsMenuKey=2&#125;</div><div class="line">    Requested w=1080 h=1704 mLayoutSeq=271</div><div class="line">    mHasSurface=true mShownPosition=[0,0] isReadyForDisplay()=true hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">    WindowStateAnimator&#123;7b190d3 com.egos.samples/com.egos.samples.toast.ToastActivity&#125;:</div><div class="line">      Surface: shown=true layer=21015 alpha=1.0 rect=(0.0,0.0) 1080.0 x 1920.0</div><div class="line">  Window #2 Window&#123;df42f03 u0 com.android.launcher3/com.android.launcher3.Launcher&#125;:</div><div class="line">    mDisplayId=0 stackId=0 mSession=Session&#123;da8c367 2497:u0a10014&#125; mClient=android.os.BinderProxy@820f3b2</div><div class="line">    mOwnerUid=10014 mShowToOwnerOnly=true package=com.android.launcher3 appop=NONE</div><div class="line">    mAttrs=WM.LayoutParams&#123;(0,0)(fillxfill) sim=#120 ty=1 fl=#81910100 fmt=-2 wanim=0x1030465 vsysui=0x700 needsMenuKey=2&#125;</div><div class="line">    Requested w=1080 h=1920 mLayoutSeq=227</div><div class="line">    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">    WindowStateAnimator&#123;371f101 com.android.launcher3/com.android.launcher3.Launcher&#125;:</div><div class="line">    mLastFreezeDuration=+2m59s941ms</div><div class="line">    mWallpaperX=0.0 mWallpaperY=0.5</div><div class="line">  Window #1 Window&#123;2126153 u0 com.android.systemui/com.android.systemui.recents.RecentsActivity&#125;:</div><div class="line">    mDisplayId=0 stackId=0 mSession=Session&#123;39b4687 2046:u0a10023&#125; mClient=android.os.BinderProxy@c0a3d42</div><div class="line">    mOwnerUid=10023 mShowToOwnerOnly=true package=com.android.systemui appop=NONE</div><div class="line">    mAttrs=WM.LayoutParams&#123;(0,0)(fillxfill) sim=#120 ty=1 fl=#81910100 pfl=0x24040 fmt=-3 vsysui=0x700 needsMenuKey=2&#125;</div><div class="line">    Requested w=1080 h=1920 mLayoutSeq=187</div><div class="line">    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">    WindowStateAnimator&#123;9f984a2 com.android.systemui/com.android.systemui.recents.RecentsActivity&#125;:</div><div class="line">      mAnimating=true mLocalAnimating=false mAnimationIsEntrance=false mAnimation=null mStackClip=1</div><div class="line">      XForm: has=true hasLocal=false &#123;alpha=1.0 matrix=[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]&#125;</div><div class="line">      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0</div><div class="line">      mGlobalScale=1.0 mDsDx=1.0 mDtDx=0.0 mDsDy=0.0 mDtDy=1.0</div><div class="line">  Window #0 Window&#123;c4fa95f u0 com.android.systemui.ImageWallpaper&#125;:</div><div class="line">    mDisplayId=0 stackId=0 mSession=Session&#123;39b4687 2046:u0a10023&#125; mClient=android.os.BinderProxy@6adfe</div><div class="line">    mOwnerUid=10023 mShowToOwnerOnly=true package=com.android.systemui appop=NONE</div><div class="line">    mAttrs=WM.LayoutParams&#123;(0,0)(1920x1920) gr=#800033 ty=2013 fl=#318 fmt=1 wanim=0x10302f2&#125;</div><div class="line">    Requested w=1920 h=1920 mLayoutSeq=238</div><div class="line">    mIsImWindow=false mIsWallpaper=true mIsFloatingLayer=true mWallpaperVisible=false</div><div class="line">    mHasSurface=true mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false</div><div class="line">    WindowStateAnimator&#123;860a6e8 com.android.systemui.ImageWallpaper&#125;:</div><div class="line">      Surface: shown=false layer=21000 alpha=1.0 rect=(0.0,0.0) 1920.0 x 1920.0</div><div class="line">    mLastFreezeDuration=+2m58s925ms</div><div class="line">    mWallpaperX=0.0 mWallpaperY=0.5</div><div class="line"></div><div class="line">  mCurConfiguration=&#123;1.0 310mcc260mnc [en_US] ldltr sw360dp w360dp h568dp 480dpi nrml port finger qwerty/v/v dpad/v s.6&#125;</div><div class="line">  mHasPermanentDpad=false</div><div class="line">  mCurrentFocus=Window&#123;699ad0c u0 com.egos.samples/com.egos.samples.toast.ToastActivity&#125;</div><div class="line">  mFocusedApp=AppWindowToken&#123;26954dc token=Token&#123;2ae93ae ActivityRecord&#123;9a6a429 u0 com.egos.samples/.toast.ToastActivity t169&#125;&#125;&#125;</div><div class="line">  mInTouchMode=true mLayoutSeq=271</div><div class="line">  mLastDisplayFreezeDuration=0 due to Window&#123;df42f03 u0 com.android.launcher3/com.android.launcher3.Launcher&#125;</div><div class="line">  mLastWakeLockHoldingWindow=null mLastWakeLockObscuringWindow=Window&#123;699ad0c u0 com.egos.samples/com.egos.samples.toast.ToastActivity&#125;</div><div class="line">Egos-MacBook-Pro:aosp Egos$</div></pre></td></tr></table></figure>
+<p>3.<code>PhoneWindowManager.java</code>拦截键盘消息(比如home操作、截屏操作等)的处理类。</p>
+<p>4.通过<code>Android Studio</code>查看<code>View Hierarchy</code>等信息。分析布局更加全面。<br><img src="/img/window1.png" alt="技巧">  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">View Hierarchy:</div><div class="line">  com.android.internal.policy.DecorView&#123;3afab2c V.E..... ... 0,0-1080,1920&#125;</div><div class="line">    android.widget.LinearLayout&#123;7fb79f5 V.E..... ... 0,0-1080,1776&#125;</div><div class="line">      android.view.ViewStub&#123;db9c38a G.E..... ... 0,0-0,0 #10203e8 android:id/action_mode_bar_stub&#125;</div><div class="line">      android.widget.FrameLayout&#123;8687dfb V.E..... ... 0,0-1080,1776&#125;</div><div class="line">        android.support.v7.widget.ActionBarOverlayLayout&#123;6024e18 V.E..... ... 0,0-1080,1776 #7f0c0055 app:id/decor_content_parent&#125;</div><div class="line">          android.support.v7.widget.ContentFrameLayout&#123;156c071 V.E..... ... 0,0-1080,1776 #1020002 android:id/content&#125;</div><div class="line">            android.widget.LinearLayout&#123;8f88e56 V.E..... ... 0,0-1080,1776&#125;</div><div class="line">              android.support.v7.widget.AppCompatButton&#123;9b6fed7 VFED..C. ... 0,240-635,384&#125;</div><div class="line">              android.support.v7.widget.AppCompatButton&#123;5da33c4 VFED..C. ... 0,384-659,528&#125;</div><div class="line">              android.support.v7.widget.AppCompatButton&#123;745f2ad VFED..C. ... 0,528-653,672&#125;</div><div class="line">          android.support.v7.widget.ActionBarContainer&#123;78739e2 V.ED.... ... 0,72-1080,240 #7f0c0056 app:id/action_bar_container&#125;</div><div class="line">            android.support.v7.widget.Toolbar&#123;f02b173 V.E..... ... 0,0-1080,168 #7f0c0057 app:id/action_bar&#125;</div><div class="line">              android.support.v7.widget.AppCompatTextView&#123;828c830 V.ED.... ... 48,43-280,124&#125;</div><div class="line">              android.support.v7.widget.ActionMenuView&#123;b7c0ca9 V.E..... ... 1080,0-1080,168&#125;</div><div class="line">            android.support.v7.widget.ActionBarContextView&#123;363122e G.E..... ... 0,0-0,0 #7f0c0058 app:id/action_context_bar&#125;</div><div class="line">    android.view.View&#123;e4cf1cf V.ED.... ... 0,1776-1080,1920 #1020030 android:id/navigationBarBackground&#125;</div><div class="line">    android.view.View&#123;d8a375c V.ED.... ... 0,0-1080,72 #102002f android:id/statusBarBackground&#125;</div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/android/" rel="tag"># android</a>
+          
+            <a href="/tags/window/" rel="tag"># window</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/22/Android截屏方法总结/" rel="next" title="Android截屏方法总结">
+                <i class="fa fa-chevron-left"></i> Android截屏方法总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/08/hello-world/" rel="prev" title="Hello World">
+                Hello World <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前置知识"><span class="nav-number">1.</span> <span class="nav-text">前置知识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">2.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本操作"><span class="nav-number">3.</span> <span class="nav-text">基本操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程分析"><span class="nav-number">4.</span> <span class="nav-text">流程分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Window-setStatusBarColor流程-api-21以上-。"><span class="nav-number">4.1.</span> <span class="nav-text">Window.setStatusBarColor流程(api 21以上)。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WindowManager-addView-流程。"><span class="nav-number">4.2.</span> <span class="nav-text">WindowManager.addView()流程。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WindowManager-removeView-流程。"><span class="nav-number">4.3.</span> <span class="nav-text">WindowManager.removeView()流程。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PopupWindow显示流程"><span class="nav-number">4.4.</span> <span class="nav-text">PopupWindow显示流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Dialog显示流程"><span class="nav-number">4.5.</span> <span class="nav-text">Dialog显示流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其它内容"><span class="nav-number">5.</span> <span class="nav-text">其它内容</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

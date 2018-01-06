@@ -1,0 +1,747 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="android,IPC," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Android 系统中充斥着各种IPC。常见的例子：对系统状态栏的控制(StatusBar和NavigationBar)、对键盘的控制等等。了解IPC 的机制，对于Android 源码的理解也可以加深。以前有做过一些简单的aidl 的IPC，做一个简单回顾。">
+<meta name="keywords" content="android,IPC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IPC基础">
+<meta property="og:url" content="http://localhost:4000/2017/05/06/IPC基础/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="Android 系统中充斥着各种IPC。常见的例子：对系统状态栏的控制(StatusBar和NavigationBar)、对键盘的控制等等。了解IPC 的机制，对于Android 源码的理解也可以加深。以前有做过一些简单的aidl 的IPC，做一个简单回顾。">
+<meta property="og:updated_time" content="2017-12-12T13:48:07.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IPC基础">
+<meta name="twitter:description" content="Android 系统中充斥着各种IPC。常见的例子：对系统状态栏的控制(StatusBar和NavigationBar)、对键盘的控制等等。了解IPC 的机制，对于Android 源码的理解也可以加深。以前有做过一些简单的aidl 的IPC，做一个简单回顾。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2017/05/06/IPC基础/"/>
+
+
+
+
+
+  <title> IPC基础 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/05/06/IPC基础/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                IPC基础
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-06T11:02:35+08:00">
+                2017-05-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/进程通信/" itemprop="url" rel="index">
+                    <span itemprop="name">进程通信</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Android 系统中充斥着各种IPC。常见的例子：对系统状态栏的控制(<code>StatusBar</code>和<code>NavigationBar</code>)、对键盘的控制等等。了解IPC 的机制，对于Android 源码的理解也可以加深。以前有做过一些简单的aidl 的IPC，做一个简单回顾。<br><a id="more"></a></p>
+<h4 id="多进程回顾"><a href="#多进程回顾" class="headerlink" title="多进程回顾"></a>多进程回顾</h4><p>进程和线程的区别？进程是一个执行单元，而线程是一个调度的单元。形象一点，一个进程代表了一个app，一个app 运行的时候会有一个主线程(UI线程)以及其它的一些线程，比如耗时操作放在其它线程等。<br>在一个app(进程)中处理的时候，更多的时候考虑的是线程同步(使用synchronized、锁等等)。在多个app  (进程)之间处理的时候就需要进程间通信了。举个例子，做了一个用来清理内存的app(单独app)。现在做了一个新的app 想调用，就可以使用进程间通信了。</p>
+<h4 id="简单aidl调用流程"><a href="#简单aidl调用流程" class="headerlink" title="简单aidl调用流程"></a>简单<code>aidl</code>调用流程</h4><p>1.书写<code>aidl</code>文件，<code>build</code>以后会生成<code>java</code>文件。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">interface IAddAidl &#123;</div><div class="line">    /**</div><div class="line">     * Demonstrates some basic types that you can use as parameters</div><div class="line">     * and return values in AIDL.</div><div class="line">     */</div><div class="line">    int add(int addA, int abbB);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>2.创建自己的<code>Service</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">public class AddService extends Service &#123;</div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public IBinder onBind(Intent intent) &#123;</div><div class="line">        return mBinder;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int onStartCommand(Intent intent, int flags, int startId) &#123;</div><div class="line">        return super.onStartCommand(intent, flags, startId);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    IAddAidl.Stub mBinder = new IAddAidl.Stub() &#123;</div><div class="line">        @Override</div><div class="line">        public int add(int addA, int addB) throws RemoteException &#123;</div><div class="line">            return addA + addB;</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>3.绑定<code>Service</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">IAddAidl mIAddAidl;</div><div class="line"></div><div class="line">ServiceConnection mConnection = new ServiceConnection() &#123;</div><div class="line">    @Override</div><div class="line">    public void onServiceConnected(ComponentName name, IBinder service) &#123;</div><div class="line">        mIAddAidl = IAddAidl.Stub.asInterface(service);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void onServiceDisconnected(ComponentName name) &#123;</div><div class="line">        mIAddAidl = null;</div><div class="line">    &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">bindService(new Intent(this, AddService.class), mConnection, Context.BIND_AUTO_CREATE);</div></pre></td></tr></table></figure></p>
+<p>4.调用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mIAddAidl.add(1, 1);</div></pre></td></tr></table></figure></p>
+<h4 id="分析aidl的调用"><a href="#分析aidl的调用" class="headerlink" title="分析aidl的调用"></a>分析<code>aidl</code>的调用</h4><p>写完<code>.aidl</code>以后，<code>build</code>一下就会自动生成<code>.java</code>文件。从上面的流程来看，绑定<code>Service</code>的时候可以得到相应的<code>IAddAidl</code>对象，最后调用的也是<code>IAddAidl</code>对象。</p>
+<p>1.绑定<code>Service</code>的时候得到的<code>IAddAidl</code>是什么。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">// IAddAidl.java</div><div class="line">/**</div><div class="line">* Cast an IBinder object into an com.egos.samples.aidl.IAddAidl interface, generating a</div><div class="line">* proxy if needed.</div><div class="line">*/</div><div class="line">public static IAddAidl asInterface(android.os.IBinder obj) &#123;</div><div class="line">    if ((obj == null)) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line">    // 通过传过来的IBinder对象来获取IInterface对象</div><div class="line">    android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);</div><div class="line">    if (((iin != null) &amp;&amp; (iin instanceof com.egos.samples.aidl.IAddAidl))) &#123;</div><div class="line">        return ((IAddAidl) iin);</div><div class="line">    &#125;</div><div class="line">    // 如果传过来的IBinder对象不满足的时候就会创建一个Proxy</div><div class="line">    return new IAddAidl.Stub.Proxy(obj);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>注意这里有一个<code>DESCRIPTOR</code>，代表的是<code>Binder</code>的唯一标志符。<code>bindService</code>回调<code>onServiceConnected</code>返回的<code>IBinder</code>对象，如果<code>Service</code>和<code>Activity</code>(或者<code>Application</code>)在同一个进程，则返回的是<code>Service.onBind</code>返回的对象，不在同一个进程中返回的是<code>BinderProxy</code>对象。<strong>即如果<code>Client</code>和<code>Server</code>运行在不同的进程，则需要创建<code>Proxy</code>对象。</strong></p>
+<p>2.创建<code>Proxy</code>的逻辑，<code>Proxy</code>实现了<code>IAddAidl</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">private static class Proxy implements IAddAidl &#123;</div><div class="line">    private android.os.IBinder mRemote;</div><div class="line"></div><div class="line">    Proxy(android.os.IBinder remote) &#123;</div><div class="line">        mRemote = remote;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public android.os.IBinder asBinder() &#123;</div><div class="line">        return mRemote;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public java.lang.String getInterfaceDescriptor() &#123;</div><div class="line">        return DESCRIPTOR;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int add(int addA, int abbB) throws android.os.RemoteException &#123;</div><div class="line">        android.os.Parcel _data = android.os.Parcel.obtain();</div><div class="line">        android.os.Parcel _reply = android.os.Parcel.obtain();</div><div class="line">        int _result;</div><div class="line">        try &#123;</div><div class="line">            _data.writeInterfaceToken(DESCRIPTOR);</div><div class="line">            _data.writeInt(addA);</div><div class="line">            _data.writeInt(abbB);</div><div class="line">            mRemote.transact(Stub.TRANSACTION_add, _data, _reply, 0);</div><div class="line">            _reply.readException();</div><div class="line">            _result = _reply.readInt();</div><div class="line">        &#125; finally &#123;</div><div class="line">            _reply.recycle();</div><div class="line">            _data.recycle();</div><div class="line">        &#125;</div><div class="line">        return _result;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>3.最终调用的是<code>Proxy.add()</code>方法。<br>在<code>add</code>方法中最终调用的是<code>mRemote.transact</code>，传递了4个参数，分别是区分需要调用方法的一个id、方法所需要的参数、方法返回的结果以及一个flags。<code>Transact</code>过程就是一个进程间通信。</p>
+<h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>1.<code>aidl</code>支持的数据类型。</p>
+<ul>
+<li>Java的原生类型(不包含short，<code>android.os.Parcel</code>不支持)</li>
+<li>CharSequence和String</li>
+<li>List和Map(里面的元素必须备aidl支持)</li>
+<li>Parcelable，实现了Parcelable的对象</li>
+<li>aidl，aidl接口本身可以在aidl文件中使用。</li>
+</ul>
+<p>然后上面还有问题，除了Java的原生类型以外，其它的类型都需要标上方向，in、out或者inout。(测试发现aidl本身也可以不写明)</p>
+<blockquote>
+<p>in表示输入型参数（Server可以获取到Client传递过去的数据，但是不能对Client端的数据进行修改）<br>out表示输出型参数（Server获取不到Client传递过去的数据，但是能对Client端的数据进行修改）<br>inout表示输入输出型参数（Server可以获取到Client传递过去的数据，但是能对Client端的数据进行修改）。</p>
+</blockquote>
+<p>举个例子。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">void test2(Map map);  // 错误</div><div class="line">void test2(in Map map); // 正确</div></pre></td></tr></table></figure>
+<p><code>aidl</code>中导入<code>Parcelable</code>对象问题。<br>(1).需要在<code>aidl</code>目录下先创建<code>aidl</code>文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">// Person.aidl</div><div class="line">package com.egos.samples.aidl;</div><div class="line">parcelable Person;</div></pre></td></tr></table></figure>
+<p>(2).在Java文件下创建<code>Person</code>类，注意需要实现<code>Parcelable</code>接口。</p>
+<h4 id="进阶"><a href="#进阶" class="headerlink" title="进阶"></a>进阶</h4><h5 id="客户端和服务端"><a href="#客户端和服务端" class="headerlink" title="客户端和服务端"></a>客户端和服务端</h5><p>Android 的<code>Binder</code>进程间通信，有一个概念是可以把进程间通信看成是客户端和服务端通信。在了解了aidl 的基本用法以后，那么客户端和服务端分别在哪？(这对看framework 的代码非常的重要，不然可能看着就不知道是应用层的调用还是服务端的实现了)<br>还是看<strong>分析aidl的调用</strong>中分析的方法<code>asInterface</code>，这个是用来用来将服务端的<code>Binder</code>转化成客户端AIDL 接口类型的对象。当传入的对象不是客户端认识的对象时(此时就代表了是其它进程的对象了)，此时会返回<code>Proxy</code>对象，即<code>Proxy</code>为客户端。<br>1.<code>Proxy#xx()</code>这个代表的是客户端的调用。主要看<code>_data.writeInt(addA);</code>和<code>_data.writeInt(abbB);</code>将客户端调用参数写入_data 中，<code>mRemote.transact(Stub.TRANSACTION_add, _data, _reply, 0);</code>调用服务端方法，最后<code>_result = _reply.readInt();</code>得到返回数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public int add(int addA, int abbB) throws android.os.RemoteException &#123;</div><div class="line">    android.os.Parcel _data = android.os.Parcel.obtain();</div><div class="line">    android.os.Parcel _reply = android.os.Parcel.obtain();</div><div class="line">    int _result;</div><div class="line">    try &#123;</div><div class="line">        _data.writeInterfaceToken(DESCRIPTOR);</div><div class="line">        _data.writeInt(addA);</div><div class="line">        _data.writeInt(abbB);</div><div class="line">        mRemote.transact(Stub.TRANSACTION_add, _data, _reply, 0);</div><div class="line">        _reply.readException();</div><div class="line">        _result = _reply.readInt();</div><div class="line">    &#125; finally &#123;</div><div class="line">        _reply.recycle();</div><div class="line">        _data.recycle();</div><div class="line">    &#125;</div><div class="line">    return _result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>2.<code>Stub#onTransact</code>运行在服务端的<code>Binder</code>线程，意思也就是这个是运行在服务端的。查看<code>case TRANSACTION_add:</code>中代码，<code>_arg0 = data.readInt();</code>获取第一个参数，<code>_arg1 = data.readInt();</code>获取第二个参数。<code>int _result = this.add(_arg0, _arg1);</code>调用实现的方法。<code>reply.writeInt(_result);</code>写入数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">// IAddAidl.Stub</div><div class="line">@Override</div><div class="line">public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags)</div><div class="line">        throws android.os.RemoteException &#123;</div><div class="line">    switch (code) &#123;</div><div class="line">        case INTERFACE_TRANSACTION: &#123;</div><div class="line">            reply.writeString(DESCRIPTOR);</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line">        case TRANSACTION_add: &#123;</div><div class="line">            data.enforceInterface(DESCRIPTOR);</div><div class="line">            int _arg0;</div><div class="line">            _arg0 = data.readInt();</div><div class="line">            int _arg1;</div><div class="line">            _arg1 = data.readInt();</div><div class="line">            int _result = this.add(_arg0, _arg1);</div><div class="line">            reply.writeNoException();</div><div class="line">            reply.writeInt(_result);</div><div class="line">            if ((_arg2 != null)) &#123;</div><div class="line">                reply.writeInt(1);</div><div class="line">                _arg2.writeToParcel(reply, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);</div><div class="line">            &#125; else &#123;</div><div class="line">                reply.writeInt(0);</div><div class="line">            &#125;</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line">  &#125;</div><div class="line">  return super.onTransact(code, data, reply, flags);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="Binder-线程池"><a href="#Binder-线程池" class="headerlink" title="Binder 线程池"></a>Binder 线程池</h5><p><code>Binder</code>通信时的<code>Thread</code>问题。客户端通过Binder 调用服务端的方法时，方法会运行在服务端的Binder 线程池中，此时客户端会阻塞。如果是在主线程中调用需要注意ANR 的问题。反过来一样。</p>
+<h5 id="双向通信"><a href="#双向通信" class="headerlink" title="双向通信"></a>双向通信</h5><p>客户端也可以做服务端为服务端提供服务，同理服务端也可以做客户端调用相应的服务。可以参看<code>Parcel#writeStrongBinder</code>和<code>Parcel#readStrongBinder</code>。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/android/" rel="tag"># android</a>
+          
+            <a href="/tags/IPC/" rel="tag"># IPC</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/18/Andorid中VSync机制的介绍/" rel="next" title="Andorid中VSync机制的介绍">
+                <i class="fa fa-chevron-left"></i> Andorid中VSync机制的介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/23/Ubuntu-搭建简易Git-Server/" rel="prev" title="Ubuntu 搭建简易Git Server">
+                Ubuntu 搭建简易Git Server <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#多进程回顾"><span class="nav-number">1.</span> <span class="nav-text">多进程回顾</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#简单aidl调用流程"><span class="nav-number">2.</span> <span class="nav-text">简单aidl调用流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分析aidl的调用"><span class="nav-number">3.</span> <span class="nav-text">分析aidl的调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#问题"><span class="nav-number">4.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#进阶"><span class="nav-number">5.</span> <span class="nav-text">进阶</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#客户端和服务端"><span class="nav-number">5.1.</span> <span class="nav-text">客户端和服务端</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Binder-线程池"><span class="nav-number">5.2.</span> <span class="nav-text">Binder 线程池</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#双向通信"><span class="nav-number">5.3.</span> <span class="nav-text">双向通信</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

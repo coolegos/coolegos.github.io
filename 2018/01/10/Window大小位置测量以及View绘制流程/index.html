@@ -1,0 +1,954 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="framework,WMS,Window," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="从ViewRootImpl开始去寻找DecorView的测量绘制流程，过程涉及到Window的大小位置的测量。基于api 25(7.1.1)。">
+<meta name="keywords" content="framework,WMS,Window">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Window大小位置测量以及View绘制流程">
+<meta property="og:url" content="http://localhost:4000/2018/01/10/Window大小位置测量以及View绘制流程/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="从ViewRootImpl开始去寻找DecorView的测量绘制流程，过程涉及到Window的大小位置的测量。基于api 25(7.1.1)。">
+<meta property="og:image" content="http://localhost:4000/img/View绘制流程.png">
+<meta property="og:image" content="http://localhost:4000/img/WMS测量过程.png">
+<meta property="og:updated_time" content="2018-01-10T14:46:34.056Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Window大小位置测量以及View绘制流程">
+<meta name="twitter:description" content="从ViewRootImpl开始去寻找DecorView的测量绘制流程，过程涉及到Window的大小位置的测量。基于api 25(7.1.1)。">
+<meta name="twitter:image" content="http://localhost:4000/img/View绘制流程.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2018/01/10/Window大小位置测量以及View绘制流程/"/>
+
+
+
+
+
+  <title> Window大小位置测量以及View绘制流程 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2018/01/10/Window大小位置测量以及View绘制流程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Window大小位置测量以及View绘制流程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-10T21:27:16+08:00">
+                2018-01-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android-framework/" itemprop="url" rel="index">
+                    <span itemprop="name">android framework</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>从<code>ViewRootImpl</code>开始去寻找<code>DecorView</code>的测量绘制流程，过程涉及到<code>Window</code>的大小位置的测量。基于api 25(7.1.1)。<a id="more"></a></p>
+<h3 id="DecorView-的测量、布局、绘制流程"><a href="#DecorView-的测量、布局、绘制流程" class="headerlink" title="DecorView 的测量、布局、绘制流程"></a>DecorView 的测量、布局、绘制流程</h3><p>下图是整体的绘制的流程。<br><img src="/img/View绘制流程.png" alt="View绘制流程"><br>第1步，这里可以简单理解是系统会<code>ViewRootImpl#performTraversals</code>来开始绘制。<br><code>performTraversals</code>整体做了4件事情：</p>
+<ol>
+<li>performMeasure：用来测量<code>View</code>大小</li>
+<li>relayoutWindow：用来测量<code>Window</code>大小</li>
+<li>performLayout：用来对<code>View</code>布局</li>
+<li>performDraw：处理<code>View</code>的绘制</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div></pre></td><td class="code"><pre><div class="line">//ViewRootImpl.java</div><div class="line">private void performTraversals() &#123; //开始遍历绘制</div><div class="line">    // cache mView since it is used so much below...</div><div class="line">    final View host = mView;</div><div class="line">    Rect frame = mWinFrame; //mWinFrame 代表的WMS 测量的Window 大小</div><div class="line">    if (host == null || !mAdded)</div><div class="line">        return;</div><div class="line">    if (mFirst) &#123; //mFirst 最开始true，代表的是第一次执行performTraversals</div><div class="line">        host.dispatchAttachedToWindow(mAttachInfo, 0); //向子类分发attachWindow 事件，只有第一次的时候才会。这里其实是很重要的把mAttachInfo 传进去了</div><div class="line">        mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(true);</div><div class="line">        dispatchApplyInsets(host);</div><div class="line">    &#125; else &#123; //判断大小是否变化了</div><div class="line">        desiredWindowWidth = frame.width();</div><div class="line">        desiredWindowHeight = frame.height();</div><div class="line">        if (desiredWindowWidth != mWidth || desiredWindowHeight != mHeight) &#123;</div><div class="line">            mFullRedrawNeeded = true;</div><div class="line">            mLayoutRequested = true;</div><div class="line">            windowSizeMayChange = true;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (viewVisibilityChanged) &#123; //判断可见性是否变化了</div><div class="line">    &#125;</div><div class="line">    if (mAttachInfo.mWindowVisibility != View.VISIBLE) &#123;</div><div class="line">        host.clearAccessibilityFocus();</div><div class="line">    &#125;</div><div class="line">    boolean insetsChanged = false; //边衬区是否变化了</div><div class="line">    boolean layoutRequested = mLayoutRequested &amp;&amp; (!mStopped || mReportNextDraw); //是否需要layout</div><div class="line">    if (layoutRequested) &#123;</div><div class="line">        final Resources res = mView.getContext().getResources();</div><div class="line">        if (mFirst) &#123;</div><div class="line">            mAttachInfo.mInTouchMode = !mAddedTouchMode;</div><div class="line">            ensureTouchModeLocally(mAddedTouchMode);</div><div class="line">        &#125; else &#123; //处理的是边衬区是否变化</div><div class="line">        &#125;</div><div class="line">        windowSizeMayChange |= measureHierarchy(host, lp, res, //开始测量大小</div><div class="line">                desiredWindowWidth, desiredWindowHeight);</div><div class="line">    &#125;</div><div class="line">    if (mFirst || mAttachInfo.mViewVisibilityChanged) &#123; //第一次或者可见性变化</div><div class="line">    &#125;</div><div class="line">    if (mFirst || windowShouldResize || insetsChanged || ////第一次进来、window 需要重新测量、边衬区改变、view可见性改变、params 不为null 体现的是Window 的属性变化等、强制刷新</div><div class="line">            viewVisibilityChanged || params != null || mForceNextWindowRelayout) &#123;</div><div class="line">        try &#123;</div><div class="line">            relayoutResult = relayoutWindow(params, viewVisibility, insetsPending); //调整Window 大小</div><div class="line">            final boolean overscanInsetsChanged = !mPendingOverscanInsets.equals(</div><div class="line">                    mAttachInfo.mOverscanInsets);</div><div class="line">            contentInsetsChanged = !mPendingContentInsets.equals(</div><div class="line">                    mAttachInfo.mContentInsets);</div><div class="line">            final boolean visibleInsetsChanged = !mPendingVisibleInsets.equals(</div><div class="line">                    mAttachInfo.mVisibleInsets);</div><div class="line">            final boolean stableInsetsChanged = !mPendingStableInsets.equals(</div><div class="line">                    mAttachInfo.mStableInsets);</div><div class="line">            final boolean outsetsChanged = !mPendingOutsets.equals(mAttachInfo.mOutsets);</div><div class="line">            final boolean surfaceSizeChanged = (relayoutResult</div><div class="line">                    &amp; WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;</div><div class="line">            final boolean alwaysConsumeNavBarChanged =</div><div class="line">                    mPendingAlwaysConsumeNavBar != mAttachInfo.mAlwaysConsumeNavBar;</div><div class="line">            //处理边衬区的变化</div><div class="line">            if (!hadSurface) &#123; //处理Surface</div><div class="line">            &#125; else if (!mSurface.isValid()) &#123;</div><div class="line">            &#125; else if ((surfaceGenerationId != mSurface.getGenerationId()</div><div class="line">                    || surfaceSizeChanged)</div><div class="line">                    &amp;&amp; mSurfaceHolder == null</div><div class="line">                    &amp;&amp; mAttachInfo.mHardwareRenderer != null) &#123;                </div><div class="line">            &#125;</div><div class="line">        &#125; catch (RemoteException e) &#123;</div><div class="line">        &#125;</div><div class="line">        mAttachInfo.mWindowLeft = frame.left;</div><div class="line">        mAttachInfo.mWindowTop = frame.top;</div><div class="line">        if (mSurfaceHolder != null) &#123; //代表已经拥有了Surface</div><div class="line">            if (mSurface.isValid()) &#123;</div><div class="line">            &#125; else if (hadSurface) &#123;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        final ThreadedRenderer hardwareRenderer = mAttachInfo.mHardwareRenderer;</div><div class="line">        if (hardwareRenderer != null &amp;&amp; hardwareRenderer.isEnabled()) &#123; //是否使用硬件加速</div><div class="line">        &#125;</div><div class="line">        if (!mStopped || mReportNextDraw) &#123;</div><div class="line">            if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()</div><div class="line">                    || mHeight != host.getMeasuredHeight() || contentInsetsChanged ||</div><div class="line">                    updatedConfiguration) &#123; //focus 改变、大小发生变化、边衬区发生变化、更新配置</div><div class="line">                int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);</div><div class="line">                int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);</div><div class="line">                performMeasure(childWidthMeasureSpec, childHeightMeasureSpec); //重新测量大小</div><div class="line">                layoutRequested = true;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125; else &#123;</div><div class="line">        maybeHandleWindowMove(frame);</div><div class="line">    &#125;</div><div class="line">    if (didLayout) &#123; //是否需要处理布局</div><div class="line">        performLayout(lp, mWidth, mHeight); //开始布局</div><div class="line">    &#125;</div><div class="line">    if (triggerGlobalLayoutListener) &#123;</div><div class="line">        mAttachInfo.mRecomputeGlobalAttributes = false;</div><div class="line">        mAttachInfo.mTreeObserver.dispatchOnGlobalLayout();</div><div class="line">    &#125;</div><div class="line">    if (computesInternalInsets) &#123;</div><div class="line">    &#125;</div><div class="line">    if (mFirst) &#123; //第一次获取焦点</div><div class="line">        if (mView != null) &#123;</div><div class="line">            if (!mView.hasFocus()) &#123;</div><div class="line">                mView.requestFocus(View.FOCUS_FORWARD);</div><div class="line">            &#125; else &#123;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    final boolean changedVisibility = (viewVisibilityChanged || mFirst) &amp;&amp; isViewVisible;</div><div class="line">    final boolean hasWindowFocus = mAttachInfo.mHasWindowFocus &amp;&amp; isViewVisible;</div><div class="line">    final boolean regainedFocus = hasWindowFocus &amp;&amp; mLostWindowFocus;</div><div class="line">    if (regainedFocus) &#123;</div><div class="line">        mLostWindowFocus = false;</div><div class="line">    &#125; else if (!hasWindowFocus &amp;&amp; mHadWindowFocus) &#123;</div><div class="line">        mLostWindowFocus = true;</div><div class="line">    &#125;</div><div class="line">    if (changedVisibility || regainedFocus) &#123;</div><div class="line">        // Toasts are presented as notifications - don&apos;t present them as windows as well</div><div class="line">        boolean isToast = (mWindowAttributes == null) ? false</div><div class="line">                : (mWindowAttributes.type == WindowManager.LayoutParams.TYPE_TOAST);</div><div class="line">        if (!isToast) &#123;</div><div class="line">            host.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (!cancelDraw &amp;&amp; !newSurface) &#123;</div><div class="line">        performDraw(); //处理绘制</div><div class="line">    &#125; else &#123;</div><div class="line">        if (isViewVisible) &#123;</div><div class="line">            scheduleTraversals();</div><div class="line">        &#125; else if (mPendingTransitions != null &amp;&amp; mPendingTransitions.size() &gt; 0) &#123;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    mIsInTraversal = false;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第35行开始测量<code>View</code>，第83行是测量完<code>Window</code>以后发现大小变化以后重新测量<code>View</code>。<br>第43行测量<code>Window</code>。<br>第91行开始对<code>View</code>布局。<br>第124行开始绘制<code>View</code>。</p>
+<p>第3步，<code>ViewRootImpl#measureHierarchy</code>测量布局大小。这里的测量跟普通<code>View</code>的测量不一样。<a href="/2017/11/12/自定义View那些事/">自定义View那些事</a>之前有涉及到。</p>
+<p>第4步，<code>ViewRootImpl#relayoutWindow</code>用来测量<code>Window</code>大小。</p>
+<blockquote>
+<p>这里可以从多个情况去看里面的实现:</p>
+<ol>
+<li>最普通的<code>Activity</code>打开</li>
+<li>设置全屏的<code>Activity</code>(<code>WindowManager.LayoutParams.FLAG_FULLSCREEN</code>)</li>
+<li>隐藏<code>Navigation</code>的情况</li>
+<li>…</li>
+</ol>
+</blockquote>
+<p>第5步，<code>Session#relayout</code>最终调用到服务端计算。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">//IWindowSession.aidl</div><div class="line">int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,</div><div class="line">        int requestedWidth, int requestedHeight, int viewVisibility,</div><div class="line">        int flags, out Rect outFrame, out Rect outOverscanInsets,</div><div class="line">        out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,</div><div class="line">        out Rect outOutsets, out Rect outBackdropFrame, out Configuration outConfig,</div><div class="line">        out Surface outSurface);</div></pre></td></tr></table></figure>
+<p>注意从<code>outFrame</code>开始后面的所有参数都是out 类型的，即服务端计算好以后会将值返回给客户端。</p>
+<p>第6步，<code>WindowManagerService#relayoutWindow</code>的逻辑，主要是创建<code>Surface</code>的逻辑以及计算<code>Window</code>大小位置(这个会在下面单独分析)。</p>
+<p>第8步，<code>ViewRootImpl#performDraw</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">//ViewRootImpl.java</div><div class="line">private void draw(boolean fullRedrawNeeded) &#123;</div><div class="line">    Surface surface = mSurface;</div><div class="line">    if (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty) &#123; //脏区域不为空、在动画中、</div><div class="line">        if (mAttachInfo.mHardwareRenderer != null &amp;&amp; mAttachInfo.mHardwareRenderer.isEnabled()) &#123;</div><div class="line">            mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this); //使用硬件绘制</div><div class="line">        &#125; else &#123;</div><div class="line">            if (mAttachInfo.mHardwareRenderer != null &amp;&amp;</div><div class="line">                    !mAttachInfo.mHardwareRenderer.isEnabled() &amp;&amp;</div><div class="line">                    mAttachInfo.mHardwareRenderer.isRequested()) &#123; //如果正在请求硬件绘制，会重新初始化</div><div class="line">                try &#123;</div><div class="line">                    mAttachInfo.mHardwareRenderer.initializeIfNeeded(</div><div class="line">                            mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);</div><div class="line">                &#125; catch (OutOfResourcesException e) &#123;</div><div class="line">                    handleOutOfResourcesException(e);</div><div class="line">                    return;</div><div class="line">                &#125;</div><div class="line">                mFullRedrawNeeded = true;</div><div class="line">                scheduleTraversals();</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line">            if (!drawSoftware(surface, mAttachInfo, xOffset, yOffset, scalingRequired, dirty)) &#123; //使用软件绘制</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>会分为硬件和软件两种绘制方法，软件绘制是通过<code>Surface#lockCanvas</code>获取到<code>Canvas</code>以后调用<code>View#draw</code>进行绘制。硬件绘制后续展示。</p>
+<p>总结：到此结束了<code>View</code>的测量(<code>measure</code>)、布局(<code>layout</code>)和绘制(<code>draw</code>)。</p>
+<h3 id="Window-测量流程"><a href="#Window-测量流程" class="headerlink" title="Window 测量流程"></a>Window 测量流程</h3><p>主要是对上面第6步的展开分析，<code>View</code>最终有多大需要通过测量<code>Window</code>以后才能准确知道。最终展示的大小可以通过<code>adb shell dumpsys window windows</code>查看(查看<code>Frames:</code>节点就行，里面会有<code>containing=</code>、<code>parent=</code>、<code>display=</code>等)。<br>先来分析三个类中关于<code>Window</code>大小：</p>
+<ol>
+<li>了解<code>ViewRootImpl</code>中成员变量的含义</li>
+<li>了解<code>WindowState</code>中成员变量的含义</li>
+<li>了解<code>PhoneWindowManager</code>中成员变量的含义</li>
+</ol>
+<h4 id="ViewRootImpl中成员变量的含义"><a href="#ViewRootImpl中成员变量的含义" class="headerlink" title="ViewRootImpl中成员变量的含义"></a><code>ViewRootImpl</code>中成员变量的含义</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">//ViewRootImpl.java</div><div class="line">int mWidth; //代表实际展示的宽</div><div class="line">int mHeight; //代表实际展示的高</div><div class="line"></div><div class="line">final Rect mWinFrame; //WMS 提供的Window 的大小</div><div class="line"></div><div class="line">final Rect mPendingOverscanInsets = new Rect();</div><div class="line">final Rect mPendingVisibleInsets = new Rect();</div><div class="line">final Rect mPendingStableInsets = new Rect();</div><div class="line">final Rect mPendingContentInsets = new Rect();</div><div class="line">final Rect mPendingOutsets = new Rect();</div><div class="line">final Rect mPendingBackDropFrame = new Rect();</div></pre></td></tr></table></figure>
+<p>上面7个<code>Rect</code>属性的表达方式不同：<code>mWinFrame</code>的4个值分别代表的是左上角和右下角的坐标。而以Inset(这里翻译成边衬区)结尾的几个值代表的是距离左、上、右、下的值。</p>
+<ul>
+<li>mPendingVisibleInsets：假设一个Window 的四周都有被一块类似输入框的区域遮住(注意是遮住，那块区域还是存在)，得到中间的那一块区域就称为可见区域，而被剔除出来的区域所组成的区域就称为可见边衬区域（Visible Insets）</li>
+<li>mPendingContentInsets：假设一个Window 的四周都有一块类似状态栏的区域，那么将这些区域剔除之后，得到中间的那一块区域就称为内容区域，而被剔除出来的区域所组成的区域就称为内容边衬区域（Content Insets）(来自老罗博客，最下面有地址)</li>
+<li>mPendingStableInsets：代表的是剔除System Bar 所占据的位置以后的区域(不管Status Bar 和Navigation Bar 是否可见都会计算在内)。</li>
+</ul>
+<h4 id="WindowState中成员变量的含义"><a href="#WindowState中成员变量的含义" class="headerlink" title="WindowState中成员变量的含义"></a><code>WindowState</code>中成员变量的含义</h4><p>之前(<a href="/2018/01/04/WMS之addView流程/">WMS之addView流程</a>)已经知道了<code>WindowState</code>是WMS 用来标识一个<code>Window</code>的。这里主要去看<code>WindowState</code>中关于大小和位置的参数。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Field</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">mRequestedWidth<br>mRequestedHeight<br>mLastRequestedWidth<br>mLastRequestedHeight</td>
+<td style="text-align:left">应用请求Window 的大小</td>
+</tr>
+<tr>
+<td style="text-align:left">mVisibleInsets<br>mLastVisibleInsets<br>mVisibleInsetsChanged</td>
+<td style="text-align:left">Window 的可见边衬区</td>
+</tr>
+<tr>
+<td style="text-align:left">mContentInsets<br>mLastContentInsets<br>mContentInsetsChanged</td>
+<td style="text-align:left">Window 的内容边衬区</td>
+</tr>
+<tr>
+<td style="text-align:left">mOverscanInsets<br>mLastOverscanInsets<br>mOverscanInsetsChanged</td>
+<td style="text-align:left">Window 的过扫描边衬区</td>
+</tr>
+<tr>
+<td style="text-align:left">mStableInsets<br>mLastStableInsets<br>mStableInsetsChanged</td>
+<td style="text-align:left">Window 被系统Window 遮住的固定边衬区</td>
+</tr>
+<tr>
+<td style="text-align:left">mOutsets<br>mLastOutsets<br>mOutsetsChanged</td>
+<td style="text-align:left">不在Window 的Surface 区域但可以绘制的区域(不理解)</td>
+</tr>
+<tr>
+<td style="text-align:left">mFrame<br>mLastFrame<br>mFrameSizeChanged</td>
+<td style="text-align:left">最后展示的区域</td>
+</tr>
+<tr>
+<td style="text-align:left">mCompatFrame<br>mContainingFrame<br>mParentFrame<br>mDisplayFrame<br>mOverscanFrame<br>mStableFrame<br>mDecorFrame<br>mContentFrame<br>mVisibleFrame<br>mOutsetFrame<br>mInsetFrame</td>
+</tr>
+</tbody>
+</table>
+<h4 id="PhoneWindowManager中成员变量的含义"><a href="#PhoneWindowManager中成员变量的含义" class="headerlink" title="PhoneWindowManager中成员变量的含义"></a><code>PhoneWindowManager</code>中成员变量的含义</h4><blockquote>
+<p>Overscan 区域的意思：Overscan 代表“过扫描”，有些显示屏(比如电视)可能存在失真现象，且越靠近边缘越严重。为了避开这个“固有缺陷”，不少厂商都把扫描调整到画面的5%～10%，这样造成的结果就是画面很可能显示不全，损失的部分称为“Overscan”。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Field</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">mOverscanScreenLeft<br>mOverscanScreenTop<br>mOverscanScreenWidth<br>mOverscanScreenHeight</td>
+<td style="text-align:left">屏幕的真实坐标，包含了过扫描的区域。代表的是左上角坐标和屏幕宽高</td>
+</tr>
+<tr>
+<td style="text-align:left">mUnrestrictedScreenLeft<br>mUnrestrictedScreenTop<br>mUnrestrictedScreenWidth<br>mUnrestrictedScreenHeight</td>
+<td style="text-align:left">不包含过扫描区域，包含了状态栏的区域的大小</td>
+</tr>
+<tr>
+<td style="text-align:left">mRestrictedOverscanScreenLeft<br>mRestrictedOverscanScreenTop<br>mRestrictedOverscanScreenWidth<br>mRestrictedOverscanScreenHeight</td>
+<td style="text-align:left">与mOverscanScreen* 类似，但是可以移动到过扫描区域</td>
+</tr>
+<tr>
+<td style="text-align:left">mRestrictedScreenLeft<br>mRestrictedScreenTop<br>mRestrictedScreenWidth<br>mRestrictedScreenHeight</td>
+<td style="text-align:left">屏幕当前的区域，但是不包含状态栏</td>
+</tr>
+<tr>
+<td style="text-align:left">mSystemLeft<br>mSystemTop<br>mSystemRight<br>mSystemBottom</td>
+<td style="text-align:left">所有可见的UI元素区域(包含了系统状态栏区域)</td>
+</tr>
+<tr>
+<td style="text-align:left">mStableLeft<br>mStableTop<br>mStableRight<br>mStableBottom</td>
+<td style="text-align:left">不包含状态栏的区域(不管状态栏是否可见)</td>
+</tr>
+<tr>
+<td style="text-align:left">mStableFullscreenLeft<br>mStableFullscreenTop<br>mStableFullscreenRight<br>mStableFullscreenBottom</td>
+<td style="text-align:left">与mStable*类似。不包含状态栏的区域</td>
+</tr>
+<tr>
+<td style="text-align:left">mCurLeft<br>mCurTop<br>mCurRight<br>mCurBottom</td>
+<td style="text-align:left">包含状态栏、输入法的内容区域</td>
+</tr>
+<tr>
+<td style="text-align:left">mContentLeft<br>mContentTop<br>mContentRight<br>mContentBottom</td>
+<td style="text-align:left">内容区域</td>
+</tr>
+<tr>
+<td style="text-align:left">mVoiceContentLeft<br>mVoiceContentTop<br>mVoiceContentRight<br>mVoiceContentBottom</td>
+<td style="text-align:left">语音区域</td>
+</tr>
+<tr>
+<td style="text-align:left">mDockLeft<br>mDockTop<br>mDockRight<br>mDockBottom</td>
+<td style="text-align:left">输入法区域</td>
+</tr>
+</tbody>
+</table>
+<p><code>PhoneWindowManager</code>中还有一系列关于<code>WindowState</code>计算的值。下面的9个值都是<code>Rect</code>，代表的都是左上角和右下角的坐标。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Field</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">mTmpParentFrame</td>
+<td style="text-align:left">父窗口区域</td>
+<td style="text-align:left">一般就是<code>mTmpDisplayFrame</code></td>
+</tr>
+<tr>
+<td style="text-align:left">mTmpDisplayFrame</td>
+<td style="text-align:left"><code>Window</code>完整展示区域</td>
+<td style="text-align:left"><code>StatusBar</code>一般是全屏，因为<code>StatusBar</code>是下拉展示全屏</td>
+</tr>
+<tr>
+<td style="text-align:left">mTmpOverscanFrame</td>
+<td style="text-align:left">左上角(overscanLeft,overscanTop)<br>右下角(displayWidth-overscanRight,displayHeight-overscanBottom)</td>
+<td style="text-align:left">去掉overscan 区域以后的区域</td>
+</tr>
+<tr>
+<td style="text-align:left">mTmpContentFrame</td>
+<td style="text-align:left"><code>Window</code>内容区域</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">mTmpVisibleFrame</td>
+<td style="text-align:left"><code>Window</code>可见区域</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">mTmpDecorFrame</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">mTmpStableFrame</td>
+<td style="text-align:left">左上角(0,statusBarHeight)<br>右下角(displayWidth,displayHeight-navigationBarHeight)</td>
+<td style="text-align:left">没有计算overscan</td>
+</tr>
+<tr>
+<td style="text-align:left">mTmpNavigationFrame</td>
+<td style="text-align:left"><code>NavigationBar</code>对应的坐标</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">mTmpOutsetFrame</td>
+<td style="text-align:left"><code>Surface</code>区域外</td>
+</tr>
+</tbody>
+</table>
+<h4 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h4><p>首先上一张测量的流程图。<br><img src="/img/WMS测量过程.png" alt="WMS 中Window 测量流程"></p>
+<p>第1步，从<code>WindowManagerService#relayoutWindow</code>调起的。</p>
+<p>第3步，<code>WindowSurfacePlacer#performSurfacePlacementInner</code>，还有一个调用可以关注下<code>WinowState#reportResized()</code>。</p>
+<p>第5步，<code>WindowSurfacePlacer#performLayoutLockedInner</code>。测量的关键方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div></pre></td><td class="code"><pre><div class="line">//WindowSurfacePlacer.java</div><div class="line">final void performLayoutLockedInner(final DisplayContent displayContent, //开始Layout</div><div class="line">        boolean initial, boolean updateInputWindows) &#123;</div><div class="line">    //...</div><div class="line">    final int N = windows.size();</div><div class="line">    int i;</div><div class="line">    mService.mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mService.mRotation,</div><div class="line">            mService.mCurConfiguration.uiMode); //先初始化相关数据</div><div class="line">    int topAttached = -1;</div><div class="line">    //第一个遍历处理的是非stub window(没有attached 到其他window 的那些窗口)</div><div class="line">    for (i = N-1; i &gt;= 0; i--) &#123;</div><div class="line">        final WindowState win = windows.get(i);</div><div class="line">        final boolean gone = (behindDream &amp;&amp; mService.mPolicy.canBeForceHidden(win, win.mAttrs))</div><div class="line">                || win.isGoneForLayoutLw();</div><div class="line">        if (!gone || !win.mHaveFrame || win.mLayoutNeeded</div><div class="line">                || ((win.isConfigChanged() || win.setReportResizeHints())</div><div class="line">                        &amp;&amp; !win.isGoneForLayoutLw() &amp;&amp;</div><div class="line">                        ((win.mAttrs.privateFlags &amp; PRIVATE_FLAG_KEYGUARD) != 0 ||</div><div class="line">                        (win.mHasSurface &amp;&amp; win.mAppToken != null &amp;&amp;</div><div class="line">                        win.mAppToken.layoutConfigChanges)))) &#123; //可见、mHaveFrame为true 代表已经计算过、需要布局</div><div class="line">            if (!win.mLayoutAttached) &#123; //不是子Window</div><div class="line">                if (initial) &#123;</div><div class="line">                    win.mContentChanged = false;</div><div class="line">                &#125;</div><div class="line">                if (win.mAttrs.type == TYPE_DREAM) &#123;</div><div class="line">                    behindDream = true;</div><div class="line">                &#125;</div><div class="line">                win.mLayoutNeeded = false;</div><div class="line">                win.prelayout();</div><div class="line">                mService.mPolicy.layoutWindowLw(win, null);</div><div class="line">                win.mLayoutSeq = seq;</div><div class="line">            &#125; else &#123;</div><div class="line">                if (topAttached &lt; 0) topAttached = i;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    //第二次遍历处理的是attach 的window。因为子Window 需要父Window 的相关属性才能计算</div><div class="line">    for (i = topAttached; i &gt;= 0; i--) &#123;</div><div class="line">        final WindowState win = windows.get(i);</div><div class="line">        if (win.mLayoutAttached) &#123;</div><div class="line">            if (attachedBehindDream &amp;&amp; mService.mPolicy.canBeForceHidden(win, win.mAttrs)) &#123;</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line">            if ((win.mViewVisibility != View.GONE &amp;&amp; win.mRelayoutCalled)</div><div class="line">                    || !win.mHaveFrame || win.mLayoutNeeded) &#123;</div><div class="line">                if (initial) &#123;</div><div class="line">                    win.mContentChanged = false;</div><div class="line">                &#125;</div><div class="line">                win.mLayoutNeeded = false;</div><div class="line">                win.prelayout();</div><div class="line">                mService.mPolicy.layoutWindowLw(win, win.mAttachedWindow);</div><div class="line">            &#125;</div><div class="line">        &#125; else if (win.mAttrs.type == TYPE_DREAM) &#123;</div><div class="line">            attachedBehindDream = behindDream;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    mService.mInputMonitor.setUpdateInputWindowsNeededLw();</div><div class="line">    if (updateInputWindows) &#123;</div><div class="line">        mService.mInputMonitor.updateInputWindowsLw(false /*force*/);</div><div class="line">    &#125;</div><div class="line">    mService.mPolicy.finishLayoutLw();</div><div class="line">    mService.mH.sendEmptyMessage(UPDATE_DOCKED_STACK_DIVIDER);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>主要是3个方法和2个遍历。</p>
+<p>3个方法：</p>
+<ol>
+<li><code>PhoneWindowManager#beginLayoutLw</code>：初始化值操作。第7行</li>
+<li><code>PhoneWindowManager#layoutWindowLw</code>：测量每一个<code>WindowState</code>。第30行</li>
+<li><code>PhoneWindowManager#finishLayoutLw</code>：结束操作。第61行</li>
+</ol>
+<p>2个遍历：</p>
+<ol>
+<li>遍历非Stub Window，处理测量流程。第11行</li>
+<li>遍历Stub Window，处理测量流程(因为子Window 需要依赖父Window 的测量结果)。第38行</li>
+</ol>
+<p>第6步，<code>PhoneWindowManager#beginLayoutLw</code>初始化相关值。<br>这个方法前部分全是赋值操作，上面介绍过这些值代表的含义。主要看<br>最后的<code>layoutNavigationBar</code>和<code>layoutStatusBar</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">//PhoneWindowManager.java</div><div class="line">private boolean layoutNavigationBar(int displayWidth, int displayHeight, int displayRotation, //displayWidth、displayHeight 代表的屏幕的宽高。displayRotation 代表屏幕方向</div><div class="line">        int uiMode, int overscanLeft, int overscanRight, int overscanBottom, Rect dcf, //uiMode 用来区分是什么设备(比如手机、手表等等)</div><div class="line">        boolean navVisible, boolean navTranslucent, boolean navAllowedHidden,</div><div class="line">        boolean statusBarExpandedNotKeyguard) &#123;</div><div class="line">    if (mNavigationBar != null) &#123;</div><div class="line">        boolean transientNavBarShowing = mNavigationBarController.isTransientShowing();</div><div class="line">        //根据displayRotation 来获取NavigationBar 的位置。可能在底部、左边、右边</div><div class="line">        mNavigationBarPosition = navigationBarPosition(displayWidth, displayHeight,</div><div class="line">                displayRotation);</div><div class="line">        if (mNavigationBarPosition == NAV_BAR_BOTTOM) &#123; //case 1 Navigation 在底部(竖屏)</div><div class="line">            int top = displayHeight - overscanBottom</div><div class="line">                    - getNavigationBarHeight(displayRotation, uiMode); //屏幕高度 - 底部过扫描高度 - NavigationBar高度。得到的NavigationBar的左上角的y坐标(即top)</div><div class="line">            mTmpNavigationFrame.set(0, top, displayWidth, displayHeight - overscanBottom); //mTmpNavigationFrame记录的是NavigationBar的位置(左上角和右下角坐标)</div><div class="line">            mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;</div><div class="line">            if (transientNavBarShowing) &#123;</div><div class="line">                mNavigationBarController.setBarShowingLw(true);</div><div class="line">            &#125; else if (navVisible) &#123;</div><div class="line">                mNavigationBarController.setBarShowingLw(true);</div><div class="line">                mDockBottom = mTmpNavigationFrame.top; //NavigationBar可见需要重新计算输入的底部位置</div><div class="line">                mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;</div><div class="line">                mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;</div><div class="line">            &#125; else &#123;</div><div class="line">                mNavigationBarController.setBarShowingLw(statusBarExpandedNotKeyguard); //这里去隐藏Navigation Bar</div><div class="line">            &#125;</div><div class="line">            if (navVisible &amp;&amp; !navTranslucent &amp;&amp; !navAllowedHidden</div><div class="line">                    &amp;&amp; !mNavigationBar.isAnimatingLw()</div><div class="line">                    &amp;&amp; !mNavigationBarController.wasRecentlyTranslucent()) &#123;</div><div class="line">                mSystemBottom = mTmpNavigationFrame.top;</div><div class="line">            &#125;</div><div class="line">        &#125; else if (mNavigationBarPosition == NAV_BAR_RIGHT) &#123; //case 2 Navigation 在右边</div><div class="line">        &#125; else if (mNavigationBarPosition == NAV_BAR_LEFT) &#123; //case 3 Navigation 在左边(屏幕旋转导致)</div><div class="line">        &#125;</div><div class="line">        mContentTop = mVoiceContentTop = mCurTop = mDockTop;</div><div class="line">        mContentBottom = mVoiceContentBottom = mCurBottom = mDockBottom;</div><div class="line">        mContentLeft = mVoiceContentLeft = mCurLeft = mDockLeft;</div><div class="line">        mContentRight = mVoiceContentRight = mCurRight = mDockRight;</div><div class="line">        mStatusBarLayer = mNavigationBar.getSurfaceLayer();</div><div class="line">        mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame, //最终调用computeFrameLw计算出mNavigationBar 中的值</div><div class="line">                mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame, dcf,</div><div class="line">                mTmpNavigationFrame, mTmpNavigationFrame);</div><div class="line">        if (mNavigationBarController.checkHiddenLw()) &#123;</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return false;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>NavigationBar</code>的计算分3种请求(<code>NavigationBar</code>可以随着屏幕的旋转出现在底、左、右)。<br>主要是分析了在底部的逻辑：<br>第12行计算出<code>NavigationBar</code>左上角坐标。底部<code>NavigationBar</code>默认宽度是屏幕宽度。<br>第14行就可以计算出底部<code>NavigationBar</code>的在屏幕的位置信息，保存在<code>mTmpNavigationFrame</code>。然后就会修改一些相关的值。<br>第39行，调用<code>WindowState#computeFrameLw</code>(这个方法后续分析)对<code>WindowState</code>内部属性赋值。<br><code>layoutStatusBar</code>主要是执行了<code>WindowState#computeFrameLw</code>。</p>
+<p>第7步，<code>PhoneWindowManager#layoutWindowLw</code>。这个逻辑会对当前展示的所有<code>Window</code>单独处理的。这里处理的顺序是从用户看到层级展示的(即优先处理的是layer 比较大的Window)。<br>所有<code>WindowState</code>都会走这里的逻辑，这肯定是会有性能影响的，所以执行是有条件的，可以看第5步中的代码。<br><code>layoutWindowLw</code>逻辑里面分成了6个case 来计算不用的<code>WindowState</code>的大小和位置。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div></pre></td><td class="code"><pre><div class="line">//PhoneWindowManager.java</div><div class="line">public void layoutWindowLw(WindowState win, WindowState attached) &#123; //会在layout 的时候处理每一个attached window</div><div class="line">    if ((win == mStatusBar &amp;&amp; !canReceiveInput(win)) || win == mNavigationBar) &#123; //StatusBar 和NavigationBar 不用处理</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    //计算WindowState的数据</div><div class="line">    final Rect pf = mTmpParentFrame;</div><div class="line">    final Rect df = mTmpDisplayFrame;</div><div class="line">    final Rect of = mTmpOverscanFrame;</div><div class="line">    final Rect cf = mTmpContentFrame;</div><div class="line">    final Rect vf = mTmpVisibleFrame;</div><div class="line">    final Rect dcf = mTmpDecorFrame;</div><div class="line">    final Rect sf = mTmpStableFrame;</div><div class="line">    Rect osf = null;</div><div class="line">    dcf.setEmpty();</div><div class="line">    if (!isDefaultDisplay) &#123; //case 1</div><div class="line">    &#125; else if (attrs.type == TYPE_INPUT_METHOD) &#123; //case 2</div><div class="line">    &#125; else if (attrs.type == TYPE_VOICE_INTERACTION) &#123; //case 3</div><div class="line">    &#125; else if (attrs.type == TYPE_WALLPAPER) &#123; //case 4</div><div class="line">    &#125; else if (win == mStatusBar) &#123; //case 5</div><div class="line">    &#125; else &#123; //case 6 计算普通Window 的值</div><div class="line">        //6.1 计算的是DecorFrame</div><div class="line">        dcf.left = mSystemLeft;</div><div class="line">        dcf.top = mSystemTop;</div><div class="line">        dcf.right = mSystemRight;</div><div class="line">        dcf.bottom = mSystemBottom;</div><div class="line">        final boolean inheritTranslucentDecor = (attrs.privateFlags</div><div class="line">                &amp; WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) != 0;</div><div class="line">        final boolean isAppWindow = //是否是应用Window</div><div class="line">                attrs.type &gt;= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW &amp;&amp;</div><div class="line">                attrs.type &lt;= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;</div><div class="line">        final boolean topAtRest =</div><div class="line">                win == mTopFullscreenOpaqueWindowState &amp;&amp; !win.isAnimatingLw();</div><div class="line">        if (isAppWindow &amp;&amp; !inheritTranslucentDecor &amp;&amp; !topAtRest) &#123;</div><div class="line">            if ((sysUiFl &amp; View.SYSTEM_UI_FLAG_FULLSCREEN) == 0 //6.1.1判断没有设置FULLSCREEN 的情况</div><div class="line">                    &amp;&amp; (fl &amp; WindowManager.LayoutParams.FLAG_FULLSCREEN) == 0</div><div class="line">                    &amp;&amp; (fl &amp; WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) == 0</div><div class="line">                    &amp;&amp; (fl &amp; WindowManager.LayoutParams.</div><div class="line">                            FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0</div><div class="line">                    &amp;&amp; (pfl &amp; PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) == 0) &#123;</div><div class="line">                dcf.top = mStableTop;</div><div class="line">            &#125;</div><div class="line">            if ((fl &amp; WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION) == 0</div><div class="line">                    &amp;&amp; (sysUiFl &amp; View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0</div><div class="line">                    &amp;&amp; (fl &amp; WindowManager.LayoutParams.</div><div class="line">                            FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0) &#123; //6.1.2判断没有设置HIDE_NAVIGATION 的情况</div><div class="line">                // Ensure policy decor includes navigation bar</div><div class="line">                dcf.bottom = mStableBottom;</div><div class="line">                dcf.right = mStableRight;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if ((fl &amp; (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR))</div><div class="line">                == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) &#123;</div><div class="line">            //6.2 计算的是pf、df、of</div><div class="line">            if (attached != null) &#123; //case 含有FLAG_LAYOUT_IN_SCREEN 或者FLAG_LAYOUT_INSET_DECOR 的子窗口</div><div class="line">                setAttachedWindowFrames(win, fl, adjust, attached, true, pf, df, of, cf, vf);</div><div class="line">            &#125; else &#123; //case 含有FLAG_LAYOUT_IN_SCREEN 或者FLAG_LAYOUT_INSET_DECOR 的非子窗口</div><div class="line">                if (attrs.type == TYPE_STATUS_BAR_PANEL</div><div class="line">                        || attrs.type == TYPE_STATUS_BAR_SUB_PANEL) &#123;</div><div class="line">                &#125; else if ((fl &amp; FLAG_LAYOUT_IN_OVERSCAN) != 0</div><div class="line">                        &amp;&amp; attrs.type &gt;= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW</div><div class="line">                        &amp;&amp; attrs.type &lt;= WindowManager.LayoutParams.LAST_SUB_WINDOW) &#123;</div><div class="line">                &#125; else if (canHideNavigationBar()</div><div class="line">                        &amp;&amp; (sysUiFl &amp; View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0</div><div class="line">                        &amp;&amp; attrs.type &gt;= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW</div><div class="line">                        &amp;&amp; attrs.type &lt;= WindowManager.LayoutParams.LAST_SUB_WINDOW) &#123; //隐藏了Navigation</div><div class="line">                    pf.left = df.left = mOverscanScreenLeft;</div><div class="line">                    pf.top = df.top = mOverscanScreenTop;</div><div class="line">                    pf.right = df.right = mOverscanScreenLeft + mOverscanScreenWidth;</div><div class="line">                    pf.bottom = df.bottom = mOverscanScreenTop + mOverscanScreenHeight;</div><div class="line">                    of.left = mUnrestrictedScreenLeft;</div><div class="line">                    of.top = mUnrestrictedScreenTop;</div><div class="line">                    of.right = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;</div><div class="line">                    of.bottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;</div><div class="line">                &#125; else &#123;</div><div class="line">                    pf.left = df.left = mRestrictedOverscanScreenLeft;</div><div class="line">                    pf.top = df.top = mRestrictedOverscanScreenTop;</div><div class="line">                    pf.right = df.right = mRestrictedOverscanScreenLeft</div><div class="line">                            + mRestrictedOverscanScreenWidth;</div><div class="line">                    pf.bottom = df.bottom = mRestrictedOverscanScreenTop</div><div class="line">                            + mRestrictedOverscanScreenHeight;</div><div class="line">                    // We need to tell the app about where the frame inside the overscan</div><div class="line">                    // is, so it can inset its content by that amount -- it didn&apos;t ask</div><div class="line">                    // to actually extend itself into the overscan region.</div><div class="line">                    of.left = mUnrestrictedScreenLeft;</div><div class="line">                    of.top = mUnrestrictedScreenTop;</div><div class="line">                    of.right = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;</div><div class="line">                    of.bottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;</div><div class="line">                &#125;</div><div class="line">                //6.3计算cf</div><div class="line">                if ((fl &amp; FLAG_FULLSCREEN) == 0) &#123;</div><div class="line">                    if (win.isVoiceInteraction()) &#123;</div><div class="line">                        cf.left = mVoiceContentLeft;</div><div class="line">                        cf.top = mVoiceContentTop;</div><div class="line">                        cf.right = mVoiceContentRight;</div><div class="line">                        cf.bottom = mVoiceContentBottom;</div><div class="line">                    &#125; else &#123;</div><div class="line">                        if (adjust != SOFT_INPUT_ADJUST_RESIZE) &#123;</div><div class="line">                            cf.left = mDockLeft;</div><div class="line">                            cf.top = mDockTop;</div><div class="line">                            cf.right = mDockRight;</div><div class="line">                            cf.bottom = mDockBottom;</div><div class="line">                        &#125; else &#123;</div><div class="line">                            cf.left = mContentLeft;</div><div class="line">                            cf.top = mContentTop;</div><div class="line">                            cf.right = mContentRight;</div><div class="line">                            cf.bottom = mContentBottom;</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line">                &#125; else &#123;</div><div class="line">                    cf.left = mRestrictedScreenLeft;</div><div class="line">                    cf.top = mRestrictedScreenTop;</div><div class="line">                    cf.right = mRestrictedScreenLeft + mRestrictedScreenWidth;</div><div class="line">                    cf.bottom = mRestrictedScreenTop + mRestrictedScreenHeight;</div><div class="line">                &#125;</div><div class="line">                applyStableConstraints(sysUiFl, fl, cf); //这里会重新计算cf 的值？</div><div class="line">                if (adjust != SOFT_INPUT_ADJUST_NOTHING) &#123; //d计算vd 的值</div><div class="line">                    vf.left = mCurLeft;</div><div class="line">                    vf.top = mCurTop;</div><div class="line">                    vf.right = mCurRight;</div><div class="line">                    vf.bottom = mCurBottom;</div><div class="line">                &#125; else &#123;</div><div class="line">                    vf.set(cf);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125; else if ((fl &amp; FLAG_LAYOUT_IN_SCREEN) != 0 || (sysUiFl</div><div class="line">                &amp; (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN</div><div class="line">                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)) != 0) &#123; //Case 2</div><div class="line">        &#125; else if (attached != null) &#123; //Case 3 子窗口的情况</div><div class="line">        &#125; else &#123; //Case 4 最后一种情况</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if ((fl &amp; FLAG_LAYOUT_NO_LIMITS) != 0 &amp;&amp; attrs.type != TYPE_SYSTEM_ERROR</div><div class="line">            &amp;&amp; !win.isInMultiWindowMode()) &#123; //特殊处理，如果flag 包含了FLAG_LAYOUT_NO_LIMITS</div><div class="line">        df.left = df.top = -10000;</div><div class="line">        df.right = df.bottom = 10000;</div><div class="line">        if (attrs.type != TYPE_WALLPAPER) &#123;</div><div class="line">            of.left = of.top = cf.left = cf.top = vf.left = vf.top = -10000;</div><div class="line">            of.right = of.bottom = cf.right = cf.bottom = vf.right = vf.bottom = 10000;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    final boolean useOutsets = shouldUseOutsets(attrs, fl);</div><div class="line">    if (isDefaultDisplay &amp;&amp; useOutsets) &#123; //跟手表相关(手表可能有一块区域(“下巴”)无法绘制)</div><div class="line">    &#125;</div><div class="line">    win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf); //把所有的值传给WindowState 去计算</div><div class="line">    // Dock windows carve out the bottom of the screen, so normal windows</div><div class="line">    // can&apos;t appear underneath them.</div><div class="line">    if (attrs.type == TYPE_INPUT_METHOD &amp;&amp; win.isVisibleOrBehindKeyguardLw()</div><div class="line">            &amp;&amp; win.isDisplayedLw() &amp;&amp; !win.getGivenInsetsPendingLw()) &#123; //输入法Window 特殊处理</div><div class="line">    &#125;</div><div class="line">    if (attrs.type == TYPE_VOICE_INTERACTION &amp;&amp; win.isVisibleOrBehindKeyguardLw()</div><div class="line">            &amp;&amp; !win.getGivenInsetsPendingLw()) &#123; //voice 界面特殊处理</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li><code>!isDefaultDisplay</code>：代表不是默认屏(即<code>DisplayContent.mDisplayId != 0</code>)，一般为false 所以不考虑。第16行</li>
+<li><code>attrs.type == TYPE_INPUT_METHOD</code>：代表的是输入法。第17行</li>
+<li><code>attrs.type == TYPE_VOICE_INTERACTION</code>：代表的是语音界面。第18行</li>
+<li><code>attrs.type == TYPE_WALLPAPER</code>：壁纸窗口。第19行</li>
+<li><code>win == mStatusBar</code>：代表的是状态栏。第20行</li>
+<li>其他：代表<code>Activity</code>、<code>Dialog</code>、<code>PopupWindow</code>、<code>Toast</code>等。</li>
+</ol>
+<p>主要分析下第6种情况，这里面又分成了4种情况：</p>
+<ol>
+<li><code>Window</code>含有<code>FLAG_LAYOUT_IN_SCREEN</code>和<code>FLAG_LAYOUT_INSET_DECOR</code>flag。(典型的应用<code>Window</code>，<code>Activity</code>初始化<code>PhoneWindow</code>的时候会设置)。第51行</li>
+<li><code>Window</code>含有<code>FLAG_LAYOUT_IN_SCREEN</code>flag，并且<code>View</code>设置了<code>SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN</code>或者<code>SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION</code>的标志。即全屏显示。第126行</li>
+<li><code>attached != null</code>即子<code>Window</code>。第129行</li>
+<li>其他情况：窗口必须在所有的装饰里面展示。第130行</li>
+</ol>
+<blockquote>
+<p>本来准备分析一个<code>Activity</code>的测量过程的，但是有太多不同配置了。这个如果是有碰到问题，可以具体的根据设置的属性查阅。</p>
+</blockquote>
+<p>后续的处理就是<code>WindowState#computeFrameLw</code>来计算每一个<code>WindowState</code>的位置和大小，主要是根据上面<code>PhoneWindowManager#layoutWindowLw</code>计算出的值。</p>
+<p>第8步，<code>PhoneWindowManager#finishLayoutLw</code>结束，目前没有任何实现。</p>
+<p>总结：<code>Window</code>的测量并不是一个简单的过程，一个最简单的<code>Activity</code>展示出来就需要考虑输入框、<code>StatusBar</code>、<code>NavigationBar</code>等众多<code>Window</code>，还需要考虑<code>Window</code>设置的flags 以及<code>View</code>设置的mSystemUiVisibility 等。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://blog.csdn.net/luoshengyang/article/details/8479101" target="_blank" rel="external">Android窗口管理服务WindowManagerService计算Activity窗口大小的过程分析</a><br>《深入理解Android内核设计思想》</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/framework/" rel="tag"># framework</a>
+          
+            <a href="/tags/WMS/" rel="tag"># WMS</a>
+          
+            <a href="/tags/Window/" rel="tag"># Window</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/04/WMS之addView流程/" rel="prev" title="WMS之addView流程">
+                WMS之addView流程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#DecorView-的测量、布局、绘制流程"><span class="nav-number">1.</span> <span class="nav-text">DecorView 的测量、布局、绘制流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Window-测量流程"><span class="nav-number">2.</span> <span class="nav-text">Window 测量流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ViewRootImpl中成员变量的含义"><span class="nav-number">2.1.</span> <span class="nav-text">ViewRootImpl中成员变量的含义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WindowState中成员变量的含义"><span class="nav-number">2.2.</span> <span class="nav-text">WindowState中成员变量的含义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PhoneWindowManager中成员变量的含义"><span class="nav-number">2.3.</span> <span class="nav-text">PhoneWindowManager中成员变量的含义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流程"><span class="nav-number">2.4.</span> <span class="nav-text">流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

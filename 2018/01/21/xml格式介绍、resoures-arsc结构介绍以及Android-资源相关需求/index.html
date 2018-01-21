@@ -1,0 +1,857 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="framework,xml,android resource," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Android 资源文件关系到了很多方面：  屏幕适配。 插件化(多套皮肤需求)。 包优化(从资源方面入手)。">
+<meta name="keywords" content="framework,xml,android resource">
+<meta property="og:type" content="article">
+<meta property="og:title" content="xml格式介绍、resoures.arsc结构介绍以及Android 资源相关需求">
+<meta property="og:url" content="http://localhost:4000/2018/01/21/xml格式介绍、resoures-arsc结构介绍以及Android-资源相关需求/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="Android 资源文件关系到了很多方面：  屏幕适配。 插件化(多套皮肤需求)。 包优化(从资源方面入手)。">
+<meta property="og:image" content="http://localhost:4000/img/resource_android_manifest.png">
+<meta property="og:image" content="http://localhost:4000/img/resource_android_manifest_simple.png">
+<meta property="og:image" content="http://localhost:4000/img/resource_arsc.png">
+<meta property="og:image" content="http://localhost:4000/img/resource_arsc_simple.png">
+<meta property="og:updated_time" content="2018-01-21T14:03:56.280Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="xml格式介绍、resoures.arsc结构介绍以及Android 资源相关需求">
+<meta name="twitter:description" content="Android 资源文件关系到了很多方面：  屏幕适配。 插件化(多套皮肤需求)。 包优化(从资源方面入手)。">
+<meta name="twitter:image" content="http://localhost:4000/img/resource_android_manifest.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2018/01/21/xml格式介绍、resoures-arsc结构介绍以及Android-资源相关需求/"/>
+
+
+
+
+
+  <title> xml格式介绍、resoures.arsc结构介绍以及Android 资源相关需求 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2018/01/21/xml格式介绍、resoures-arsc结构介绍以及Android-资源相关需求/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                xml格式介绍、resoures.arsc结构介绍以及Android 资源相关需求
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-21T21:44:48+08:00">
+                2018-01-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android-framework/" itemprop="url" rel="index">
+                    <span itemprop="name">android framework</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Android 资源文件关系到了很多方面：</p>
+<ol>
+<li>屏幕适配。</li>
+<li>插件化(多套皮肤需求)。</li>
+<li>包优化(从资源方面入手)。<a id="more"></a>
+</li>
+</ol>
+<p>所以了解Android 中资源存储的机制对相关的需求是有帮助的。</p>
+<p>主要从三个方面来介绍下，资源相关基础、xml 格式介绍、resoures.arsc结构介绍。</p>
+<h3 id="资源相关基础"><a href="#资源相关基础" class="headerlink" title="资源相关基础"></a>资源相关基础</h3><p>主要有两点：资源分类以及资源配置信息。可以从官网<a href="https://developer.android.google.cn/guide/topics/resources/providing-resources.html" target="_blank" rel="external">Providing Resources</a>找到相关信息。然后就是资源文件打包的介绍。</p>
+<h4 id="资源分类以及配置信息"><a href="#资源分类以及配置信息" class="headerlink" title="资源分类以及配置信息"></a>资源分类以及配置信息</h4><p>资源分类：animator、anim、color、drawable、mipmap、layout、menu、raw、values、xml。</p>
+<p>资源配置信息(可能会不断的增加新的配置，可以从官网获取最新的<a href="https://developer.android.google.cn/guide/topics/resources/providing-resources.html" target="_blank" rel="external">Providing Resources</a>)：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">配置</th>
+<th style="text-align:left">限定符值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">MCC 和 MNC</td>
+<td style="text-align:left">示例：<br> mcc310、mcc310-mnc004、mcc208-mnc00等等</td>
+</tr>
+<tr>
+<td style="text-align:left">语言和区域</td>
+<td style="text-align:left">示例：en、fr、en-rUS、fr-rFR、fr-rCA等等</td>
+</tr>
+<tr>
+<td style="text-align:left">布局方向</td>
+<td style="text-align:left">ldrtl、ldltr</td>
+</tr>
+<tr>
+<td style="text-align:left">smallestWidth</td>
+<td style="text-align:left">sw&lt; N &gt;dp<br>示例：sw320dp、sw600dp、sw720dp等等</td>
+</tr>
+<tr>
+<td style="text-align:left">可用宽度</td>
+<td style="text-align:left">w&lt; N &gt;dp<br>示例：w720dp、w1024dp等等</td>
+</tr>
+<tr>
+<td style="text-align:left">可用高度</td>
+<td style="text-align:left">h&lt; N &gt;dp<br>示例：h720dp、h1024dp等等</td>
+</tr>
+<tr>
+<td style="text-align:left">屏幕尺寸</td>
+<td style="text-align:left">small<br>normal、large、xlarge</td>
+</tr>
+<tr>
+<td style="text-align:left">屏幕纵横比</td>
+<td style="text-align:left">long、notlong</td>
+</tr>
+<tr>
+<td style="text-align:left">圆形屏幕</td>
+<td style="text-align:left">round、notround</td>
+</tr>
+<tr>
+<td style="text-align:left">屏幕方向</td>
+<td style="text-align:left">port、land</td>
+</tr>
+<tr>
+<td style="text-align:left">UI 模式</td>
+<td style="text-align:left">car、desk、television、appliance watch</td>
+</tr>
+<tr>
+<td style="text-align:left">夜间模式</td>
+<td style="text-align:left">night、notnight</td>
+</tr>
+<tr>
+<td style="text-align:left">屏幕像素密度 (dpi)</td>
+<td style="text-align:left">ldpi、mdpi、hdpi、xhdpi、xxhdpi<br>xxxhdpi、nodpi、tvdpi、anydpi</td>
+</tr>
+<tr>
+<td style="text-align:left">触摸屏类型</td>
+<td style="text-align:left">notouch、finger</td>
+</tr>
+<tr>
+<td style="text-align:left">键盘可用性</td>
+<td style="text-align:left">keysexposed、keyshidden、keyssoft</td>
+</tr>
+<tr>
+<td style="text-align:left">主要文本输入法</td>
+<td style="text-align:left">nokeys、qwerty、12key</td>
+</tr>
+<tr>
+<td style="text-align:left">导航键可用性</td>
+<td style="text-align:left">navexposed、navhidden</td>
+</tr>
+<tr>
+<td style="text-align:left">主要非触摸导航方法</td>
+<td style="text-align:left">nonav、dpad、trackball、wheel</td>
+</tr>
+<tr>
+<td style="text-align:left">平台版本（API 级别）</td>
+<td style="text-align:left">示例：v3、v4、v7等等</td>
+</tr>
+</tbody>
+</table>
+<h4 id="资源文件打包"><a href="#资源文件打包" class="headerlink" title="资源文件打包"></a>资源文件打包</h4><p>Android res 中的xml 文件(不包括assets 文件夹里面的xml)以及AndroidManifest.xml 在打包的时候都会被转化成二进制的xml。</p>
+<blockquote>
+<p>这些二进制格式的XML文件分别有一个字符串资源池，用来保存文件中引用到的每一个字符串，包括XML元素标签、属性名称、属性值，以及其它的一切文本值所使用到的字符串。这样原来在文本格式的XML文件中的每一个放置字符串的地方在二进制格式的XML文件中都被替换成一个索引到字符串资源池的整数值。这样做有两个好处：<br>A. 文件占用更小。例如，假设在原来的文本格式的XML文件中，有四个地方使用的都是同一个字符串，那么在最终编译出来的二进制格式的XML文件中，字符串资源池只有一份字符串值，而引用它的四个地方只占用一个整数值。<br>B. 解析速度更快。由于在二进制格式的XML文件中，所有的XML元素标签和属性等值都是使用整数来描述的，因此，在解析的过程中，就不再需要进行字符串解析，这样就可以提高解析速度。(来自老罗博客)</p>
+</blockquote>
+<p>其实有一个问题：为什么Android 要分那么多种类的资源，这样不是非常的复杂吗？<br>因为市面上Android 手机种类很多(不同的价格、文化、语言等适用于不同的人)。为了让软件更加符合一款手机使用就必须适配不同的方案，因此就有很多不同种类的资源。</p>
+<h3 id="Android-二进制xml-格式介绍"><a href="#Android-二进制xml-格式介绍" class="headerlink" title="Android 二进制xml 格式介绍"></a>Android 二进制xml 格式介绍</h3><p><img src="/img/resource_android_manifest.png" alt="AndroidManifest 二进制文件格式"><br>(上面AndroidManifest 二进制文件格式图片是网上盗的图)</p>
+<p>1.String Chunk：解析出字符串的信息，包含所有的字符串。<br>比如下面的一个Activity 的申明。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;activity android:configChanges=&quot;keyboardHidden|orientation|screenLayout|screenSize&quot; android:label=&quot;@string/app_name&quot; android:name=&quot;egos.samplez.lifestyle.SampleTextActivity&quot; android:theme=&quot;@style/SampleAppTheme&quot;&gt;</div><div class="line">    &lt;intent-filter&gt;</div><div class="line">        &lt;action android:name=&quot;android.intent.action.MAIN&quot;/&gt;</div><div class="line">        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot;/&gt;</div><div class="line">    &lt;/intent-filter&gt;</div><div class="line">&lt;/activity&gt;</div></pre></td></tr></table></figure>
+<p>那么String Chunk 中就会把activity、android、configChanges、label、name 等一系列的String 都保存在String Chunk 中(<strong>只需要保存一次，这样就减少了存储空间了</strong>)。</p>
+<p>2.ResourceId Chunk：保存的是AndroidManifest 中用到的系统属性值对应的资源Id。<br>比如对应的是：0101021b、0101021c、0101020c，解析出来对应的就是<code>android.R</code>中的versionCode、versionName、minSdkVersion。</p>
+<p>3.Start Namespace Chunk：这个跟xml 格式相关。Android 中xml 采用的是Schema 格式，所以这里主要是解析Prefix 和Uri。<br>比如下图就是一个StartNamespace。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; package=&quot;egos.sample1&quot; platformBuildVersionCode=&quot;24&quot; platformBuildVersionName=&quot;7.0&quot;&gt;</div></pre></td></tr></table></figure>
+<p>解析的时候就会得出Prefix 为android，而Uri 为<a href="http://schemas.android.com/apk/res/android。" target="_blank" rel="external">http://schemas.android.com/apk/res/android。</a></p>
+<p>4.StartTag Chunk：这里开始就是xml 中对应的信息了。<br>下面是一个xml 中相关的信息(是两个StartTag)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">&lt;manifest xmls:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    android:versionCode=&quot;1&quot;</div><div class="line">    android:versionName=&quot;1.0&quot;</div><div class="line">    package=&quot;egos.sample1&quot;</div><div class="line">    platformBuildVersionCode=&quot;25&quot;</div><div class="line">    platformBuildVersionName=&quot;7.1.1&quot;&gt;</div><div class="line">&lt;uses-sdk</div><div class="line">    android:minSdkVersion=&quot;15&quot;</div><div class="line">    android:targetSdkVersion=&quot;25&quot;&gt;</div></pre></td></tr></table></figure>
+<p>会解析两个StartTag Chunk 得到相应的信息(里面所有的字符串信息都是保存在String Chunk 中)。</p>
+<p>5.EndTag Chunk：与StartTag Chunk 相对应。<br>上面的StartTag Chunk 的代码会与下面相对应。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;/uses-sdk&gt;</div><div class="line">&lt;/manifest&gt;</div></pre></td></tr></table></figure>
+<p>6.End Namespace Chunk：与Start Namespace Chunk 相对应。<br>上面的Start Namespace Chunk 会与下面的内容相对应。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;/manifest&gt;</div></pre></td></tr></table></figure>
+<p>AndroidManifest.xml 文件格式可以总结一下:</p>
+<p><img src="/img/resource_android_manifest_simple.png" alt="AndroidManifest 文件格式总结"></p>
+<p>验证了最上面关于二进制xml 文件的总结(老罗的总结)：将所有的字符串提取出来，减少了重复字符串的存储，压缩了xml 大小。解析的时候(从StartTagChunk 开始)不在读取字符串，而是直接读取整数，提高解析速度。</p>
+<h3 id="resoures-arsc-文件结构介绍"><a href="#resoures-arsc-文件结构介绍" class="headerlink" title="resoures.arsc 文件结构介绍"></a>resoures.arsc 文件结构介绍</h3><p>resoures.arsc 文件(下面简称arsc)中存储的是public.xml(public.xml 文件可以通过apktool 反编译得到，在/res/values 目录下)中所有的内容。内容比较的多和复杂，比如一张图片ic_launcher.png 在多个dpi 中都要存储，一个string(比如：app_name)在不同的语言(比如：values-en、values-fr)中不一样。这些不同的资源配置信息也需要在arsc 中存储起来。(其实打包以后/res/values 目录下面的所有的信息都是保存在arsc 中了，可以通过解压apk 验证，不存在任何values 文件夹。)后续通过id 加载layout，查找drawable、color、string等都跟arsc 中存储的内容相关。</p>
+<p>先给出一张网上的神图。<br><img src="/img/resource_arsc.png" alt="resoures.arsc 文件结构"><br>(上面resoures.arsc 文件结构的图片是网上盗的图，上图有一些错误，最下面的Type Spec 和Config List 应该是交替出现的)</p>
+<p>主要包含了3个资源池：</p>
+<ol>
+<li>string 资源池：所有定义的string 信息和资源的路径信息。</li>
+<li>type 资源池：所有定义的资源type。例如：attr、drawable、layout、anim等</li>
+<li>key 资源池：所有的定义在各种资源中的name(上面已经有介绍，在public.xml 中存在的name 都会保存在里面)。</li>
+</ol>
+<p>string 资源池分成了两部分，string 部分和style 部分(字符串是可以设置style)。<br>string 部分包含了xml 中定义的string(比如string.xml 中的<code>&lt;string name=&quot;app_name&quot;&gt;App4&lt;/string&gt;</code>定义的字符串App)、资源的路径(比如<code>res/drawable-xxhdpi-v11/leak_canary_notification.png</code>)。<br>style 部分则是存储了<code>string.xml</code>对应string 的样式。如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;string name=&quot;large_text&quot;&gt;&lt;b&gt;Material&lt;/b&gt; is the &lt;i&gt;metaphor&lt;/i&gt;&lt;/string&gt; //0～7 b，16～23 i</div><div class="line">&lt;string name=&quot;large_text2&quot;&gt;&lt;b&gt;Bold&lt;/b&gt;, graphic, &lt;i&gt;intentional&lt;/i&gt;.&lt;/string&gt; //0～3 b，15～25 i</div></pre></td></tr></table></figure>
+<p>下面给出一些strig 资源池里面的string 更加好理解。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">App4</div><div class="line">res/drawable/abc_btn_check_material.xml</div><div class="line">res/color/abc_primary_text_disable_only_material_light.xml</div><div class="line">res/layout/design_navigation_menu_item.xml</div><div class="line">res/menu/menu_normal_app_bar_layout.xml</div><div class="line">res/raw/video1.mp4</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>字符串资源池解析以后就是存储的资源信息了。<br>下面就直接介绍后面的存储格式了(<a href="http://blog.csdn.net/jiangwei0910410003/article/details/50628894" target="_blank" rel="external">Android逆向之旅—解析编译之后的Resource.arsc文件格式</a>更加的详细)。</p>
+<p>1.接下来的格式就是直接解析一种资源(对应的是图中的RES_TABLE_TYPE_SPEC_TYPE 中的type id)，假设对应的是mipmap 资源。并且会解析出该资源会有哪些不同类型的资源配置(对应的是图中的RES_TABLE_TYPE_SPEC_TYPE 中的资源项组spec 数)。</p>
+<p>2.接下来就是mipmap 资源的配置信息(上面第1步假设的mipmap，对应的是图中的RES_TABLE_TYPE_TYPE，会解析出第1步中资源项组spec 数种不同配置信息)，解析出配置信息(运营商、locale、屏幕尺寸等等)。然后就会解析出这种配置下所有mipmap 的信息。</p>
+<p>3.解析出mipmap 的信息(对应的是图中的ResTable_entry)，包括资源对应的名称(比如：ic_launcher)，对应的值信息(比如：res/mipmap-mdpi-v4/ic_launcher.png)等等。</p>
+<p>最后就是重复的解析第2步给出的第3步数量的ResTable_entry)，然后解析第1步给出的第2步数量RES_TABLE_TYPE_TYPE。</p>
+<p>所以arsc 的格式可以简单的重新画一个，如下：<br><img src="/img/resource_arsc_simple.png" alt="arsc 格式总结"></p>
+<h3 id="相关需求"><a href="#相关需求" class="headerlink" title="相关需求"></a>相关需求</h3><p>最开始已经有提到过，还可以加一些。包优化<a href="https://github.com/shwenzhang/AndResGuard" target="_blank" rel="external">AndResGuard</a>。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这篇博客在很早之前就写了大部分，主要是在研究项目中关于皮肤代码时的总结(好记性不如烂笔头，所以这次记下来了)，并且不是自己完整的研究了arsc 的生成或者xml 的解析，主要是在老罗的博客中边看边学，在<a href="http://blog.csdn.net/jiangwei0910410003/" target="_blank" rel="external">尼古拉斯_赵四</a>的博客中慢慢验证的。所以可能是会有错误的，如果你发现了错误，方便的话可以发一份邮件给我(相信你找得到)。<br>然后Android 中资源相关的内容，个人觉得是非常重要的，熟悉一下还是有很大帮助的。</p>
+<p><a href="https://developer.android.google.cn/guide/topics/resources/providing-resources.html" target="_blank" rel="external">Providing Resources</a><br><a href="http://blog.csdn.net/luoshengyang/article/details/8738877" target="_blank" rel="external">Android资源管理框架（Asset Manager）简要介绍和学习计划</a><br><a href="http://blog.csdn.net/jiangwei0910410003/article/details/50568487" target="_blank" rel="external">Android逆向之旅—解析编译之后的AndroidManifest文件格式</a><br><a href="http://blog.csdn.net/jiangwei0910410003/article/details/50628894" target="_blank" rel="external">Android逆向之旅—解析编译之后的Resource.arsc文件格式</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/framework/" rel="tag"># framework</a>
+          
+            <a href="/tags/xml/" rel="tag"># xml</a>
+          
+            <a href="/tags/android-resource/" rel="tag"># android resource</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/10/Window大小位置测量以及View绘制流程/" rel="prev" title="Window大小位置测量以及View绘制流程">
+                Window大小位置测量以及View绘制流程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">27</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#资源相关基础"><span class="nav-number">1.</span> <span class="nav-text">资源相关基础</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#资源分类以及配置信息"><span class="nav-number">1.1.</span> <span class="nav-text">资源分类以及配置信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#资源文件打包"><span class="nav-number">1.2.</span> <span class="nav-text">资源文件打包</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-二进制xml-格式介绍"><span class="nav-number">2.</span> <span class="nav-text">Android 二进制xml 格式介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#resoures-arsc-文件结构介绍"><span class="nav-number">3.</span> <span class="nav-text">resoures.arsc 文件结构介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#相关需求"><span class="nav-number">4.</span> <span class="nav-text">相关需求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

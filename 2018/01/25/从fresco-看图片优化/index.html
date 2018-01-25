@@ -1,0 +1,965 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="android,fresco," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="怎么优化图片：  图片保存和传输优化：需要压缩图片大小。不同格式占空间大小不同。 内存优化(oom)：压缩和复用。">
+<meta name="keywords" content="android,fresco">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从fresco 看图片优化">
+<meta property="og:url" content="http://localhost:4000/2018/01/25/从fresco-看图片优化/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="怎么优化图片：  图片保存和传输优化：需要压缩图片大小。不同格式占空间大小不同。 内存优化(oom)：压缩和复用。">
+<meta property="og:image" content="http://localhost:4000/img/fresco_pin_drawable.png">
+<meta property="og:image" content="http://localhost:4000/img/fresco流数据保存在Native流程.png">
+<meta property="og:image" content="http://localhost:4000/img/fresco封装保存数据在Native的流的类图.png">
+<meta property="og:image" content="http://localhost:4000/img/fresco封装保存数据在Native的类图.png">
+<meta property="og:image" content="http://localhost:4000/img/fresco_decoder_uml.png">
+<meta property="og:image" content="http://localhost:4000/img/fresco%20base%20pool.png">
+<meta property="og:image" content="http://localhost:4000/img/fresco%20byte%20array%20pool.png">
+<meta property="og:image" content="http://localhost:4000/img/fresco%20KitKat%20encode%20image%20实现流程.png">
+<meta property="og:image" content="http://localhost:4000/img/Fresco%20Pool结构.png">
+<meta property="og:updated_time" content="2018-01-25T15:11:54.736Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从fresco 看图片优化">
+<meta name="twitter:description" content="怎么优化图片：  图片保存和传输优化：需要压缩图片大小。不同格式占空间大小不同。 内存优化(oom)：压缩和复用。">
+<meta name="twitter:image" content="http://localhost:4000/img/fresco_pin_drawable.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2018/01/25/从fresco-看图片优化/"/>
+
+
+
+
+
+  <title> 从fresco 看图片优化 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2018/01/25/从fresco-看图片优化/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                从fresco 看图片优化
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-25T22:30:19+08:00">
+                2018-01-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开源框架/" itemprop="url" rel="index">
+                    <span itemprop="name">开源框架</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>怎么优化图片：</p>
+<ol>
+<li>图片保存和传输优化：需要压缩图片大小。不同格式占空间大小不同。</li>
+<li>内存优化(oom)：压缩和复用。</li>
+</ol>
+<a id="more"></a>
+<h3 id="文件大小优化"><a href="#文件大小优化" class="headerlink" title="文件大小优化"></a>文件大小优化</h3><p>图片保存和传输优化：图片不同的存储格式区别比较多，png、jpeg、webp等。这里不深入文件格式相关内容(下面有一些可以参考地址)。</p>
+<h3 id="内存优化"><a href="#内存优化" class="headerlink" title="内存优化"></a>内存优化</h3><p>大部分选择fresco 的原因就是因为fresco 在内存方面的优化。可以先了解Android Bitmap 的优化以及解码方式的改进。</p>
+<h4 id="Android-不同版本内存优化"><a href="#Android-不同版本内存优化" class="headerlink" title="Android 不同版本内存优化"></a>Android 不同版本内存优化</h4><ol>
+<li>Android 2.2(API level 8) and lower，此时不支持并发GC。<strong>2.3增加了并发的GC 机制</strong></li>
+<li>Android 2.3.3(API level 10) and lower，保存在Native 中，拥有很大的内存(相比Java Heap)，但是回收不可控，可能导致crash。推荐<code>Bitmap</code>不使用的时候调用recycle(<strong>需要确保<code>Bitmap</code>不再使用了，不然会出错</strong>)</li>
+<li>Android 3.0(API level 11) and Higher，保存在Java Heap 中，使用<code>Options.inBitmap</code>复用<code>Bitmap</code>里面的数据。</li>
+<li>5.0以后GC 机制有修改，虚拟机升级为art。GC 效果提升明显。</li>
+</ol>
+<h4 id="Android-Bitmap-解码参数介绍"><a href="#Android-Bitmap-解码参数介绍" class="headerlink" title="Android Bitmap 解码参数介绍"></a>Android Bitmap 解码参数介绍</h4><p>这部分主要是在解码(<code>Bitmap.Config</code>和<code>BitmapFactory.Options</code>)的时候处理，主要分为两部分：压缩和复用。<br>可以先了解<code>BitmapFactory.Options</code>(下面简称<code>Options</code>)相关的内容。<code>Options</code>相当于是Android 解码图片时的策略。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">inPreferredConfig</td>
+<td style="text-align:left">(Config)解码的格式</td>
+<td style="text-align:left">可以参考下面关于<code>Bitmap.Config</code>的表格</td>
+</tr>
+<tr>
+<td style="text-align:left">inDensity</td>
+<td style="text-align:left">(int)图片对应像素密度</td>
+<td style="text-align:left">api 4引入。可以理解为一张图片对应的dpi(<code>Resource#openRawResource</code>两个参数方法中的<code>TypedValue</code>)</td>
+</tr>
+<tr>
+<td style="text-align:left">inScreenDensity</td>
+<td style="text-align:left">(int)屏幕实际的像素密度</td>
+<td style="text-align:left">api 4引入。可以用来避免将当前处于屏幕密度的位图缩放到兼容性密度。inScreenDensity 和inDensity 相同则不压缩</td>
+</tr>
+<tr>
+<td style="text-align:left">inTargetDensity</td>
+<td style="text-align:left">(int)目标像素密度</td>
+<td style="text-align:left">api 4引入。可以理解为手机的像素密度。</td>
+</tr>
+<tr>
+<td style="text-align:left">inScaled</td>
+<td style="text-align:left">(boolean)为true 并且设置了inDensity、inTargetDensity  会将Bitmpa 压缩到inTargetDensity</td>
+<td style="text-align:left">api 4引入，默认为true。.9图忽略这个属性。</td>
+</tr>
+<tr>
+<td style="text-align:left">inPremultiplied</td>
+<td style="text-align:left">(boolean)为true 则生成的位图的颜色通道将由Alpha通道预先倍增。</td>
+<td style="text-align:left">api 19引入，默认为true。</td>
+</tr>
+<tr>
+<td style="text-align:left">inDither</td>
+<td style="text-align:left">(boolean)是否开启抖动效果。</td>
+<td style="text-align:left">api 24 废弃。</td>
+</tr>
+<tr>
+<td style="text-align:left">inMutable</td>
+<td style="text-align:left">(boolean)是否是不可变的Bitmap。</td>
+<td style="text-align:left">api 11引入。</td>
+</tr>
+<tr>
+<td style="text-align:left">inJustDecodeBounds</td>
+<td style="text-align:left">(boolean)设置为true 那么不会生成Bitmap，<br>会将图片的大小解析出来保存在<code>Options.outWidth</code>和<code>Options.outHeight</code></td>
+<td style="text-align:left">一般跟inSampleSize 配合使用</td>
+</tr>
+<tr>
+<td style="text-align:left">inSampleSize</td>
+<td style="text-align:left">(int)会对图片的长宽像素缩小到1/n，比如值为2，<br>那么像素就会减少到1/4</td>
+<td style="text-align:left">一般与<strong>inJustDecodeBounds</strong>配合使用，&lt;=0时默认是1，并且设置的值会向下取整到2的k次方，比如设置为3，那么最终会是2</td>
+</tr>
+<tr>
+<td style="text-align:left">inPurgeable</td>
+<td style="text-align:left">(boolean)为true 则代表会将Bitmap 数据保存的Native 内存中</td>
+<td style="text-align:left">api 4引入，api 21 以后废弃。</td>
+</tr>
+<tr>
+<td style="text-align:left">inInputShareable</td>
+<td style="text-align:left">(boolean) inPurgeable 为True 才有效。表示是否能共享输入的数据。</td>
+<td style="text-align:left">api 4引入，api 21 以后废弃。</td>
+</tr>
+<tr>
+<td style="text-align:left">inBitmap</td>
+<td style="text-align:left">(Bitmap)新解码的bitmap 会尝试使用之前bitmap 在heap中所占据的pixel data 内存区域，而不是去问内存重新申请一块区域来存放bitmap</td>
+<td style="text-align:left">api 11引入。如果inBitmap 是mutable，那么decode 出来的Bitmap 也是mutable。</td>
+</tr>
+<tr>
+<td style="text-align:left">inPreferQualityOverSpeed</td>
+<td style="text-align:left">(boolean)设置为true 会使解码成更高质量的图片</td>
+<td style="text-align:left">api 24以后废弃。</td>
+</tr>
+<tr>
+<td style="text-align:left">inTempStorage</td>
+<td style="text-align:left">零时存储的数据，用来后续decode</td>
+<td style="text-align:left">相当于是一个缓冲</td>
+</tr>
+<tr>
+<td style="text-align:left">mCancel</td>
+<td style="text-align:left">(boolean)被另外一个decode 线程取消当前的decode</td>
+<td style="text-align:left">api 24以后废弃。可能并不会取消掉decode 过程，但返回null。outWidth/outHeight 返回-1</td>
+</tr>
+<tr>
+<td style="text-align:left">inPreferredColorSpace</td>
+<td style="text-align:left">(ColorSpace)</td>
+<td style="text-align:left">api 26 加入</td>
+</tr>
+<tr>
+<td style="text-align:left">outWidth</td>
+<td style="text-align:left">(int)解码以后Bitmap 的宽度</td>
+<td style="text-align:left">如果inJustDecodeBounds=true 则是图片的宽度，否则则是处理缩放等以后的宽度</td>
+</tr>
+<tr>
+<td style="text-align:left">outHeight</td>
+<td style="text-align:left">(int)解码以后Bitmap 的高度</td>
+<td style="text-align:left">同outWidth 备注</td>
+</tr>
+<tr>
+<td style="text-align:left">outMimeType</td>
+<td style="text-align:left">(String)图片解码以后mime</td>
+<td style="text-align:left">可能为null</td>
+</tr>
+<tr>
+<td style="text-align:left">outConfig</td>
+<td style="text-align:left">(Config)</td>
+<td style="text-align:left">api 26 加入</td>
+</tr>
+<tr>
+<td style="text-align:left">outColorSpace</td>
+<td style="text-align:left">(ColorSpace)</td>
+<td style="text-align:left">api 26 加入</td>
+</tr>
+</tbody>
+</table>
+<p>上面的表格还可以总结一下：</p>
+<ol>
+<li>Bitmap 压缩</li>
+<li>Bitmap 内存放置位置设置</li>
+<li>Bitmap 复用</li>
+<li>其他</li>
+</ol>
+<p>inDither 介绍。</p>
+<blockquote>
+<p>什么是抖动？开启抖动可以让高质量的图片在低质量的屏幕上还能保持较好的显示效果。比如图片的色彩模式是ARGB8888，但是屏幕的支持的色彩模式是RGB565，开启抖动可以让图片显示不会过于失真。</p>
+</blockquote>
+<p>inMutable 介绍。</p>
+<blockquote>
+<p>什么是可变和不可变？(这个概念没有完全理解)可以从<code>Drawable#mutate()</code>来看看这个问题。Drawable 设置为mutable 可以保证一个Drawable 的修改不会影响另一个(即两个独立Drable 了)。Bitmap 默认mutable 为false。并且只有Bitmap 为immutable 才可以创建Canvas。所以默认状态Bitmap 的修改会影响多处的Bitmap。(fresco默认设置为true，因为需要后处理)</p>
+</blockquote>
+<p><code>inPurgeable</code>和<code>inInputShareable</code>优缺点：</p>
+<blockquote>
+<p>decode 出的bitmap 保存在Ashmem 内存中，GC 无法自动回收它。当该Bitmap 在被使用时会被pin 住，使用完之后就unpin ，这样系统就可以在将来某一时间释放这部分内存。如果一个unpinned 的bitmap在之后又要被使用，系统会运行时又将它重新decode，但是这个decode 操作是发生在UI线程中，有可能会造成掉帧现象，因此该做法已经被Google 废弃掉。</p>
+</blockquote>
+<p><img src="/img/fresco_pin_drawable.png" alt="Bitmap使用inPurgeable流程"></p>
+<p><code>inBitmap</code>优缺点：</p>
+<blockquote>
+<p>inBitmap 来告知bitmap 解码器去尝试使用已经存在的内存区域，新解码的bitmap 会尝试去使用之前那张bitmap 在heap 中所占据的pixel data 内存区域，而不是去问内存重新申请一块区域来存放bitmap。利用这种特性，即使是上千张的图片，也只会仅仅只需要占用屏幕所能够显示的图片数量的内存大小。<br>在SDK 11 -&gt; 18之间，只对JPEG 和PNG 有效并且重用的bitmap 大小必须是一致的，例如给inBitmap 赋值的图片大小为100-100，那么新申请的bitmap 必须也为100-100才能够被重用。从SDK 19开始，新申请的bitmap 大小(一般就是像素数量)必须小于或者等于已经赋值过的bitmap大小。<br>在SDK 11 -&gt; 18之间，新申请的bitmap 与旧的bitmap 必须有相同的解码格式，例如大家都是8888的，如果前面的bitmap是8888，那么就不能支持4444与565格式的bitmap 了。</p>
+</blockquote>
+<p><code>Bitmap.Config</code></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ALPHA_8</td>
+<td style="text-align:left">1 pixel 只占用1字节</td>
+<td style="text-align:left">适合遮罩</td>
+</tr>
+<tr>
+<td style="text-align:left">RGB_565</td>
+<td style="text-align:left">1 pixel 占用2字节</td>
+<td style="text-align:left">适合不透明图片压缩</td>
+</tr>
+<tr>
+<td style="text-align:left">ARGB_4444</td>
+<td style="text-align:left">1 pixel 占用2字节</td>
+<td style="text-align:left">API 13 废弃。比较适合保存低品质的像素。但是效果比较差，废弃了</td>
+</tr>
+<tr>
+<td style="text-align:left">ARGB_8888</td>
+<td style="text-align:left">1 pixel 占用4字节</td>
+<td style="text-align:left">像素保证完好</td>
+</tr>
+<tr>
+<td style="text-align:left">RGBA_F16</td>
+<td style="text-align:left">1 pixel 只占用8字节</td>
+<td style="text-align:left">api 26加入</td>
+</tr>
+<tr>
+<td style="text-align:left">HARDWARE</td>
+<td style="text-align:left">数据保存在graphic memory</td>
+<td style="text-align:left">api 26加入</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fresco-解码前优化"><a href="#fresco-解码前优化" class="headerlink" title="fresco 解码前优化"></a>fresco 解码前优化</h3><blockquote>
+<p>这部分的优化不是解码的处理，但是也有一些关系(fresco 里面的注释：<strong>We cannot decode from a stream, as that does not support purgeable decodes.</strong>)。但是自己用decodeStream 来解析似乎也是可以的，所以这里不是很明白，求赐教。所以这里需要先理解decode 的操作都是decodeByteArray: ArtDecoder 是封装了一个<code>PooledByteBufferInputStream</code>，<code>KitKatPurgeableDecoder</code>是先将数据copy 到java heap 然后decode，<code>GingerbreadPurgeableDecoder</code>则是先将数据copy 到MemoryFile 然后decode。</p>
+</blockquote>
+<p>fresco 解码图片的时候不是使用<code>BitmapFactory#decodeStream</code>，那么保存这些数据在内存中消耗还是很大。所以fresco 实际上把这些数据保存在了Native 内存中。</p>
+<p>简单的时序图：<br><img src="/img/fresco流数据保存在Native流程.png" alt="fresco流数据保存在Native简单流程"><br>第8步，实际上最终的操作都是跟Native 交互的。<br>fresco 封装保存数据在Native 的流的类图：<br><img src="/img/fresco封装保存数据在Native的流的类图.png" alt="fresco封装保存数据在Native的流的类图"><br>fresco 封装保存数据在Native 的类图：<br><img src="/img/fresco封装保存数据在Native的类图.png" alt="fresco封装保存数据在Native的类图"></p>
+<p>所以代码中使用的<code>PooledByteBuffer</code>实际上是一个<code>NativePooledByteBuffer</code>，保存的是解码前的数据，并且是保存在Native 中。所有于Native 的交互都封装在<code>NativeMemoryChunk</code>。</p>
+<h3 id="fresco-解码优化"><a href="#fresco-解码优化" class="headerlink" title="fresco 解码优化"></a>fresco 解码优化</h3><p>fresco 对Bitmap 解码优化的原理基于上面方式的改进。fresco 针对不同的Android 版本做的不同优化处理：总体分成ArtDecoder(5.0以后使用art 虚拟机)和DalvikPurgeableDecoder(5.0以前使用Dalvik 虚拟机)。在5.0以前再分成GingerbreadPurgeableDecoder(API 9～18)和KitKatPurgeableDecoder(API 19)。<br>Java 代码类图如下：<br><img src="/img/fresco_decoder_uml.png" alt="fresco 解码相关类图"></p>
+<h4 id="ArtDecoder-优化"><a href="#ArtDecoder-优化" class="headerlink" title="ArtDecoder 优化"></a>ArtDecoder 优化</h4><p>获取部分解码配置。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">//ArtDecoder.java</div><div class="line">private static BitmapFactory.Options getDecodeOptionsForStream(</div><div class="line">    EncodedImage encodedImage,</div><div class="line">    Bitmap.Config bitmapConfig) &#123;</div><div class="line">  //1.使用inJustDecodeBounds 和inSampleSize 来压缩图片。得到图片最终大小</div><div class="line">  final BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">  options.inSampleSize = encodedImage.getSampleSize(); //相当于是设置的压缩比</div><div class="line">  options.inJustDecodeBounds = true;</div><div class="line">  BitmapFactory.decodeStream(encodedImage.getInputStream(), null, options);//解码得出Bitmap 大小</div><div class="line">  //...</div><div class="line">  //2.构造最终解码的配置：</div><div class="line">  options.inJustDecodeBounds = false;</div><div class="line">  options.inDither = true; //开启抖动效果</div><div class="line">  options.inPreferredConfig = bitmapConfig; //解码对应的色彩模式</div><div class="line">  options.inMutable = true; //后处理Bitmap，所以设置</div><div class="line">  return options;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后最终解码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">////ArtDecoder.java</div><div class="line">protected CloseableReference&lt;Bitmap&gt; decodeStaticImageFromStream(</div><div class="line">    InputStream inputStream, BitmapFactory.Options options, @Nullable Rect regionToDecode) &#123;</div><div class="line">  Preconditions.checkNotNull(inputStream);</div><div class="line">  int targetWidth = options.outWidth;</div><div class="line">  int targetHeight = options.outHeight;</div><div class="line">  //...</div><div class="line">  int sizeInBytes =</div><div class="line">      BitmapUtil.getSizeInByteForBitmap(targetWidth, targetHeight, options.inPreferredConfig);</div><div class="line">  final Bitmap bitmapToReuse = mBitmapPool.get(sizeInBytes);</div><div class="line">  //...</div><div class="line">  options.inBitmap = bitmapToReuse; //inBitmap 复用Bitmap</div><div class="line">  Bitmap decodedBitmap = null;</div><div class="line">  ByteBuffer byteBuffer = mDecodeBuffers.acquire();</div><div class="line">  //...</div><div class="line">  try &#123;</div><div class="line">    options.inTempStorage = byteBuffer.array(); //inTempStorage，相当于是一个缓冲区域</div><div class="line">    //省略部分decode 逻辑</div><div class="line">    if (decodedBitmap == null) &#123;</div><div class="line">      decodedBitmap = BitmapFactory.decodeStream(inputStream, null, options);</div><div class="line">    &#125;</div><div class="line">  &#125; catch (RuntimeException re) &#123;</div><div class="line">    mBitmapPool.release(bitmapToReuse); //异常释放bitmapToReuse</div><div class="line">    throw re;</div><div class="line">  &#125; finally &#123;</div><div class="line">    mDecodeBuffers.release(byteBuffer);</div><div class="line">  &#125;</div><div class="line">  if (bitmapToReuse != decodedBitmap) &#123;</div><div class="line">    mBitmapPool.release(bitmapToReuse);</div><div class="line">    decodedBitmap.recycle();</div><div class="line">    throw new IllegalStateException();</div><div class="line">  &#125;</div><div class="line">  return CloseableReference.of(decodedBitmap, mBitmapPool);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第12行配置了inBitmap 用于复用Bitmap。这里有一个<code>BitmapPool</code>(复用池节点分析)<br>第17行配置了inTempStorage，相当于是一个缓冲区域。<br>第20行使用的是<code>BitmapFactory#decodeStream</code>来解码，也没有造成上面分析fresco 解码优化的问题(拷贝未解码数据到java heap 的问题)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">//EncodedImage.java</div><div class="line">public InputStream getInputStream() &#123;</div><div class="line">  if (mInputStreamSupplier != null) &#123;</div><div class="line">    return mInputStreamSupplier.get();</div><div class="line">  &#125;</div><div class="line">  CloseableReference&lt;PooledByteBuffer&gt; pooledByteBufferRef =</div><div class="line">      CloseableReference.cloneOrNull(mPooledByteBufferRef);</div><div class="line">  if (pooledByteBufferRef != null) &#123;</div><div class="line">    try &#123;</div><div class="line">      return new PooledByteBufferInputStream(pooledByteBufferRef.get());</div><div class="line">    &#125; finally &#123;</div><div class="line">      CloseableReference.closeSafely(pooledByteBufferRef);</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  return null;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>总结：ArtDecoder 主要是利用了inBitmap 来多内存优化。(为什么不所有的版本都使用inBitmap？上面有介绍缺点)</p>
+<h4 id="KitKatPurgeableDecoder-和-GingerbreadPurgeableDecoder优化"><a href="#KitKatPurgeableDecoder-和-GingerbreadPurgeableDecoder优化" class="headerlink" title="KitKatPurgeableDecoder 和 GingerbreadPurgeableDecoder优化"></a>KitKatPurgeableDecoder 和 GingerbreadPurgeableDecoder优化</h4><p>api 19以下<code>Options</code>的参数是一样，解码的流程流程也是一样(都是先decode 然后pin)。主要的不同是api 19需要先将未解码的流数据copy 到java heap 以后再解码，而api 11～18则是将数据copy 到<code>MemoryFile</code>再decode。所以两个流程一起看。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">//DalvikPurgeableDecoder.java</div><div class="line">private static BitmapFactory.Options getBitmapFactoryOptions(</div><div class="line">    int sampleSize,</div><div class="line">    Bitmap.Config bitmapConfig) &#123;</div><div class="line">  BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">  options.inDither = true; // known to improve picture quality at low cost</div><div class="line">  options.inPreferredConfig = bitmapConfig;</div><div class="line">  // Decode the image into a &apos;purgeable&apos; bitmap that lives on the ashmem heap</div><div class="line">  options.inPurgeable = true;</div><div class="line">  // Enable copy of of bitmap to enable purgeable decoding by filedescriptor</div><div class="line">  options.inInputShareable = true;</div><div class="line">  // Sample size should ONLY be different than 1 when downsampling is enabled in the pipeline</div><div class="line">  options.inSampleSize = sampleSize;</div><div class="line">  if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.HONEYCOMB) &#123;</div><div class="line">    options.inMutable = true;  // no known perf difference; allows postprocessing to work</div><div class="line">  &#125;</div><div class="line">  return options;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第9行和第11行设置的<code>inPurgeable</code>和<code>inInputShareable</code>。这是Dalvik 解码图片时主要的优化。后面就是分别处理解码操作了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//KitKatPurgeableDecoder.java</div><div class="line">protected Bitmap decodeByteArrayAsPurgeable(</div><div class="line">    CloseableReference&lt;PooledByteBuffer&gt; bytesRef,</div><div class="line">    BitmapFactory.Options options) &#123;</div><div class="line">  final PooledByteBuffer pooledByteBuffer = bytesRef.get();</div><div class="line">  final int length = pooledByteBuffer.size();</div><div class="line">  final CloseableReference&lt;byte[]&gt; encodedBytesArrayRef = mFlexByteArrayPool.get(length);</div><div class="line">  try &#123;</div><div class="line">    final byte[] encodedBytesArray = encodedBytesArrayRef.get();</div><div class="line">    pooledByteBuffer.read(0, encodedBytesArray, 0, length);</div><div class="line">    Bitmap bitmap = BitmapFactory.decodeByteArray(</div><div class="line">        encodedBytesArray,</div><div class="line">        0,</div><div class="line">        length,</div><div class="line">        options);</div><div class="line">    return Preconditions.checkNotNull(bitmap, &quot;BitmapFactory returned null&quot;);</div><div class="line">  &#125; finally &#123;</div><div class="line">    CloseableReference.closeSafely(encodedBytesArrayRef);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第7行和第9行获取到一个保存在Java heap 的byte[] 对象。<br>第10行，把保存在Native 的流信息拷贝到上面步骤的byte[] 对象中。<br>第11行，调用<code>BitmapFactory#decodeByteArray</code>解码。</p>
+<blockquote>
+<p>这里的问题需要拷贝数据到byte[] 以后再解码？<br>因为设置<code>Options#inPurgeable</code>为true 以后是不支持<code>BitmapFactory#decodeStream</code>(上面提到)以及<code>MemoryFile</code>模式(后面<code>GingerbreadPurgeableDecoder</code>会提到)的解码在kitkat 没用。所以综合起来把数据拷贝到Java heap。</p>
+</blockquote>
+<p><strong>拷贝到byte[] 会消耗大量Java Heap 内存是怎么处理的？</strong>直接拷贝数据到Java heap 肯定是会占据大量的内存的，同时需要的数量也比较多导致会频繁执行gc，会影响到流畅度。<br>注意上面第9行代码有一个<code>FlexByteArrayPool</code>对象，这个是用来处理内存复用的(复用池节点分析)。</p>
+<p>接下来就是解决<code>inPurgeable</code>的问题(上面已经提到过，会在stopDraw 以后(某个时间点)清除ashmem 内存导致下次draw 的时候重新decode)。主要代码是：<code>DalvikPurgeableDecoder#pinBitmap</code>-&gt;<code>Bitmaps#pinBitmap</code>-&gt;<code>Bitmaps#nativePinBitmap</code>。最终会调用<code>AndroidBitmap_lockPixels</code>。这样就不会回收stopDraw 的Bitmap 内存。</p>
+<blockquote>
+<p>本来是想验证一下Android 系统是在什么时候去做的unpin 操作的，但是做的demo 体现不了。可以先理解当Bitmap 被使用时会被pin 住，使用完之后就unpin，这样系统就可以在将来某一时间释放这部分内存。</p>
+</blockquote>
+<p><code>GingerbreadPurgeableDecoder</code>(api 9～18)则是将数据copy 到MemoryFile 然后构造FileDescriptor 最后通过<code>BitmapFactory#decodeFileDescriptor</code>来decode。<code>MemoryFile</code>的学习可以移步老罗的博客<a href="http://blog.csdn.net/luoshengyang/article/details/6651971" target="_blank" rel="external">Android系统匿名共享内存Ashmem（Anonymous Shared Memory）简要介绍和学习计划</a>。下面代码是将未解码流数据copy 到<code>MemoryFile</code>的流程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">//GingerbreadPurgeableDecoder.java</div><div class="line">private static MemoryFile copyToMemoryFile(</div><div class="line">    CloseableReference&lt;PooledByteBuffer&gt; bytesRef,</div><div class="line">    int inputLength,</div><div class="line">    @Nullable byte[] suffix) throws IOException &#123;</div><div class="line">  int outputLength = inputLength + (suffix == null ? 0 : suffix.length);</div><div class="line">  MemoryFile memoryFile = new MemoryFile(null, outputLength);</div><div class="line">  memoryFile.allowPurging(false);</div><div class="line">  PooledByteBufferInputStream pbbIs = null;</div><div class="line">  LimitedInputStream is = null;</div><div class="line">  OutputStream os = null;</div><div class="line">  try &#123;</div><div class="line">    pbbIs = new PooledByteBufferInputStream(bytesRef.get());</div><div class="line">    is = new LimitedInputStream(pbbIs, inputLength);</div><div class="line">    os = memoryFile.getOutputStream();</div><div class="line">    ByteStreams.copy(is, os);</div><div class="line">    if (suffix != null) &#123;</div><div class="line">      memoryFile.writeBytes(suffix, 0, inputLength, suffix.length);</div><div class="line">    &#125;</div><div class="line">    return memoryFile;</div><div class="line">  &#125; finally &#123;</div><div class="line">    //close 操作</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>为什么Dalvik 的优化还要分两部分呢？(The MemoryFile trick used in GingerbreadPurgeableDecoder does not work in KitKat)。</p>
+</blockquote>
+<p>总结：上面的过程是完整的从decode 到pin 的操作。这样的好处就是在api 19以下会把Bitmap 的数据保存在asheme 中(不会保存在<code>Bitmap.mBuffer</code>中)，并且是不会在使用的时候回收掉Bitmap 内存。大大的减少了Bitmap 占据的Heap 内存。</p>
+<h3 id="复用池"><a href="#复用池" class="headerlink" title="复用池"></a>复用池</h3><p>上面在<code>ArtDecoder</code>提到了一个<code>BitmapPool</code>用来提供复用的<code>Bitmap</code>(实际在看代码的时候<code>BitmapPool</code>默认不起作用，每次都是需要createBitmap)，在<code>KitKatPurgeableDecoder</code>中提到一个<code>FlexByteArrayPool</code>用来提供byte[]防止decode 时频繁创建byte[]。<br>fresco 目前提供了3个复用池(还有两个在测试中使用)。<br><img src="/img/fresco base pool.png" alt="fresco base pool"><br>主要分析下<code>FlexByteArrayPool</code>的内容。<br>首先具体类图。<br><img src="/img/fresco byte array pool.png" alt="fresco byte array pool"><br>上面<code>KitKatPurgeableDecoder</code>提到的<code>FlexByteArrayPool</code>，具体分析。<br>使用的时候主要是<code>FlexByteArrayPool#get</code>获取一个复用的byte[]，可以仔细的看看<code>BasePool#get</code>逻辑，里面包含了复用池不存在数据时创建的逻辑。<br><img src="/img/fresco KitKat encode image 实现流程.png" alt="fresco KitKat encode image 实现流程"><br>第4步和第5步，默认配置下基本都是可以获取到数据的。主要原因是在<code>BasePool#initBuckets</code>。<code>BasePool#mBuckets</code>在默认情况下是会保存一组数据的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//BasePool.java</div><div class="line">private synchronized void initBuckets(SparseIntArray inUseCounts) &#123;</div><div class="line">  final SparseIntArray bucketSizes = mPoolParams.bucketSizes;</div><div class="line">  if (bucketSizes != null) &#123;</div><div class="line">    for (int i = 0; i &lt; bucketSizes.size(); ++i) &#123;</div><div class="line">      final int bucketSize = bucketSizes.keyAt(i);</div><div class="line">      final int maxLength = bucketSizes.valueAt(i);</div><div class="line">      int bucketInUseCount = inUseCounts.get(bucketSize, 0);</div><div class="line">      mBuckets.put(</div><div class="line">          bucketSize,</div><div class="line">          new Bucket&lt;V&gt;(</div><div class="line">              getSizeInBytes(bucketSize),</div><div class="line">              maxLength,</div><div class="line">              bucketInUseCount));</div><div class="line">    &#125;</div><div class="line">    mAllowNewBuckets = false;</div><div class="line">  &#125; else &#123;</div><div class="line">    //...</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>那么保存的是什么样的一组数据呢？代码逻辑：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//DefaultFlexByteArrayPoolParams.java</div><div class="line">//generateBuckets(128 * 1024, 4 * 1024 * 1024, Runtime.getRuntime().availableProcessors())</div><div class="line">public static SparseIntArray generateBuckets(int min, int max, int numThreads) &#123;</div><div class="line">  SparseIntArray buckets = new SparseIntArray();</div><div class="line">  for (int i = min; i &lt;= max; i*=2) &#123;</div><div class="line">    buckets.put(i, numThreads);</div><div class="line">  &#125;</div><div class="line">  return buckets;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>所以fresco 内部默认已经保存了一组数据(从128k 到4M之间，这里并没有创建byte[] 对象，使用的时候才会创建)。</p>
+<p><code>BasePool</code>保存着一组<code>Bucket</code>在<code>mBuckets</code>(<code>SparseArray&lt;Bucket&lt;V&gt;&gt;</code>，<code>Bucket</code>则是存储着一组数据(<code>mFreeList</code>)，key 值代表的是单个数据的长度)。下面是画的一个简图。<br><img src="/img/Fresco Pool结构.png" alt="Fresco Pool结构"><br>这样下次需要128K 的byte[]时就会直接从<code>mFreeList</code>读取，存在就不会创建新的对象了。(同理其他大小的byte[]也是一样的逻辑)</p>
+<blockquote>
+<p>为什么在实现<code>GenericByteArrayPool</code>不直接创建一个最大的数组？而是要创建多个不同的呢？为了节省内存。比如创建100 个4M 和创建80个128K 和20个4M 的。</p>
+</blockquote>
+<p>总结：使用复用池减少对象的创建次数。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>文章是以前项目介入fresco 之前写的，发现整理起来还是挺费劲的，希望对接入fresco 的你有一些帮助。分析的代码基于<code>fresco 1.5.0</code>。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://blog.csdn.net/luoshengyang/article/details/6651971" target="_blank" rel="external">Android系统匿名共享内存Ashmem（Anonymous Shared Memory）简要介绍和学习计划</a><br><a href="https://juejin.im/post/59e818bb6fb9a044fd10de38" target="_blank" rel="external">Ashmem 讲解</a><br><a href="https://zhuanlan.zhihu.com/p/24720958" target="_blank" rel="external">谈谈fresco的bitmap内存分配</a><br><a href="http://hukai.me/android-performance-patterns-season-2/" target="_blank" rel="external">Android性能优化典范 - 第2季</a><br><a href="https://developer.android.google.cn/topic/performance/graphics/manage-memory.html" target="_blank" rel="external">Managing Bitmap Memory</a><br><a href="https://github.com/bumptech/glide" target="_blank" rel="external">glide</a>中似乎提供了多种优化<br><a href="https://source.android.com/devices/tech/dalvik/?hl=zh-cn" target="_blank" rel="external">art vs dalvik</a><br><a href="https://en.wikipedia.org/wiki/Portable_Network_Graphics" target="_blank" rel="external">png</a><br><a href="https://en.wikipedia.org/wiki/WebP" target="_blank" rel="external">webp</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/android/" rel="tag"># android</a>
+          
+            <a href="/tags/fresco/" rel="tag"># fresco</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/21/xml格式介绍、resoures-arsc结构介绍以及Android-资源相关需求/" rel="prev" title="xml格式介绍、resoures.arsc结构介绍以及Android 资源相关需求">
+                xml格式介绍、resoures.arsc结构介绍以及Android 资源相关需求 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#文件大小优化"><span class="nav-number">1.</span> <span class="nav-text">文件大小优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存优化"><span class="nav-number">2.</span> <span class="nav-text">内存优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Android-不同版本内存优化"><span class="nav-number">2.1.</span> <span class="nav-text">Android 不同版本内存优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Android-Bitmap-解码参数介绍"><span class="nav-number">2.2.</span> <span class="nav-text">Android Bitmap 解码参数介绍</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fresco-解码前优化"><span class="nav-number">3.</span> <span class="nav-text">fresco 解码前优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fresco-解码优化"><span class="nav-number">4.</span> <span class="nav-text">fresco 解码优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ArtDecoder-优化"><span class="nav-number">4.1.</span> <span class="nav-text">ArtDecoder 优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KitKatPurgeableDecoder-和-GingerbreadPurgeableDecoder优化"><span class="nav-number">4.2.</span> <span class="nav-text">KitKatPurgeableDecoder 和 GingerbreadPurgeableDecoder优化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#复用池"><span class="nav-number">5.</span> <span class="nav-text">复用池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

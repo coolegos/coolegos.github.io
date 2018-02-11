@@ -98,7 +98,7 @@
 <meta property="og:image" content="http://localhost:4000/img/resource_android_manifest_simple.png">
 <meta property="og:image" content="http://localhost:4000/img/resource_arsc.png">
 <meta property="og:image" content="http://localhost:4000/img/resource_arsc_simple.png">
-<meta property="og:updated_time" content="2018-01-21T15:19:28.064Z">
+<meta property="og:updated_time" content="2018-02-11T14:15:36.768Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="xml格式介绍、resoures.arsc结构介绍以及Android 资源相关需求">
 <meta name="twitter:description" content="Android 资源文件关系到了很多方面：  屏幕适配。 插件化(多套皮肤需求)。 包优化(从资源方面入手)。">
@@ -462,7 +462,7 @@
 <p>解析的时候就会得出Prefix 为android，而Uri 为<a href="http://schemas.android.com/apk/res/android。" target="_blank" rel="external">http://schemas.android.com/apk/res/android。</a></p>
 <p>4.StartTag Chunk：这里开始就是xml 中对应的信息了。<br>下面是一个xml 中相关的信息(是两个StartTag)。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">&lt;manifest xmls:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    android:versionCode=&quot;1&quot;</div><div class="line">    android:versionName=&quot;1.0&quot;</div><div class="line">    package=&quot;egos.sample1&quot;</div><div class="line">    platformBuildVersionCode=&quot;25&quot;</div><div class="line">    platformBuildVersionName=&quot;7.1.1&quot;&gt;</div><div class="line">&lt;uses-sdk</div><div class="line">    android:minSdkVersion=&quot;15&quot;</div><div class="line">    android:targetSdkVersion=&quot;25&quot;&gt;</div></pre></td></tr></table></figure>
-<p>会解析两个StartTag Chunk 得到相应的信息(里面所有的字符串信息都是保存在String Chunk 中)。</p>
+<p>会解析两个StartTag Chunk 得到相应的信息(里面所有的字符串信息都是保存在String Chunk 中)。每一个属性值(比如上面的minSdkVersion、targetSdkVersion等)会被解析成[Namespace，Uri，Name，ValueString，Data]，包含5个值，每个值对应4字节。</p>
 <p>5.EndTag Chunk：与StartTag Chunk 相对应。<br>上面的StartTag Chunk 的代码会与下面相对应。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;/uses-sdk&gt;</div><div class="line">&lt;/manifest&gt;</div></pre></td></tr></table></figure>
 <p>6.End Namespace Chunk：与Start Namespace Chunk 相对应。<br>上面的Start Namespace Chunk 会与下面的内容相对应。</p>
@@ -470,6 +470,7 @@
 <p>AndroidManifest.xml 文件格式可以总结一下:</p>
 <p><img src="/img/resource_android_manifest_simple.png" alt="AndroidManifest 文件格式总结"></p>
 <p>验证了最上面关于二进制xml 文件的总结(老罗的总结)：将所有的字符串提取出来，减少了重复字符串的存储，压缩了xml 大小。解析的时候(从StartTagChunk 开始)不在读取字符串，而是直接读取整数，提高解析速度。</p>
+<p>res 中的xml 经过编译以后的格式和AndroidManifest.xml 大体是一致的，主要的不同是StringChunk 的格式有一些区别。所以这里也可以看出一些资源优化的点，<strong>减少xml 中string，尽量把所有的string 字符串写在string.xml 中</strong>。(这里之前跟朋友争论说在xml 写xxdp 也会增大xml 大小，其实是不会的，因为都是占4字节。)</p>
 <h3 id="resoures-arsc-文件结构介绍"><a href="#resoures-arsc-文件结构介绍" class="headerlink" title="resoures.arsc 文件结构介绍"></a>resoures.arsc 文件结构介绍</h3><p>resoures.arsc 文件(下面简称arsc)中存储的是public.xml(public.xml 文件可以通过apktool 反编译得到，在/res/values 目录下)中所有的内容。内容比较的多和复杂，比如一张图片ic_launcher.png 在多个dpi 中都要存储，一个string(比如：app_name)在不同的语言(比如：values-en、values-fr)中不一样。这些不同的资源配置信息也需要在arsc 中存储起来。(其实打包以后/res/values 目录下面的所有的信息都是保存在arsc 中了，可以通过解压apk 验证，不存在任何values 文件夹。)后续通过id 加载layout，查找drawable、color、string等都跟arsc 中存储的内容相关。</p>
 <p>先给出一张网上的神图。<br><img src="/img/resource_arsc.png" alt="resoures.arsc 文件结构"><br>(上面resoures.arsc 文件结构的图片是网上盗的图，上图有一些错误，最下面的Type Spec 和Config List 应该是交替出现的)</p>
 <p>主要包含了3个资源池：</p>
@@ -480,7 +481,7 @@
 </ol>
 <p>string 资源池分成了两部分，string 部分和style 部分(字符串是可以设置style)。<br>string 部分包含了xml 中定义的string(比如string.xml 中的<code>&lt;string name=&quot;app_name&quot;&gt;App4&lt;/string&gt;</code>定义的字符串App)、资源的路径(比如<code>res/drawable-xxhdpi-v11/leak_canary_notification.png</code>)。<br>style 部分则是存储了<code>string.xml</code>对应string 的样式。如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;string name=&quot;large_text&quot;&gt;&lt;b&gt;Material&lt;/b&gt; is the &lt;i&gt;metaphor&lt;/i&gt;&lt;/string&gt; //0～7 b，16～23 i</div><div class="line">&lt;string name=&quot;large_text2&quot;&gt;&lt;b&gt;Bold&lt;/b&gt;, graphic, &lt;i&gt;intentional&lt;/i&gt;.&lt;/string&gt; //0～3 b，15～25 i</div></pre></td></tr></table></figure>
-<p>下面给出一些strig 资源池里面的string 更加好理解。</p>
+<p>下面给出一些string 资源池里面的string 更加好理解。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">App4</div><div class="line">res/drawable/abc_btn_check_material.xml</div><div class="line">res/color/abc_primary_text_disable_only_material_light.xml</div><div class="line">res/layout/design_navigation_menu_item.xml</div><div class="line">res/menu/menu_normal_app_bar_layout.xml</div><div class="line">res/raw/video1.mp4</div><div class="line">...</div></pre></td></tr></table></figure>
 <p>字符串资源池解析以后就是存储的资源信息了。<br>下面就直接介绍后面的存储格式了(<a href="http://blog.csdn.net/jiangwei0910410003/article/details/50628894" target="_blank" rel="external">Android逆向之旅—解析编译之后的Resource.arsc文件格式</a>更加的详细)。</p>
 <p>1.接下来的格式就是直接解析一种资源(对应的是图中的RES_TABLE_TYPE_SPEC_TYPE 中的type id)，假设对应的是mipmap 资源。并且会解析出该资源会有哪些不同类型的资源配置(对应的是图中的RES_TABLE_TYPE_SPEC_TYPE 中的资源项组spec 数)。</p>
@@ -488,7 +489,8 @@
 <p>3.解析出mipmap 的信息(对应的是图中的ResTable_entry)，包括资源对应的名称(比如：ic_launcher)，对应的值信息(比如：res/mipmap-mdpi-v4/ic_launcher.png)等等。</p>
 <p>最后就是重复的解析第2步给出的第3步数量的ResTable_entry)，然后解析第1步给出的第2步数量RES_TABLE_TYPE_TYPE。</p>
 <p>所以arsc 的格式可以简单的重新画一个，如下：<br><img src="/img/resource_arsc_simple.png" alt="arsc 格式总结"></p>
-<h3 id="相关需求"><a href="#相关需求" class="headerlink" title="相关需求"></a>相关需求</h3><p>最开始已经有提到过，还可以加一些。包优化<a href="https://github.com/shwenzhang/AndResGuard" target="_blank" rel="external">AndResGuard</a>。皮肤包<a href="https://github.com/likebamboo/ThemeSwitch" target="_blank" rel="external">ThemeSwitch</a></p>
+<p>所以对于资源的查找应该应该也有一个比较清晰的认识。通过资源id，取前两位先拿到对应的packageId，取3、4位拿到typeId，这样就定位到package 和type。最后就根据当前设备的维度信息，寻找到最合适的资源。最后如果得到的是资源文件(layout、drawable等)再去解析就可以了。</p>
+<h3 id="相关需求"><a href="#相关需求" class="headerlink" title="相关需求"></a>相关需求</h3><p>最开始已经有提到过，还可以加一些。包优化<a href="https://github.com/shwenzhang/AndResGuard" target="_blank" rel="external">AndResGuard</a>。皮肤包<a href="https://github.com/likebamboo/ThemeSwitch" target="_blank" rel="external">ThemeSwitch</a>。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这篇博客在很早之前就写了大部分，主要是在研究项目中关于皮肤代码时的总结(好记性不如烂笔头，所以这次记下来了)，并且不是自己完整的研究了arsc 的生成或者xml 的解析，主要是在老罗的博客中边看边学，在<a href="http://blog.csdn.net/jiangwei0910410003/" target="_blank" rel="external">尼古拉斯_赵四</a>的博客中慢慢验证的。所以可能是会有错误的，如果你发现了错误，方便的话可以发一份邮件给我(相信你找得到)。<br>然后Android 中资源相关的内容，个人觉得是非常重要的，熟悉一下还是有很大帮助的。</p>
 <p><a href="https://developer.android.google.cn/guide/topics/resources/providing-resources.html" target="_blank" rel="external">Providing Resources</a><br><a href="http://blog.csdn.net/luoshengyang/article/details/8738877" target="_blank" rel="external">Android资源管理框架（Asset Manager）简要介绍和学习计划</a><br><a href="http://blog.csdn.net/jiangwei0910410003/article/details/50568487" target="_blank" rel="external">Android逆向之旅—解析编译之后的AndroidManifest文件格式</a><br><a href="http://blog.csdn.net/jiangwei0910410003/article/details/50628894" target="_blank" rel="external">Android逆向之旅—解析编译之后的Resource.arsc文件格式</a></p>
 

@@ -71,7 +71,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="绘制原理," />
+  <meta name="keywords" content="okhttp,缓存," />
 
 
 
@@ -87,23 +87,17 @@
 
 
 
-<meta name="description" content="这篇博客介绍了关于VSync 的一些概念和原理(对Android 的绘制原理非常重要)，主要是从《深入理解Android内核设计思想》这本书中所讲的总结。">
-<meta name="keywords" content="绘制原理">
+<meta name="description" content="大半年前将okhttp引入工程，当时还专门去分析过她的缓存的实现，现在印象又模糊了，所以还是拿小本本记录下。源码地址DiskLruCache。  内存数据是什么数据结构存储的？ 关闭app 以后重新打开是怎么恢复缓存在本地的信息的？">
+<meta name="keywords" content="okhttp,缓存">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Andorid中VSync机制的介绍">
-<meta property="og:url" content="http://localhost:4000/2017/10/18/Andorid中VSync机制的介绍/index.html">
+<meta property="og:title" content="okhttp缓存探究">
+<meta property="og:url" content="http://localhost:4000/2018/02/27/okhttp缓存探究/index.html">
 <meta property="og:site_name" content="Egos Blog">
-<meta property="og:description" content="这篇博客介绍了关于VSync 的一些概念和原理(对Android 的绘制原理非常重要)，主要是从《深入理解Android内核设计思想》这本书中所讲的总结。">
-<meta property="og:image" content="http://localhost:4000/img/vsync_0.jpg">
-<meta property="og:image" content="http://localhost:4000/img/vsync_1.png">
-<meta property="og:image" content="http://localhost:4000/img/vsync_2.png">
-<meta property="og:image" content="http://localhost:4000/img/vsync_3.png">
-<meta property="og:image" content="http://localhost:4000/img/vsync_4.png">
-<meta property="og:updated_time" content="2018-01-06T16:19:32.000Z">
+<meta property="og:description" content="大半年前将okhttp引入工程，当时还专门去分析过她的缓存的实现，现在印象又模糊了，所以还是拿小本本记录下。源码地址DiskLruCache。  内存数据是什么数据结构存储的？ 关闭app 以后重新打开是怎么恢复缓存在本地的信息的？">
+<meta property="og:updated_time" content="2018-02-27T15:06:15.699Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Andorid中VSync机制的介绍">
-<meta name="twitter:description" content="这篇博客介绍了关于VSync 的一些概念和原理(对Android 的绘制原理非常重要)，主要是从《深入理解Android内核设计思想》这本书中所讲的总结。">
-<meta name="twitter:image" content="http://localhost:4000/img/vsync_0.jpg">
+<meta name="twitter:title" content="okhttp缓存探究">
+<meta name="twitter:description" content="大半年前将okhttp引入工程，当时还专门去分析过她的缓存的实现，现在印象又模糊了，所以还是拿小本本记录下。源码地址DiskLruCache。  内存数据是什么数据结构存储的？ 关闭app 以后重新打开是怎么恢复缓存在本地的信息的？">
 
 
 
@@ -131,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://localhost:4000/2017/10/18/Andorid中VSync机制的介绍/"/>
+  <link rel="canonical" href="http://localhost:4000/2018/02/27/okhttp缓存探究/"/>
 
 
 
 
 
-  <title> Andorid中VSync机制的介绍 | Egos Blog </title>
+  <title> okhttp缓存探究 | Egos Blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -256,7 +250,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/10/18/Andorid中VSync机制的介绍/">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2018/02/27/okhttp缓存探究/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Egos">
@@ -277,7 +271,7 @@
             
             
               
-                Andorid中VSync机制的介绍
+                okhttp缓存探究
               
             
           </h1>
@@ -292,8 +286,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-18T00:01:08+08:00">
-                2017-10-18
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-27T22:15:29+08:00">
+                2018-02-27
               </time>
             
 
@@ -315,8 +309,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index">
-                    <span itemprop="name">Android</span>
+                  <a href="/categories/开源框架/" itemprop="url" rel="index">
+                    <span itemprop="name">开源框架</span>
                   </a>
                 </span>
 
@@ -350,46 +344,56 @@
       
 
       
-        <p>这篇博客介绍了关于VSync 的一些概念和原理(对Android 的绘制原理非常重要)，主要是从《深入理解Android内核设计思想》这本书中所讲的总结。<a id="more"></a></p>
-<p>VSync 全称是Vertical Synchronization（垂直同步），在Android 4.1中引入Android 系统(同时引入的一个概念是Triple Buffering)。</p>
-<p>学计算机的经常听到Buffer 的概念(生活中也碰到过很多，比如弹簧)，起到的都是一个类似的作用。<strong>用来协调两个不同速度的东西工作</strong></p>
-<p>假设显示内容和绘制使用的是用一块内存，那可能会出现下面的问题。显示有截断的异常(图中的Tear Point #1和Tear Point #2)。为什么会这样呢？因为cpu/gpu 处理和屏幕展示的速度不一样但是却使用的是同一块内存。<br><img src="/img/vsync_0.jpg" alt="Tearing_(simulated)"></p>
-<p>怎么解决呢？可以将cpu/gpu 处理和屏幕展示分开，cpu/gpu 在后台处理，处理完一帧的数据以后才交给屏幕展示(这样可能导致另外的问题是，如果cpu/gpu 处理很慢，那么屏幕可能会一直展示某一帧的数据，下面主要分析这个问题的处理)。</p>
-<p>绘制过程中的两个概念。</p>
-<ul>
-<li>手机屏幕刷新率：手机硬件每秒刷新屏幕的次数，单位HZ。一般是一个固定值，例如60HZ。</li>
-<li>FPS：画面每秒传输帧数，通俗来讲就是指动画或视频的画面数。单位HZ。</li>
-</ul>
-<p>手机屏幕刷新率是固定的，FPS 则是一直变化的，怎么才能保证能够运行流畅呢？从几个例子来看吧。</p>
-<p>先解释图片代表的意思：最下面黑线代表的是时间，黄色代表屏幕展示，绿色代表GPU 处理，蓝色代表CPU 处理。Jank 代表的是重复展示上一帧的异常。<strong>下面会从屏幕展示的每一帧开始分析</strong></p>
-<h3 id="没有引入VSync-机制"><a href="#没有引入VSync-机制" class="headerlink" title="没有引入VSync 机制"></a>没有引入VSync 机制</h3><p><img src="/img/vsync_1.png" alt="没有VSync机制的绘制"></p>
-<p>上图是没有引入VSync 机制的处理流程。</p>
+        <p>大半年前将<a href="https://github.com/square/okhttp" target="_blank" rel="external">okhttp</a>引入工程，当时还专门去分析过她的缓存的实现，现在印象又模糊了，所以还是拿小本本记录下。源码地址<a href="https://github.com/JakeWharton/DiskLruCache" target="_blank" rel="external">DiskLruCache</a>。</p>
 <ol>
-<li>Display 展示第0帧数据，这时cpu/gpu 会去处理第1帧的数据。</li>
-<li>Display 展示第1帧数据(此时屏幕显示是正常的)，这时cpu/gpu 可能处理其他任务导致很晚才去处理绘制。</li>
-<li>因为cpu/gpu 没处理好第2帧的数据，所以Display 还是展示第1帧数据(此时屏幕显示是异常的)，cpu/gpu 处理完第2帧没有处理完的数据然后继续处理第3帧的数据。</li>
-<li>…</li>
+<li>内存数据是什么数据结构存储的？</li>
+<li>关闭app 以后重新打开是怎么恢复缓存在本地的信息的？</li>
 </ol>
-<p>上图中一个很明显的问题是，只要一次cpu/gpu 处理出现异常就可能导致后面的一系列的处理出现异常。</p>
-<h3 id="引入VSync-机制"><a href="#引入VSync-机制" class="headerlink" title="引入VSync 机制"></a>引入VSync 机制</h3><p>VSync 可以简单的认为是一种定时中断，系统在每次需要绘制的时候都会发送VSync Pulse 信号，cpu/gpu 收到信号后马上处理绘制。</p>
-<h3 id="正常情况"><a href="#正常情况" class="headerlink" title="正常情况"></a>正常情况</h3><p>在4.1以后引入VSync 机制。<br><img src="/img/vsync_2.png" alt="VSync机制的绘制"><br>在FPS &lt; 手机屏幕刷新率的情况下，一切运行完美。</p>
-<h3 id="Double-Buffering-异常情况"><a href="#Double-Buffering-异常情况" class="headerlink" title="Double Buffering 异常情况"></a>Double Buffering 异常情况</h3><p>VSync 机制下Double Buffering 时FPS &gt; 手机屏幕刷新率的情况。<br><img src="/img/vsync_3.png" alt="VSync机制出现double buffering"></p>
-<ol>
-<li>Display 展示第A 帧数据，cpu/gpu 收到VSync Pulse 信号马上处理B 帧的数据，但是由于计算太多，导致没有在一个VSync 间隔内处理完。</li>
-<li>由于第B 帧数据没有处理好，Display 继续展示第A 帧数据(此时屏幕显示是异常的)。由于系统中只存在一块内存给cpu/gpu 处理绘制，所以在这个VSync 间隔内cpu 不处理任何事。</li>
-<li>Display 展示第B 帧数据，cpu/gpu 收到VSync Pulse 信号马上处理即将展示A 帧的数据，由于计算太多，导致没有在一个VSync 间隔内处理完。</li>
-<li>需要展示的A 帧数据没有处理好，Display 继续展示第B 帧数据(此时屏幕显示是异常的)。由于系统中只存在一块内存给cpu/gpu 处理绘制，所以在这个VSync 间隔内cpu 不处理任何事。</li>
-<li>…</li>
-</ol>
-<p>上图中一个很明显的问题是，只要出现一次Jank 就会影响下一次的VSync(cpu 不能工作)。</p>
-<h3 id="Triple-Buffering-异常情况"><a href="#Triple-Buffering-异常情况" class="headerlink" title="Triple Buffering 异常情况"></a>Triple Buffering 异常情况</h3><p>Triple Buffering 的引入。<br><img src="/img/vsync_4.png" alt="VSync机制出现triple buffering"></p>
-<ol>
-<li>Display 展示第A 帧数据，cpu/gpu 收到VSync Pulse 信号马上处理B 帧的数据，但是由于计算太多，导致没有在一个VSync 间隔内处理完。</li>
-<li>由于第B 帧数据没有准备好，Display 继续展示第A 帧数据(此时屏幕显示是异常的)。此时虽然B 被gpu 在使用，但是cpu 可以处理Buffer C(因为有3个缓冲)。</li>
-<li>Display 展示第B 帧数据，gpu 继续处理上一步骤的C，cpu 则处理A。</li>
-<li>后续过程出错的情况被降低了…</li>
-</ol>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p>《深入理解Android内核设计思想》<br><a href="https://en.wikipedia.org/wiki/File:Tearing_%28simulated%29.jpg" target="_blank" rel="external">Tearing__simulated</a></p>
+<a id="more"></a>
+<p>第一个问题是<code>LinkedHashMap</code>保存的缓存数据。第二个问题是读取journal 文件里面信息恢复的。</p>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>journal 中记录的数据有如下4种“状态”，对“状态”理解以后有助于查看本地的缓存记录以及对代码的理解。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">操作符</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">DIRTY</td>
+<td style="text-align:left">代表一个数据是“脏”状态。数据将会被更新或者被删除</td>
+<td style="text-align:left">简单理解是需要更新数据了。</td>
+</tr>
+<tr>
+<td style="text-align:left">CLEAN</td>
+<td style="text-align:left">代表一个数据是“干净”状态，可以被读取使用了。后面会记录缓存数据的大小</td>
+<td style="text-align:left">简单理解是增加了缓存数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">REMOVE</td>
+<td style="text-align:left">表示删除某条记录</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">READ</td>
+<td style="text-align:left">通过LRU 获取数据</td>
+</tr>
+</tbody>
+</table>
+<h3 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h3><h4 id="DiskLruCache-create"><a href="#DiskLruCache-create" class="headerlink" title="DiskLruCache#create"></a>DiskLruCache#create</h4><p>用来创建一个<code>DiskLruCache</code>的实例。okhttp 里面只会持有一个<code>DiskLruCache</code>实例(使用<code>OkhttpClient#newBuilder</code>来构造<code>OkhttpClient.Builder</code>)。</p>
+<p>1.<code>DiskLruCache#create</code>中构造<code>OkHttp DiskLruCache</code>线程池</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Executor executor = new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS,</div><div class="line">    new LinkedBlockingQueue&lt;Runnable&gt;(), Util.threadFactory(&quot;OkHttp DiskLruCache&quot;, true));</div></pre></td></tr></table></figure>
+<p>里面会创建一个<code>OkHttp DiskLruCache</code>线程池，这个线程池常驻线程数量为0，并且最多只能有一个线程(相当于是一个单线程的实例)。<code>OkHttp DiskLruCache</code>用来清理缓存数据信息，比如缓存信息超过允许的最大值的时候。该线程池也会处理journal 文件的冗余信息，防止文件太大。<strong>具体的逻辑是在<code>DiskLruCache#rebuildJournal</code>处理，会使用当前内存中的缓存数据<code>lruEntries</code>来生成一个新的journal 文件。里面使用了3个文件，journalFile(最终生成的文件)、journalFileBackup(备份文件，防止失败以后重新恢复)、journalFileTmp(临时文件，数据先更新在临时文件再做最后处理)。</strong></p>
+<p>2.创建<code>DiskLruCache</code>实例</p>
+<p>构造函数里面会创建journalFile、journalFileBackup 和journalFileTmp 文件。valueCount 代表的是每一个缓存对应的文件数，比如okhttp 需要缓存的头信息以及实体信息，所以valueCount 为2。</p>
+<h4 id="DiskLruCache-get"><a href="#DiskLruCache-get" class="headerlink" title="DiskLruCache#get"></a>DiskLruCache#get</h4><p>代表的是从缓存中获取数据。</p>
+<p>保存在内存中的数据格式是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">final LinkedHashMap&lt;String, Entry&gt; lruEntries = new LinkedHashMap&lt;&gt;(0, 0.75f, true);</div></pre></td></tr></table></figure>
+<p>Key(String)代表的是一个缓存的唯一标识(okhttp 中代表的是url 的MD5 值)，Value(Entry)则代表的是缓存的数据。</p>
+<p>app 重新启动，会通过<code>DiskLruCache#readJournal</code>一行行的读取journal 文件中的信息，并且恢复到<code>DiskLruCache.lruEntries</code>中。主要的代码逻辑在<code>DiskLruCache#readJournalLine</code>中，会根据REMOVE、CLEAN、DIRTY、READ 做不同逻辑处理。</p>
+<h3 id="缓存同步问题"><a href="#缓存同步问题" class="headerlink" title="缓存同步问题"></a>缓存同步问题</h3><p><code>DiskLruCache#get(String key)</code>和<code>DiskLruCache#edit(String key, long expectedSequenceNumber)</code>都是<code>synchronized</code>修饰的，所以每次只有一个线程在缓存中读或者取(上面有分析只有一个<code>DiskLruCache</code>实例)。<strong>这样是否会影响到<code>get</code>/<code>edit</code>的性能？</strong>或许会，但是最终只有一个线程处理才能保证journal 文件的一致性。</p>
 
       
     </div>
@@ -419,7 +423,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/绘制原理/" rel="tag"># 绘制原理</a>
+            <a href="/tags/okhttp/" rel="tag"># okhttp</a>
+          
+            <a href="/tags/缓存/" rel="tag"># 缓存</a>
           
         </div>
       
@@ -432,18 +438,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/10/20/fresco整体框架/" rel="next" title="fresco(1)：整体框架">
-                <i class="fa fa-chevron-left"></i> fresco(1)：整体框架
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/05/06/IPC基础/" rel="prev" title="IPC基础">
-                IPC基础 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/01/25/从fresco-看图片优化/" rel="prev" title="从fresco 看图片优化">
+                从fresco 看图片优化 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -573,7 +575,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#没有引入VSync-机制"><span class="nav-number">1.</span> <span class="nav-text">没有引入VSync 机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引入VSync-机制"><span class="nav-number">2.</span> <span class="nav-text">引入VSync 机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#正常情况"><span class="nav-number">3.</span> <span class="nav-text">正常情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Double-Buffering-异常情况"><span class="nav-number">4.</span> <span class="nav-text">Double Buffering 异常情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Triple-Buffering-异常情况"><span class="nav-number">5.</span> <span class="nav-text">Triple Buffering 异常情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#分析"><span class="nav-number">1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程分析"><span class="nav-number">2.</span> <span class="nav-text">流程分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DiskLruCache-create"><span class="nav-number">2.1.</span> <span class="nav-text">DiskLruCache#create</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DiskLruCache-get"><span class="nav-number">2.2.</span> <span class="nav-text">DiskLruCache#get</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存同步问题"><span class="nav-number">3.</span> <span class="nav-text">缓存同步问题</span></a></li></ol></div>
             
 
           </div>

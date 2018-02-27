@@ -98,7 +98,7 @@
 <meta property="og:image" content="http://localhost:4000/img/resource_android_manifest_simple.png">
 <meta property="og:image" content="http://localhost:4000/img/resource_arsc.png">
 <meta property="og:image" content="http://localhost:4000/img/resource_arsc_simple.png">
-<meta property="og:updated_time" content="2018-02-11T14:15:36.768Z">
+<meta property="og:updated_time" content="2018-02-11T14:48:20.981Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="xml格式介绍、resoures.arsc结构介绍以及Android 资源相关需求">
 <meta name="twitter:description" content="Android 资源文件关系到了很多方面：  屏幕适配。 插件化(多套皮肤需求)。 包优化(从资源方面入手)。">
@@ -489,7 +489,7 @@
 <p>3.解析出mipmap 的信息(对应的是图中的ResTable_entry)，包括资源对应的名称(比如：ic_launcher)，对应的值信息(比如：res/mipmap-mdpi-v4/ic_launcher.png)等等。</p>
 <p>最后就是重复的解析第2步给出的第3步数量的ResTable_entry)，然后解析第1步给出的第2步数量RES_TABLE_TYPE_TYPE。</p>
 <p>所以arsc 的格式可以简单的重新画一个，如下：<br><img src="/img/resource_arsc_simple.png" alt="arsc 格式总结"></p>
-<p>所以对于资源的查找应该应该也有一个比较清晰的认识。通过资源id，取前两位先拿到对应的packageId，取3、4位拿到typeId，这样就定位到package 和type。最后就根据当前设备的维度信息，寻找到最合适的资源。最后如果得到的是资源文件(layout、drawable等)再去解析就可以了。</p>
+<p>所以对于资源的查找应该也有一个比较清晰的认识。通过资源id，取前两位先拿到对应的packageId，取3、4位拿到typeId，这样就定位到package 和type。最后就根据当前设备的维度信息，寻找到最合适的资源。最后如果得到的是资源文件(layout、drawable等)再去解析就可以了。</p>
 <h3 id="相关需求"><a href="#相关需求" class="headerlink" title="相关需求"></a>相关需求</h3><p>最开始已经有提到过，还可以加一些。包优化<a href="https://github.com/shwenzhang/AndResGuard" target="_blank" rel="external">AndResGuard</a>。皮肤包<a href="https://github.com/likebamboo/ThemeSwitch" target="_blank" rel="external">ThemeSwitch</a>。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这篇博客在很早之前就写了大部分，主要是在研究项目中关于皮肤代码时的总结(好记性不如烂笔头，所以这次记下来了)，并且不是自己完整的研究了arsc 的生成或者xml 的解析，主要是在老罗的博客中边看边学，在<a href="http://blog.csdn.net/jiangwei0910410003/" target="_blank" rel="external">尼古拉斯_赵四</a>的博客中慢慢验证的。所以可能是会有错误的，如果你发现了错误，方便的话可以发一份邮件给我(相信你找得到)。<br>然后Android 中资源相关的内容，个人觉得是非常重要的，熟悉一下还是有很大帮助的。</p>
 <p><a href="https://developer.android.google.cn/guide/topics/resources/providing-resources.html" target="_blank" rel="external">Providing Resources</a><br><a href="http://blog.csdn.net/luoshengyang/article/details/8738877" target="_blank" rel="external">Android资源管理框架（Asset Manager）简要介绍和学习计划</a><br><a href="http://blog.csdn.net/jiangwei0910410003/article/details/50568487" target="_blank" rel="external">Android逆向之旅—解析编译之后的AndroidManifest文件格式</a><br><a href="http://blog.csdn.net/jiangwei0910410003/article/details/50628894" target="_blank" rel="external">Android逆向之旅—解析编译之后的Resource.arsc文件格式</a></p>
@@ -623,7 +623,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-count">24</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -645,7 +645,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-count">28</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

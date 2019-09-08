@@ -1,0 +1,739 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="不管是做增长，还是做产品。数据已经是必不可少的了。没有准确的、全面的用户身份和行为数据作为输入，在后续分析中得到准确洞察的可能性就会非常不确定，营销闭环也会缺少过程数据依据，精细化运营更难以开展。本文从客户端角度出发，谈谈如何实现一套好用的客户端框架。">
+<meta name="keywords">
+<meta property="og:type" content="article">
+<meta property="og:title" content="客户端埋点漫谈">
+<meta property="og:url" content="http://localhost:4000/2019/09/08/客户端埋点漫谈/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="不管是做增长，还是做产品。数据已经是必不可少的了。没有准确的、全面的用户身份和行为数据作为输入，在后续分析中得到准确洞察的可能性就会非常不确定，营销闭环也会缺少过程数据依据，精细化运营更难以开展。本文从客户端角度出发，谈谈如何实现一套好用的客户端框架。">
+<meta property="og:image" content="http://localhost:4000/img/tracker_mixpanel_summary.png">
+<meta property="og:updated_time" content="2019-09-08T07:56:37.544Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="客户端埋点漫谈">
+<meta name="twitter:description" content="不管是做增长，还是做产品。数据已经是必不可少的了。没有准确的、全面的用户身份和行为数据作为输入，在后续分析中得到准确洞察的可能性就会非常不确定，营销闭环也会缺少过程数据依据，精细化运营更难以开展。本文从客户端角度出发，谈谈如何实现一套好用的客户端框架。">
+<meta name="twitter:image" content="http://localhost:4000/img/tracker_mixpanel_summary.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2019/09/08/客户端埋点漫谈/"/>
+
+
+
+
+
+  <title> 客户端埋点漫谈 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2019/09/08/客户端埋点漫谈/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                客户端埋点漫谈
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-08T15:22:33+08:00">
+                2019-09-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>不管是做增长，还是做产品。数据已经是必不可少的了。没有准确的、全面的用户身份和行为数据作为输入，在后续分析中得到准确洞察的可能性就会非常不确定，营销闭环也会缺少过程数据依据，精细化运营更难以开展。<br>本文从客户端角度出发，谈谈如何实现一套好用的客户端框架。<a id="more"></a></p>
+<h2 id="客户端埋点框架组成"><a href="#客户端埋点框架组成" class="headerlink" title="客户端埋点框架组成"></a>客户端埋点框架组成</h2><p>一套成熟的客户端打点框架由下面3部分组成。</p>
+<ul>
+<li>采集点位</li>
+<li>存储点位</li>
+<li>发送点位</li>
+</ul>
+<p>客户端打点的流程：收集用户行为数据-&gt;存储数据-&gt;发送数据。先存储数据的原因是为了防止网络失败遗失点位。<strong>存储点位</strong>和<strong>发送点位</strong>跟app 中使用的存储框架和网络框架保持一致最好。接下来主要讲下<strong>采集点位</strong>部分。</p>
+<h2 id="采集点位方案"><a href="#采集点位方案" class="headerlink" title="采集点位方案"></a>采集点位方案</h2><p>采集点位的方案可以总结为三种，手动埋点、可视化埋点、无埋点。下面主要介绍下3种采集点位的方案。(目前我们App 主要使用的是手动埋点，从无埋点转到手动埋点)</p>
+<h3 id="手动埋点"><a href="#手动埋点" class="headerlink" title="手动埋点"></a>手动埋点</h3><p>最容易理解的一套埋点框架，在需要采集点位的地方调用相应的代码。比如在按钮点击、页面曝光的时候。</p>
+<h3 id="无埋点"><a href="#无埋点" class="headerlink" title="无埋点"></a>无埋点</h3><p>无埋点是指集成采集 SDK 后，SDK 便直接开始捕捉和监测用户在应用里的所有行为，并全部上报，不需要开发人员添加额外代码。实现也比较简单，Android 的实现hook 页面的<code>LayoutInflater</code>然后通过<code>View$AccessibilityDelegate</code>监控每一个控件。页面曝光则监控<code>Activity#onResume</code>。</p>
+<h3 id="可视化埋点"><a href="#可视化埋点" class="headerlink" title="可视化埋点"></a>可视化埋点</h3><p>可视化埋点是指开发同学集成采集 SDK 后，不再需要额外操作。后续由业务同学去下发需要收集的点位。采集方式跟无埋点类似，但是可以过滤冗余点位。</p>
+<p><img src="/img/tracker_mixpanel_summary.png" alt="mixpanel 原理"></p>
+<p>最后可以总结为：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">__</th>
+<th style="text-align:left">准确性</th>
+<th style="text-align:left">开发成本</th>
+<th style="text-align:left">维护成本</th>
+<th style="text-align:left">灵活性(打点覆盖面、冗余打点)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">手动埋点</td>
+<td style="text-align:left">中(需要测试阶段保证数据准确性)</td>
+<td style="text-align:left">中</td>
+<td style="text-align:left">高(需要跟版本迭代打点)</td>
+<td style="text-align:left">高</td>
+</tr>
+<tr>
+<td style="text-align:left">无埋点</td>
+<td style="text-align:left">高</td>
+<td style="text-align:left">中</td>
+<td style="text-align:left">低</td>
+<td style="text-align:left">中(可能存在大量冗余数据)</td>
+</tr>
+<tr>
+<td style="text-align:left">可视化埋点</td>
+<td style="text-align:left">高</td>
+<td style="text-align:left">高</td>
+<td style="text-align:left">低</td>
+<td style="text-align:left">中(打点功能受限，比如分享成功打点)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="采集事件类型"><a href="#采集事件类型" class="headerlink" title="采集事件类型"></a>采集事件类型</h2><ul>
+<li>曝光：</li>
+<li>操作事件：点击、长按、移动等</li>
+<li>触发事件：关注成功、收藏成功、接口请求失败等</li>
+</ul>
+<h2 id="采集数据"><a href="#采集数据" class="headerlink" title="采集数据"></a>采集数据</h2><ul>
+<li>device/mobile</li>
+<li>event</li>
+<li>业务数据</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.jianshu.com/p/37cbb7607ca4" target="_blank" rel="external">代码埋点、可视化埋点、无埋点三者之间的区别</a><br><a href="https://www.jianshu.com/p/f0c4e280357c" target="_blank" rel="external">网易HubbleData无埋点SDK在iOS端的设计与实现</a><br><a href="https://www.jianshu.com/p/8459a75ce5ca" target="_blank" rel="external">网易HubbleData之Android无埋点实践</a><br><a href="https://www.jianshu.com/p/419e7c25d1ba" target="_blank" rel="external">MixPanel －Android端埋点技术研究</a><br><a href="https://www.jianshu.com/p/2cf94e65eb4c" target="_blank" rel="external">MixPanel代码阅读笔记-初探</a><br><a href="https://github.com/sensorsdata/sa-sdk-android" target="_blank" rel="external">神策可视化埋点源码</a><br><a href="https://www.jianshu.com/p/d6886d1c8668" target="_blank" rel="external">神策可视化埋点实现细节</a><br><a href="https://github.com/snowplow/snowplow-android-tracker" target="_blank" rel="external">snowplow-android-tracker</a>：收集方案。<br><a href="https://github.com/nailperry-zd/LazierTracker" target="_blank" rel="external">LazierTracker</a>：通过Android字节码插桩插件实现Android端无埋点（或自动埋点），并且支持根据配置文件实现业务数据的自动采集。<br><a href="https://github.com/mixpanel/mixpanel-android" target="_blank" rel="external">mixpanel-android</a>：开源可视化方案<br><a href="https://zhuanlan.zhihu.com/p/41084975" target="_blank" rel="external">客户端埋点？这可能是全网最实用的深度解析</a><br><a href="https://blog.growingio.com/growth/457" target="_blank" rel="external">完整埋点方案设计的四要素</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/12/敲开RxJava 的大门/" rel="prev" title="敲开RxJava 的大门">
+                敲开RxJava 的大门 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端埋点框架组成"><span class="nav-number">1.</span> <span class="nav-text">客户端埋点框架组成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#采集点位方案"><span class="nav-number">2.</span> <span class="nav-text">采集点位方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#手动埋点"><span class="nav-number">2.1.</span> <span class="nav-text">手动埋点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无埋点"><span class="nav-number">2.2.</span> <span class="nav-text">无埋点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可视化埋点"><span class="nav-number">2.3.</span> <span class="nav-text">可视化埋点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#采集事件类型"><span class="nav-number">3.</span> <span class="nav-text">采集事件类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#采集数据"><span class="nav-number">4.</span> <span class="nav-text">采集数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

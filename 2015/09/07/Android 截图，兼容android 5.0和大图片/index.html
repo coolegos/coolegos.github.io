@@ -91,10 +91,10 @@
 <meta name="keywords" content="截图">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android 截图，兼容android 5.0和大图片">
-<meta property="og:url" content="http://localhost:4000/2015/09/07/Android-截图，兼容android-5-0和大图片/index.html">
+<meta property="og:url" content="http://localhost:4000/2015/09/07/Android 截图，兼容android 5.0和大图片/index.html">
 <meta property="og:site_name" content="Egos Blog">
 <meta property="og:description" content="Android 中选择一张图片然后截取部分作为头像是一个非常常见的需求。当然很多个性化的应用中都会有自己专门定制的选择图片和裁剪图片。但本文现在主要讨论的是一些系统的东西，包括打开系统图片的选择、调用系统的截图功能。">
-<meta property="og:updated_time" content="2017-11-26T09:16:54.000Z">
+<meta property="og:updated_time" content="2019-09-08T08:01:06.692Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android 截图，兼容android 5.0和大图片">
 <meta name="twitter:description" content="Android 中选择一张图片然后截取部分作为头像是一个非常常见的需求。当然很多个性化的应用中都会有自己专门定制的选择图片和裁剪图片。但本文现在主要讨论的是一些系统的东西，包括打开系统图片的选择、调用系统的截图功能。">
@@ -125,7 +125,7 @@
 
 
 
-  <link rel="canonical" href="http://localhost:4000/2015/09/07/Android-截图，兼容android-5-0和大图片/"/>
+  <link rel="canonical" href="http://localhost:4000/2015/09/07/Android 截图，兼容android 5.0和大图片/"/>
 
 
 
@@ -250,7 +250,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2015/09/07/Android-截图，兼容android-5-0和大图片/">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2015/09/07/Android 截图，兼容android 5.0和大图片/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Egos">
@@ -369,7 +369,6 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options opts = new Options();</div><div class="line">opts.inJustDecodeBounds = true; // 为true的话就不会decode的时候生成Bitmap。</div><div class="line">BitmapFactory.decodeStream(is, null, opts);</div><div class="line">// 但是可以通过opts拿到图片的宽和高</div><div class="line">int bmpWidth = opts.outWidth;    </div><div class="line">int bmpHeight = opts.outHeight;</div><div class="line">// 选择一个比较大的比例，这样缩放以后就不会放不下</div><div class="line">int scale = Math.max(bmpWidth / 300, bmpHeight / 300);</div><div class="line">opts.inSampleSize = scale;  // 设置缩放的比例</div><div class="line">// 这样得到的就是一个压缩以后的图片，一般不会内存溢出（注意这个地方是is1）</div><div class="line">Bitmap bitmap = BitmapFactory.decodeStream(is1, null, opts);</div></pre></td></tr></table></figure>
 <p>所以呢可以专门写一个用来压缩的函数。（我这里是指定大小为300，300）</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * 通过Uri得到压缩以后的图片</div><div class="line"> */</div><div class="line">private Bitmap getBitmapFromBigImagByUri(Uri uri)</div><div class="line">&#123;</div><div class="line">    Bitmap result = null;</div><div class="line">    InputStream is1 = null;</div><div class="line">    InputStream is2 = null;</div><div class="line">    try</div><div class="line">    &#123;</div><div class="line">        // 如果图片太大，这个地方依旧会出现问题</div><div class="line">        // Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);</div><div class="line">        // 使用两个inputstream的原因</div><div class="line">        // http://stackoverflow.com/questions/12841482/resizing-bitmap-from-inputstream</div><div class="line">        is1 = getContentResolver().openInputStream(uri);</div><div class="line">        is2 = getContentResolver().openInputStream(uri);</div><div class="line">        BitmapFactory.Options opts1 = new Options();</div><div class="line">        opts1.inJustDecodeBounds = true;</div><div class="line">        BitmapFactory.decodeStream(is1, null, opts1);</div><div class="line">        int bmpWidth = opts1.outWidth;</div><div class="line">        int bmpHeight = opts1.outHeight;</div><div class="line">        int scale = Math.max(bmpWidth / 300, bmpHeight / 300);</div><div class="line">        BitmapFactory.Options opts2 = new Options();</div><div class="line">        // 缩放的比例</div><div class="line">        opts2.inSampleSize = scale;</div><div class="line">        // 内存不足时可被回收</div><div class="line">        opts2.inPurgeable = true;</div><div class="line">        // 设置为false,表示不仅Bitmap的属性，也要加载bitmap</div><div class="line">        opts2.inJustDecodeBounds = false;</div><div class="line">        result = BitmapFactory.decodeStream(is2, null, opts2);</div><div class="line">    &#125;</div><div class="line">    catch (Exception ex)</div><div class="line">    &#123;</div><div class="line">    &#125;</div><div class="line">    finally</div><div class="line">    &#123;</div><div class="line">        if (is1 != null)</div><div class="line">        &#123;</div><div class="line">            try</div><div class="line">            &#123;</div><div class="line">                is1.close();</div><div class="line">            &#125;</div><div class="line">            catch (IOException e1)</div><div class="line">            &#123;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (is2 != null)</div><div class="line">        &#123;</div><div class="line">            try</div><div class="line">            &#123;</div><div class="line">                is2.close();</div><div class="line">            &#125;</div><div class="line">            catch (IOException e2)</div><div class="line">            &#123;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-
       
     </div>
 
@@ -486,7 +485,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">26</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -550,7 +549,7 @@
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2018</span>
+  <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

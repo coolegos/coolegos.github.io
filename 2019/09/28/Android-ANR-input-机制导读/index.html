@@ -95,11 +95,12 @@
 <meta property="og:site_name" content="Egos Blog">
 <meta property="og:description" content="Android 工程师应该都遇到过应用无响应（ANR，Application Not Responding）问题，当应用程序一段时间无法及时响应，则会弹出ANR对话框，让用户选择继续等待，还是强制关闭。 前段时间做预装厂商反馈了好些ANR，借此机会再次复习下ANR 相关的知识。App 稳定性监控ANR 也占了大头，对ANR 流程的深刻理解也有助于做监控。希望这些Input ANR 知识对你能有所帮">
 <meta property="og:image" content="http://localhost:4000/img/input_anr_dialog.jpeg">
+<meta property="og:image" content="http://localhost:4000/img/Input%20事件队列关系.png">
 <meta property="og:image" content="http://localhost:4000/img/Input%20事件分发流程.jpg">
 <meta property="og:image" content="http://localhost:4000/img/Input%20ANR%20流程.jpg">
 <meta property="og:image" content="http://localhost:4000/img/Input%20ANR%20处理流程.jpg">
 <meta property="og:image" content="http://localhost:4000/img/Input%20ANR%20收集信息流程.jpg">
-<meta property="og:updated_time" content="2019-09-29T00:20:01.855Z">
+<meta property="og:updated_time" content="2019-09-29T15:45:49.242Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android ANR input 机制导读">
 <meta name="twitter:description" content="Android 工程师应该都遇到过应用无响应（ANR，Application Not Responding）问题，当应用程序一段时间无法及时响应，则会弹出ANR对话框，让用户选择继续等待，还是强制关闭。 前段时间做预装厂商反馈了好些ANR，借此机会再次复习下ANR 相关的知识。App 稳定性监控ANR 也占了大头，对ANR 流程的深刻理解也有助于做监控。希望这些Input ANR 知识对你能有所帮">
@@ -343,6 +344,7 @@
 <li>waitQueue 用于记录已分发给目标应用，且应用尚未处理完成的输入事件</li>
 <li>mCommandQueue 用于记录一些特殊事件(比如这里面要讲解的ANR)</li>
 </ul>
+<p>下面是mInBoundQueue、outBoundQueue、waitQueue、mCommandQueue 对应的关系。<br><img src="/img/Input 事件队列关系.png" alt="事件队列对应关系"></p>
 <p>这里要讲的ANR 和事件分发流程起始点都是<code>InputDispatcherThread::threadLoop</code>。</p>
 <h3 id="Input-事件分发流程"><a href="#Input-事件分发流程" class="headerlink" title="Input 事件分发流程"></a>Input 事件分发流程</h3><p><img src="/img/Input 事件分发流程.jpg" alt="Input 事件分发流程"></p>
 <p>代码：</p>
@@ -358,8 +360,9 @@
 <li>事件分发成功以后会重置ANR 以及mPendingEvent 等(releasePendingEventLocked)</li>
 </ol>
 <!--#### 问题还需解决
-1. startDispatchCycleLocked 分发事件成功没有从outBoundQueue 将事件删除吗？
-2. 没有地方看到从outBoundQueue 和waitQueue 中获取事件的？-->
+1. startDispatchCycleLocked 看起来不是每次都会执行的`wasEmpty && !connection->outboundQueue.isEmpty()`？
+2. startDispatchCycleLocked 分发事件成功没有从outBoundQueue 将事件删除吗？
+3. 没有地方看到从outBoundQueue 和waitQueue 中获取事件的？-->
 <h3 id="Input-ANR-流程"><a href="#Input-ANR-流程" class="headerlink" title="Input ANR 流程"></a>Input ANR 流程</h3><p><img src="/img/Input ANR 流程.jpg" alt="Input ANR 流程"><br>Input ANR 产生的流程如果不仔细研究下，可能会存在一些误解。分析下来可将ANR 分成3个步骤：</p>
 <ol>
 <li>步骤1(上图2～8)，<code>checkWindowReadyForMoreInputLocked</code>检查可能出现ANR(具体原因可以查看下方：ANR 原因)，<code>handleTargetsNotReadyLocked</code>计算出发生ANR 的超时时间</li>
@@ -390,7 +393,7 @@
 <h3 id="Input-ANR-收集信息流程"><a href="#Input-ANR-收集信息流程" class="headerlink" title="Input ANR 收集信息流程"></a>Input ANR 收集信息流程</h3><p><img src="/img/Input ANR 收集信息流程.jpg" alt="Input ANR 收集信息流程"></p>
 <p>ANR <strong>Trace 日志</strong>是解决ANR 问题的关键。<code>system_process</code>进程通过<code>sendSignal</code>(SIGNAL_QUIT 信号)发送信号给发生ANR 的进程，最后发生ANR 的进程在<code>Signal Catcher</code>线程收集所有线程的信息。</p>
 <p>代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">/art/runtime/signal_catcher.cc</div><div class="line">/art/runtime/runtime.cc</div><div class="line">/art/runtime/thread_list.cc</div><div class="line">/art/runtime/thread.cc</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">/art/runtime/signal_catcher.cc</div><div class="line">/art/runtime/runtime.cc</div><div class="line">/art/runtime/thread_list.cc</div><div class="line">/art/runtime/thread.cc</div><div class="line">/art/runtime/thread_state.h(定义了线程状态)</div></pre></td></tr></table></figure>
 <p>具体生成的ANR <strong>Trace 日志</strong>可以查看上面<strong>Trace 日志</strong>信息。里面包含了大量的信息：Classloader Info、Intern Table、JavaVM、Heap、oat、JIT、Deoptimizations、ThreadList 等等。最主要的信息是线程的堆栈信息，ThreadList 收集的线程有两种attached 和not attached，详细代码可以查看<code>Thread::DumpState</code>和<code>Thread::DumpStack</code>，分别打印线程状态和堆栈信息。</p>
 <h2 id="ANR-原因"><a href="#ANR-原因" class="headerlink" title="ANR 原因"></a>ANR 原因</h2><p>Input ANR 流程中分析<code>checkWindowReadyForMoreInputLocked</code>有分析产生ANR 的原因。</p>
 <ol>
@@ -407,7 +410,7 @@
 <li>可以全局搜索<code>ANR in</code>用来定位ANR 原因</li>
 <li>最后收集ANR 日志是通过<code>sendSignal(SIGNAL_QUIT)</code>，可以参考实现ANR 监控</li>
 </ol>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://gityuan.com/2019/04/06/android-anr/" target="_blank" rel="external">彻底理解安卓应用无响应机制</a><br><a href="http://gityuan.com/2017/01/01/input-anr/" target="_blank" rel="external">Input系统—ANR原理分析</a><br><a href="http://gityuan.com/2016/12/17/input-dispatcher/" target="_blank" rel="external">Input系统—InputDispatcher线程</a><br><a href="http://gityuan.com/2016/12/31/input-ipc/" target="_blank" rel="external">Input系统—事件处理全过程</a><br><a href="http://gityuan.com/2016/12/10/input-manager/" target="_blank" rel="external">Input系统—启动篇</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://gityuan.com/2019/04/06/android-anr/" target="_blank" rel="external">彻底理解安卓应用无响应机制</a><br><a href="http://gityuan.com/2017/01/01/input-anr/" target="_blank" rel="external">Input系统—ANR原理分析</a><br><a href="http://gityuan.com/2016/12/17/input-dispatcher/" target="_blank" rel="external">Input系统—InputDispatcher线程</a><br><a href="http://gityuan.com/2016/12/31/input-ipc/" target="_blank" rel="external">Input系统—事件处理全过程</a><br><a href="http://gityuan.com/2016/12/10/input-manager/" target="_blank" rel="external">Input系统—启动篇</a><br><a href="https://www.jianshu.com/p/f406d535a8bc" target="_blank" rel="external">Android trace文件抓取原理</a></p>
 
       
     </div>

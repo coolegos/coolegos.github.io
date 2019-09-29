@@ -1,0 +1,764 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Android 工程师应该都遇到过应用无响应（ANR，Application Not Responding）问题，当应用程序一段时间无法及时响应，则会弹出ANR对话框，让用户选择继续等待，还是强制关闭。 前段时间做预装厂商反馈了好些ANR，借此机会再次复习下ANR 相关的知识。App 稳定性监控ANR 也占了大头，对ANR 流程的深刻理解也有助于做监控。希望这些Input ANR 知识对你能有所帮">
+<meta name="keywords">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android ANR input 机制导读">
+<meta property="og:url" content="http://localhost:4000/2019/09/28/Android-ANR-input-机制导读/index.html">
+<meta property="og:site_name" content="Egos Blog">
+<meta property="og:description" content="Android 工程师应该都遇到过应用无响应（ANR，Application Not Responding）问题，当应用程序一段时间无法及时响应，则会弹出ANR对话框，让用户选择继续等待，还是强制关闭。 前段时间做预装厂商反馈了好些ANR，借此机会再次复习下ANR 相关的知识。App 稳定性监控ANR 也占了大头，对ANR 流程的深刻理解也有助于做监控。希望这些Input ANR 知识对你能有所帮">
+<meta property="og:image" content="http://localhost:4000/img/input_anr_dialog.jpeg">
+<meta property="og:image" content="http://localhost:4000/img/Input%20事件分发流程.jpg">
+<meta property="og:image" content="http://localhost:4000/img/Input%20ANR%20流程.jpg">
+<meta property="og:image" content="http://localhost:4000/img/Input%20ANR%20处理流程.jpg">
+<meta property="og:image" content="http://localhost:4000/img/Input%20ANR%20收集信息流程.jpg">
+<meta property="og:updated_time" content="2019-09-29T00:20:01.855Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android ANR input 机制导读">
+<meta name="twitter:description" content="Android 工程师应该都遇到过应用无响应（ANR，Application Not Responding）问题，当应用程序一段时间无法及时响应，则会弹出ANR对话框，让用户选择继续等待，还是强制关闭。 前段时间做预装厂商反馈了好些ANR，借此机会再次复习下ANR 相关的知识。App 稳定性监控ANR 也占了大头，对ANR 流程的深刻理解也有助于做监控。希望这些Input ANR 知识对你能有所帮">
+<meta name="twitter:image" content="http://localhost:4000/img/input_anr_dialog.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://localhost:4000/2019/09/28/Android-ANR-input-机制导读/"/>
+
+
+
+
+
+  <title> Android ANR input 机制导读 | Egos Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Egos Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2019/09/28/Android-ANR-input-机制导读/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Egos">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Egos Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android ANR input 机制导读
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-28T17:46:34+08:00">
+                2019-09-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Android 工程师应该都遇到过应用无响应（ANR，Application Not Responding）问题，当应用程序一段时间无法及时响应，则会弹出ANR对话框，让用户选择继续等待，还是强制关闭。</p>
+<p>前段时间做预装厂商反馈了好些ANR，借此机会再次复习下ANR 相关的知识。App 稳定性监控ANR 也占了大头，对ANR 流程的深刻理解也有助于做监控。希望这些Input ANR 知识对你能有所帮助。<br><a id="more"></a></p>
+<h2 id="ANR-信息"><a href="#ANR-信息" class="headerlink" title="ANR 信息"></a>ANR 信息</h2><p>发生ANR 以后会有3个主要的信息帮助开发者修复问题：Log 日志可以查看ANR 的原因，Trace 日志可以找到具体耗时Trace 路径，弹窗则提示用户发生了ANR。</p>
+<h3 id="Log-日志"><a href="#Log-日志" class="headerlink" title="Log 日志"></a>Log 日志</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">ANR in com.bugsnag.android.example (com.bugsnag.android.example/.ExampleActivity)</div><div class="line">    PID: 5353</div><div class="line">    Reason: Input dispatching timed out (Waiting to send non-key event because the touched window has not finished processing certain input events that were delivered to it over 500.0ms ago.  Wait queue length: 7.  Wait queue head age: 5518.6ms.)</div><div class="line">    Load: 0.19 / 0.13 / 0.05</div><div class="line">    CPU usage from 0ms to 9178ms later (2019-09-28 20:29:00.987 to 2019-09-28 20:29:10.164):</div><div class="line">      5.9% 5353/com.bugsnag.android.example: 3.1% user + 2.8% kernel / faults: 840 minor</div><div class="line">      3.7% 1783/system_server: 1.1% user + 2.5% kernel / faults: 471 minor</div><div class="line">    .....  </div><div class="line">    7.5% TOTAL: 2.8% user + 4.7% kernel</div></pre></td></tr></table></figure>
+<h3 id="Trace-日志"><a href="#Trace-日志" class="headerlink" title="Trace 日志"></a>Trace 日志</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line">----- pid 1783 at 2019-09-28 18:04:06 -----</div><div class="line">Cmd line: system_server</div><div class="line">Build fingerprint: &apos;google/sdk_gphone_x86/generic_x86:8.1.0/OSM1.180201.031/5455776:userdebug/dev-keys&apos;</div><div class="line">ABI: &apos;x86&apos;</div><div class="line">Build type: optimized</div><div class="line"></div><div class="line">### Classloader Info</div><div class="line">Zygote loaded classes=5300 post zygote classes=3590</div><div class="line"></div><div class="line">### Intern Table</div><div class="line">Intern table: 47863 strong; 1329 weak</div><div class="line"></div><div class="line">### JavaVM</div><div class="line">JNI: CheckJNI is on; globals=2309 (plus 58 weak)</div><div class="line">Libraries: /system/lib/libandroid.so /system/lib/libandroid_servers.so /system/lib/libcompiler_rt.so /system/lib/libjavacrypto.so /system/lib/libjnigraphics.so /system/lib/libmedia_jni.so /system/lib/libsoundpool.so /system/lib/libwebviewchromium_loader.so /system/lib/libwifi-service.so libjavacore.so libopenjdk.so (11)</div><div class="line"></div><div class="line"></div><div class="line">### Heap</div><div class="line">Heap: 1% free, 14MB/15MB; 252408 objects</div><div class="line">Dumping cumulative Gc timings</div><div class="line">...</div><div class="line"></div><div class="line">### oat</div><div class="line">/system/priv-app/Telecom/oat/x86/Telecom.odex: speed</div><div class="line">/system/framework/oat/x86/services.odex: speed</div><div class="line">/system/framework/oat/x86/ethernet-service.odex: speed</div><div class="line">/system/framework/oat/x86/wifi-service.odex: speed</div><div class="line">/system/framework/oat/x86/com.android.location.provider.odex: speed</div><div class="line">/system/priv-app/SettingsProvider/oat/x86/SettingsProvider.odex: speed</div><div class="line">/system/priv-app/FusedLocation/oat/x86/FusedLocation.odex: speed</div><div class="line">/system/framework/oat/x86/com.android.location.provider.odex: speed</div><div class="line">Running non JIT</div><div class="line"></div><div class="line">### ThreadList：分为了Thread 和Unattach Thread</div><div class="line">suspend all histogram:	Sum: 2.261ms 99% C.I. 0.133us-782.400us Avg: 75.366us Max: 811us</div><div class="line">DALVIK THREADS (102):</div><div class="line">&quot;Signal Catcher&quot; daemon prio=5 tid=2 Runnable</div><div class="line">  | group=&quot;system&quot; sCount=0 dsCount=0 flags=0 obj=0x12c80000 self=0xe4488000</div><div class="line">  | sysTid=1788 nice=0 cgrp=default sched=0/0 handle=0xe4750970</div><div class="line">  | state=R schedstat=( 6939261 18404 8 ) utm=0 stm=0 core=2 HZ=100</div><div class="line">  | stack=0xe4656000-0xe4658000 stackSize=1006KB</div><div class="line">  | held mutexes= &quot;mutator lock&quot;(shared held)</div><div class="line">  native: #00 pc 0047eae1  /system/lib/libart.so (art::DumpNativeStack(std::__1::basic_ostream&lt;char, std::__1::char_traits&lt;char&gt;&gt;&amp;, int, BacktraceMap*, char const*, art::ArtMethod*, void*)+209)</div><div class="line">  </div><div class="line">.....</div><div class="line"></div><div class="line">&quot;android.anim&quot; prio=5 (not attached)</div><div class="line">  | sysTid=5358 nice=-10 cgrp=default</div><div class="line">  | state=S schedstat=( 860788 0 3 ) utm=0 stm=0 core=2 HZ=100</div><div class="line">  kernel: futex_wait_queue_me+0xdf/0x130</div><div class="line">  kernel: futex_wait+0x113/0x22e</div><div class="line">  kernel: do_futex+0xbe/0x825</div><div class="line">  kernel: compat_SyS_futex+0xb7/0x129</div><div class="line">  kernel: sysenter_dispatch+0x7/0x1a</div><div class="line"></div><div class="line">----- end 1783 -----</div></pre></td></tr></table></figure>
+<h3 id="弹窗"><a href="#弹窗" class="headerlink" title="弹窗"></a>弹窗</h3><p><img src="/img/input_anr_dialog.jpeg" width="40%"></p>
+<h2 id="Input-机制相关流程"><a href="#Input-机制相关流程" class="headerlink" title="Input 机制相关流程"></a>Input 机制相关流程</h2><p>主要代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">/frameworks/native/services/inputflinger/InputDispatcher.cpp</div><div class="line">/frameworks/native/services/inputflinger/InputReader.cpp</div><div class="line">/frameworks/native/services/inputflinger/EventHub.cpp</div></pre></td></tr></table></figure>
+<p>InputDispatcher(InputDispatcherThread)线程负责将输入事件分发到目标窗口，其中用到了几个重要的事件队列：</p>
+<ul>
+<li>mInBoundQueue 用于记录InputReader 发送过来的输入事件</li>
+<li>outBoundQueue 用于记录即将分发给目标应用窗口的输入事件</li>
+<li>waitQueue 用于记录已分发给目标应用，且应用尚未处理完成的输入事件</li>
+<li>mCommandQueue 用于记录一些特殊事件(比如这里面要讲解的ANR)</li>
+</ul>
+<p>这里要讲的ANR 和事件分发流程起始点都是<code>InputDispatcherThread::threadLoop</code>。</p>
+<h3 id="Input-事件分发流程"><a href="#Input-事件分发流程" class="headerlink" title="Input 事件分发流程"></a>Input 事件分发流程</h3><p><img src="/img/Input 事件分发流程.jpg" alt="Input 事件分发流程"></p>
+<p>代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/frameworks/native/libs/input/InputTransport.cpp(InputPublisher 和InputChannel)</div></pre></td></tr></table></figure>
+<p>这里是一个完整的按键事件流程(简易版本)，主要涉及到的流程：</p>
+<ol>
+<li>mInBoundQueue 队列中获取输入事件(dispatchOnceInnerLocked)</li>
+<li>按键事件分发(dispatchKeyLocked)</li>
+<li>查找事件对应的目标窗口(findFocusedWindowTargetsLocked)</li>
+<li>enqueueDispatchEntriesLocked 将事件加入到outBoundQueue 队列中</li>
+<li>startDispatchCycleLocked 分发事件，如果分发失败会将事件从outBoundQueue 中移除然后加入到waitQueue 队列</li>
+<li>InputChannel 部分后面以后可以专门详细分析</li>
+<li>事件分发成功以后会重置ANR 以及mPendingEvent 等(releasePendingEventLocked)</li>
+</ol>
+<!--#### 问题还需解决
+1. startDispatchCycleLocked 分发事件成功没有从outBoundQueue 将事件删除吗？
+2. 没有地方看到从outBoundQueue 和waitQueue 中获取事件的？-->
+<h3 id="Input-ANR-流程"><a href="#Input-ANR-流程" class="headerlink" title="Input ANR 流程"></a>Input ANR 流程</h3><p><img src="/img/Input ANR 流程.jpg" alt="Input ANR 流程"><br>Input ANR 产生的流程如果不仔细研究下，可能会存在一些误解。分析下来可将ANR 分成3个步骤：</p>
+<ol>
+<li>步骤1(上图2～8)，<code>checkWindowReadyForMoreInputLocked</code>检查可能出现ANR(具体原因可以查看下方：ANR 原因)，<code>handleTargetsNotReadyLocked</code>计算出发生ANR 的超时时间</li>
+<li>步骤2(上图9～16)，<code>handleTargetsNotReadyLocked</code>判断是否发生了ANR(当前事件时间距离上次事件时间超过5s，不同的ROM 可能修改这个时间的，具体时间间隔是下一次<code>dispatchOnceInnerLocked</code>距离上一次<code>resetANRTimeoutsLocked</code>时间间隔超过5s)，最后调用<code>onANRLocked</code>记录ANR 事件</li>
+<li>步骤3(上图17～20)，<code>runCommandsLockedInterruptible</code>最后执行ANR 相关事件</li>
+</ol>
+<p>具体3个步骤开始入口可以查看下方代码<code>InputDispatcher::dispatchOnce()</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">void InputDispatcher::dispatchOnce() &#123;</div><div class="line">    ...</div><div class="line">    &#123;</div><div class="line">        ...</div><div class="line">        if (!haveCommandsLocked()) &#123;</div><div class="line">            dispatchOnceInnerLocked(&amp;nextWakeupTime); // 第1，2步骤执行</div><div class="line">        &#125;</div><div class="line">        ...</div><div class="line">        if (runCommandsLockedInterruptible()) &#123; // 第3 步骤执行</div><div class="line">            nextWakeupTime = LONG_LONG_MIN;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>ANR 计算关键代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) &#123;</div><div class="line">    nsecs_t currentTime = now();</div><div class="line">    ...</div><div class="line">    </div><div class="line">    // Ready to start a new event.</div><div class="line">    // If we don&apos;t already have a pending event, go grab one.</div><div class="line">    if (! mPendingEvent) &#123;</div><div class="line">        ...</div><div class="line">        // Get ready to dispatch the event.</div><div class="line">        resetANRTimeoutsLocked();</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">    switch (mPendingEvent-&gt;type) &#123;</div><div class="line">    ...</div><div class="line"></div><div class="line">    case EventEntry::TYPE_KEY: &#123;</div><div class="line">        KeyEntry* typedEntry = static_cast&lt;KeyEntry*&gt;(mPendingEvent);</div><div class="line">        ...</div><div class="line">        done = dispatchKeyLocked(currentTime, typedEntry, &amp;dropReason, nextWakeupTime);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ...</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><code>currentTime</code>表示当前事件开始的时间</li>
+<li>如果当前还有未完成的事件(<code>mPendingEvent</code>不为null)则会通过<code>resetANRTimeoutsLocked</code>重置ANR</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">int32_t InputDispatcher::handleTargetsNotReadyLocked(nsecs_t currentTime,</div><div class="line">        const EventEntry* entry,</div><div class="line">        const sp&lt;InputApplicationHandle&gt;&amp; applicationHandle,</div><div class="line">        const sp&lt;InputWindowHandle&gt;&amp; windowHandle,</div><div class="line">        nsecs_t* nextWakeupTime, const char* reason) &#123;</div><div class="line">    if (applicationHandle == NULL &amp;&amp; windowHandle == NULL) &#123;</div><div class="line"></div><div class="line">        ...</div><div class="line"></div><div class="line">    &#125; else &#123;</div><div class="line">        if (mInputTargetWaitCause != INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY) &#123;</div><div class="line"></div><div class="line">            ...</div><div class="line"></div><div class="line">            nsecs_t timeout;</div><div class="line">            ...</div><div class="line">            mInputTargetWaitCause = INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY;</div><div class="line">            mInputTargetWaitStartTime = currentTime;</div><div class="line">            mInputTargetWaitTimeoutTime = currentTime + timeout;</div><div class="line">            mInputTargetWaitTimeoutExpired = false;</div><div class="line">            mInputTargetWaitApplicationHandle.clear();</div><div class="line"></div><div class="line">            if (windowHandle != NULL) &#123;</div><div class="line">                mInputTargetWaitApplicationHandle = windowHandle-&gt;inputApplicationHandle;</div><div class="line">            &#125;</div><div class="line">            if (mInputTargetWaitApplicationHandle == NULL &amp;&amp; applicationHandle != NULL) &#123;</div><div class="line">                mInputTargetWaitApplicationHandle = applicationHandle;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (mInputTargetWaitTimeoutExpired) &#123;</div><div class="line">        return INPUT_EVENT_INJECTION_TIMED_OUT;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (currentTime &gt;= mInputTargetWaitTimeoutTime) &#123;</div><div class="line">        onANRLocked(currentTime, applicationHandle, windowHandle,</div><div class="line">                entry-&gt;eventTime, mInputTargetWaitStartTime, reason);</div><div class="line">        ...</div><div class="line">        *nextWakeupTime = LONG_LONG_MIN;</div><div class="line">        return INPUT_EVENT_INJECTION_PENDING;</div><div class="line">    &#125; else &#123;</div><div class="line">        ...</div><div class="line">        return INPUT_EVENT_INJECTION_PENDING;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><code>mInputTargetWaitTimeoutTime</code>是计算出发生ANR 的时间。具体计算的值是步骤1(上图2～8)分发事件时间 + <code>timeout</code>(此处<code>timeout</code>为5s)。由于是第1次执行<code>handleTargetsNotReadyLocked</code>所以<code>currentTime &lt; mInputTargetWaitTimeoutTime</code>会直接退出该方法</li>
+<li>步骤2(上图9～16)也会执行到<code>handleTargetsNotReadyLocked</code>，<code>currentTime &gt;= mInputTargetWaitTimeoutTime</code>成立会继续执行<code>onANRLocked</code>记录ANR 信息</li>
+</ul>
+<h3 id="Input-ANR-处理流程"><a href="#Input-ANR-处理流程" class="headerlink" title="Input ANR 处理流程"></a>Input ANR 处理流程</h3><p><img src="/img/Input ANR 处理流程.jpg" alt="Input ANR 处理流程"></p>
+<p><code>system_process</code>进程处理ANR，流程中也有一些关键需要注意：</p>
+<ul>
+<li>步骤2，<code>InputMonitor#notifyANR</code>会计算发生ANR 的进程</li>
+<li>步骤5，<code>AppErrors#appNotResponding</code>会打印ANR 的<strong>Log 日志</strong></li>
+<li>步骤6，<code>ActivityManagerService#dumpStackTraces</code>会收集ANR 的<strong>Trace 日志</strong></li>
+<li>步骤8，<code>AppErrors#handleShowAnrUi</code>会展示给用户<strong>ANR 弹窗</strong></li>
+</ul>
+<h3 id="Input-ANR-收集信息流程"><a href="#Input-ANR-收集信息流程" class="headerlink" title="Input ANR 收集信息流程"></a>Input ANR 收集信息流程</h3><p><img src="/img/Input ANR 收集信息流程.jpg" alt="Input ANR 收集信息流程"></p>
+<p>ANR <strong>Trace 日志</strong>是解决ANR 问题的关键。<code>system_process</code>进程通过<code>sendSignal</code>(SIGNAL_QUIT 信号)发送信号给发生ANR 的进程，最后发生ANR 的进程在<code>Signal Catcher</code>线程收集所有线程的信息。</p>
+<p>代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">/art/runtime/signal_catcher.cc</div><div class="line">/art/runtime/runtime.cc</div><div class="line">/art/runtime/thread_list.cc</div><div class="line">/art/runtime/thread.cc</div></pre></td></tr></table></figure>
+<p>具体生成的ANR <strong>Trace 日志</strong>可以查看上面<strong>Trace 日志</strong>信息。里面包含了大量的信息：Classloader Info、Intern Table、JavaVM、Heap、oat、JIT、Deoptimizations、ThreadList 等等。最主要的信息是线程的堆栈信息，ThreadList 收集的线程有两种attached 和not attached，详细代码可以查看<code>Thread::DumpState</code>和<code>Thread::DumpStack</code>，分别打印线程状态和堆栈信息。</p>
+<h2 id="ANR-原因"><a href="#ANR-原因" class="headerlink" title="ANR 原因"></a>ANR 原因</h2><p>Input ANR 流程中分析<code>checkWindowReadyForMoreInputLocked</code>有分析产生ANR 的原因。</p>
+<ol>
+<li>无窗口, 有应用：Waiting because no window has focus but there is a focused application that may eventually add a window when it finishes starting up.</li>
+<li>窗口暂停：Waiting because the 【targetType】 window is paused.</li>
+<li>窗口未连接：Waiting because the 【targetType】 window’s input channel is not registered with the input dispatcher.  The window may be in the process of being removed.</li>
+<li>窗口连接已死亡：Waiting because the 【targetType】 window’s input connection is 【StatusLabel】.The window may be in the process of being removed.</li>
+<li>窗口连接已满：Waiting because the 【targetType】 window’s input channel is full. Outbound queue length: 【outboundQueue.count】.  Wait queue length: 【waitQueue.count】. </li>
+<li>按键事件，输出队列或事件等待队列不为空：Waiting to send key event because the 【targetType】 window has not finished processing all of the input events that were previously delivered to it.  Outbound queue length: 【outboundQueue.count】.  Wait queue length: 【waitQueue.count】.</li>
+<li>非按键事件，事件等待队列不为空且头事件分发超时500ms：Waiting to send non-key event because the 【targetType】 window has not finished processing certain input events that were delivered to it over 【STREAM_AHEAD_EVENT_TIMEOUT】 ago.  Wait queue length: 【waitQueue.count】.  Wait queue head age: 【等待时长】.</li>
+</ol>
+<h2 id="ANR-可能存在的误解"><a href="#ANR-可能存在的误解" class="headerlink" title="ANR 可能存在的误解"></a>ANR 可能存在的误解</h2><p>大家可能会误解只要主线程执行时间超过5s 就会发生Input ANR，从上面分析中可以得出实际上不是。实际上发生一个Input ANR 至少需要执行两次<code>InputDispatcher::dispatchOnce</code>，第一次是检查可能出现了ANR 并且计算出发生ANR 的时间，第二次<code>InputDispatcher::onANRLocked</code>才是处理ANR 相关的逻辑。<br><!--误以为的anr 是什么，真是的anr 是什么？5s 执行时间是错的--></p>
+<h2 id="处理ANR-小秘诀"><a href="#处理ANR-小秘诀" class="headerlink" title="处理ANR 小秘诀"></a>处理ANR 小秘诀</h2><ol>
+<li>可以全局搜索<code>ANR in</code>用来定位ANR 原因</li>
+<li>最后收集ANR 日志是通过<code>sendSignal(SIGNAL_QUIT)</code>，可以参考实现ANR 监控</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://gityuan.com/2019/04/06/android-anr/" target="_blank" rel="external">彻底理解安卓应用无响应机制</a><br><a href="http://gityuan.com/2017/01/01/input-anr/" target="_blank" rel="external">Input系统—ANR原理分析</a><br><a href="http://gityuan.com/2016/12/17/input-dispatcher/" target="_blank" rel="external">Input系统—InputDispatcher线程</a><br><a href="http://gityuan.com/2016/12/31/input-ipc/" target="_blank" rel="external">Input系统—事件处理全过程</a><br><a href="http://gityuan.com/2016/12/10/input-manager/" target="_blank" rel="external">Input系统—启动篇</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/09/08/客户端埋点漫谈/" rel="prev" title="客户端埋点漫谈">
+                客户端埋点漫谈 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.gif"
+               alt="Egos" />
+          <p class="site-author-name" itemprop="name">Egos</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">27</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ANR-信息"><span class="nav-number">1.</span> <span class="nav-text">ANR 信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Log-日志"><span class="nav-number">1.1.</span> <span class="nav-text">Log 日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Trace-日志"><span class="nav-number">1.2.</span> <span class="nav-text">Trace 日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#弹窗"><span class="nav-number">1.3.</span> <span class="nav-text">弹窗</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Input-机制相关流程"><span class="nav-number">2.</span> <span class="nav-text">Input 机制相关流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Input-事件分发流程"><span class="nav-number">2.1.</span> <span class="nav-text">Input 事件分发流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Input-ANR-流程"><span class="nav-number">2.2.</span> <span class="nav-text">Input ANR 流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Input-ANR-处理流程"><span class="nav-number">2.3.</span> <span class="nav-text">Input ANR 处理流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Input-ANR-收集信息流程"><span class="nav-number">2.4.</span> <span class="nav-text">Input ANR 收集信息流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ANR-原因"><span class="nav-number">3.</span> <span class="nav-text">ANR 原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ANR-可能存在的误解"><span class="nav-number">4.</span> <span class="nav-text">ANR 可能存在的误解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理ANR-小秘诀"><span class="nav-number">5.</span> <span class="nav-text">处理ANR 小秘诀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Egos</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

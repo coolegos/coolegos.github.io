@@ -97,10 +97,11 @@
 <meta property="og:image" content="http://localhost:4000/img/input_anr_dialog.jpeg">
 <meta property="og:image" content="http://localhost:4000/img/Input%20事件队列关系.png">
 <meta property="og:image" content="http://localhost:4000/img/Input%20事件分发流程.jpg">
+<meta property="og:image" content="http://localhost:4000/img/Input%20事件分发Java%20流程.jpg">
 <meta property="og:image" content="http://localhost:4000/img/Input%20ANR%20流程.jpg">
 <meta property="og:image" content="http://localhost:4000/img/Input%20ANR%20处理流程.jpg">
 <meta property="og:image" content="http://localhost:4000/img/Input%20ANR%20收集信息流程.jpg">
-<meta property="og:updated_time" content="2019-09-29T15:45:49.242Z">
+<meta property="og:updated_time" content="2019-10-14T00:09:13.817Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android ANR input 机制导读">
 <meta name="twitter:description" content="Android 工程师应该都遇到过应用无响应（ANR，Application Not Responding）问题，当应用程序一段时间无法及时响应，则会弹出ANR对话框，让用户选择继续等待，还是强制关闭。 前段时间做预装厂商反馈了好些ANR，借此机会再次复习下ANR 相关的知识。App 稳定性监控ANR 也占了大头，对ANR 流程的深刻理解也有助于做监控。希望这些Input ANR 知识对你能有所帮">
@@ -359,6 +360,7 @@
 <li>InputChannel 部分后面以后可以专门详细分析</li>
 <li>事件分发成功以后会重置ANR 以及mPendingEvent 等(releasePendingEventLocked)</li>
 </ol>
+<p>Java 层的流程：<br><img src="/img/Input 事件分发Java 流程.jpg" alt="Input 事件分发Java 流程"></p>
 <!--#### 问题还需解决
 1. startDispatchCycleLocked 看起来不是每次都会执行的`wasEmpty && !connection->outboundQueue.isEmpty()`？
 2. startDispatchCycleLocked 分发事件成功没有从outBoundQueue 将事件删除吗？

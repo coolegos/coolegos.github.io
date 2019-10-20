@@ -71,7 +71,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="android,nestedscrolling," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -87,19 +87,22 @@
 
 
 
-<meta name="description" content="最近做一个自定义Behavior的需求，然后回过头来看了下嵌套滚动的流程。做个笔记记录下。  回顾下View的事件机制是由父ViewGroup传递到子View的。这样的一个问题是无法处理同级子View的事件分发(特殊的手段可以实现，比如通过onTouchEvent强行传给另外一个View)。嵌套滚动机制的一个比较重要的封装是处理同级子View滚动效果。">
-<meta name="keywords" content="android,nestedscrolling">
+<meta name="description" content="除了Binder 进程间通信机制，Handler 机制可能是Android 最重要的机制了。Android 应用应用程序是通过消息来驱动的。我们一起来看下Handler 涉及到的内容。">
+<meta name="keywords">
 <meta property="og:type" content="article">
-<meta property="og:title" content="NestedScrolling笔记">
-<meta property="og:url" content="http://localhost:4000/2017/11/01/NestedScrolling笔记/index.html">
+<meta property="og:title" content="Handler 机制导读">
+<meta property="og:url" content="http://localhost:4000/2019/10/20/Handler-机制导读/index.html">
 <meta property="og:site_name" content="Egos Blog">
-<meta property="og:description" content="最近做一个自定义Behavior的需求，然后回过头来看了下嵌套滚动的流程。做个笔记记录下。  回顾下View的事件机制是由父ViewGroup传递到子View的。这样的一个问题是无法处理同级子View的事件分发(特殊的手段可以实现，比如通过onTouchEvent强行传给另外一个View)。嵌套滚动机制的一个比较重要的封装是处理同级子View滚动效果。">
-<meta property="og:image" content="http://localhost:4000/img/NestedScrolling.png">
-<meta property="og:updated_time" content="2019-09-08T07:59:44.026Z">
+<meta property="og:description" content="除了Binder 进程间通信机制，Handler 机制可能是Android 最重要的机制了。Android 应用应用程序是通过消息来驱动的。我们一起来看下Handler 涉及到的内容。">
+<meta property="og:image" content="http://localhost:4000/img/handler_mechanism.png">
+<meta property="og:image" content="http://localhost:4000/img/Handler%20初始化流程.jpg">
+<meta property="og:image" content="http://localhost:4000/img/Handler%20send%20message%20流程.jpg">
+<meta property="og:image" content="http://localhost:4000/img/io%20复用.jpg">
+<meta property="og:updated_time" content="2019-10-20T14:29:34.702Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="NestedScrolling笔记">
-<meta name="twitter:description" content="最近做一个自定义Behavior的需求，然后回过头来看了下嵌套滚动的流程。做个笔记记录下。  回顾下View的事件机制是由父ViewGroup传递到子View的。这样的一个问题是无法处理同级子View的事件分发(特殊的手段可以实现，比如通过onTouchEvent强行传给另外一个View)。嵌套滚动机制的一个比较重要的封装是处理同级子View滚动效果。">
-<meta name="twitter:image" content="http://localhost:4000/img/NestedScrolling.png">
+<meta name="twitter:title" content="Handler 机制导读">
+<meta name="twitter:description" content="除了Binder 进程间通信机制，Handler 机制可能是Android 最重要的机制了。Android 应用应用程序是通过消息来驱动的。我们一起来看下Handler 涉及到的内容。">
+<meta name="twitter:image" content="http://localhost:4000/img/handler_mechanism.png">
 
 
 
@@ -127,13 +130,13 @@
 
 
 
-  <link rel="canonical" href="http://localhost:4000/2017/11/01/NestedScrolling笔记/"/>
+  <link rel="canonical" href="http://localhost:4000/2019/10/20/Handler-机制导读/"/>
 
 
 
 
 
-  <title> NestedScrolling笔记 | Egos Blog </title>
+  <title> Handler 机制导读 | Egos Blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -252,7 +255,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2017/11/01/NestedScrolling笔记/">
+    <link itemprop="mainEntityOfPage" href="http://localhost:4000/2019/10/20/Handler-机制导读/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Egos">
@@ -273,7 +276,7 @@
             
             
               
-                NestedScrolling笔记
+                Handler 机制导读
               
             
           </h1>
@@ -288,8 +291,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-01T23:44:31+08:00">
-                2017-11-01
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-20T21:02:11+08:00">
+                2019-10-20
               </time>
             
 
@@ -298,28 +301,6 @@
             
           </span>
 
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/android/" itemprop="url" rel="index">
-                    <span itemprop="name">android</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
           
 
           
@@ -346,30 +327,31 @@
       
 
       
-        <p>最近做一个自定义<code>Behavior</code>的需求，然后回过头来看了下嵌套滚动的流程。做个笔记记录下。</p>
-<blockquote>
-<p>回顾下<code>View</code>的事件机制是由父<code>ViewGroup</code>传递到子<code>View</code>的。这样的一个问题是无法处理同级子<code>View</code>的事件分发(特殊的手段可以实现，比如通过<code>onTouchEvent</code>强行传给另外一个<code>View</code>)。<strong>嵌套滚动机制的一个比较重要的封装是处理同级子<code>View</code>滚动效果。</strong></p>
-</blockquote>
-<a id="more"></a>
-<p>嵌套滚动主要涉及到的两个接口是<code>NestedScrollingChild</code>和<code>NestedScrollingParent</code>，调用关系如下图。<br><img src="/img/NestedScrolling.png" alt="嵌套滚动的流程"></p>
-<blockquote>
-<p><strong><code>dispatchNestedPreScroll</code>是在<code>onTouchEvent</code>的<code>ACTION_MOVE</code>中执行的。</strong> </p>
-<p>public boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed, int[] offsetInWindow)</p>
-<blockquote>
-<p>在当前<code>View</code>消耗之前(<code>dispatchNestedScroll</code>)会执行。可以用来阻止子View的消耗。<strong>consumed</strong>会赋值为滚动消耗的值(代表的是所有的子<code>View</code>滚动的距离的最大值)，分别对应的是x、y的值。<strong>offsetInWindow</strong>相当于是<code>View</code>(当前<code>View</code>滚动的距离，比如是<code>RecyclerView</code>)滚动的距离。</p>
-</blockquote>
-<p><strong><code>dispatchNestedScroll</code>是在<code>onTouchEvent</code>的<code>ACTION_MOVE</code>中执行的。</strong> </p>
-<p>public boolean dispatchNestedScroll(int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int[] offsetInWindow)</p>
-<blockquote>
-<p>开始分发滚动事件。<strong>offsetInWindow</strong>相当于是<code>View</code>(当前<code>View</code>滚动的距离，比如是<code>RecyclerView</code>)滚动的距离。</p>
-</blockquote>
-</blockquote>
-<p><code>CoordinatorLayout</code>是很重要的一个关于嵌套滚动的类，里面海涉及到一个类<code>Behavior</code>。</p>
-<ul>
-<li>behavior 是什么：用来协调<code>CoordinatorLayout</code>里面的元素。<code>CoordinatorLayout</code>里面的直接子<code>View</code>都可以使用<code>Behavior</code>来控制交互。</li>
-<li>怎么设置：在xml中可以设置属性<code>app:layout_behavior</code>(string)，会通过反射创佳一个Behavior。<code>&lt;attr name=&quot;layout_behavior&quot; format=&quot;string&quot;/&gt;</code></li>
-</ul>
-<p><a href="https://github.com/JakeWharton/DrawerBehavior" target="_blank" rel="external">DrawerBehavior</a><br><a href="https://github.com/whiteMill/appbarlayout-spring-behavior-master/" target="_blank" rel="external">appbarlayout-spring-behavior-master</a></p>
+        <p>除了Binder 进程间通信机制，Handler 机制可能是Android 最重要的机制了。Android 应用应用程序是通过消息来驱动的。我们一起来看下Handler 涉及到的内容。<br><a id="more"></a></p>
+<h2 id="Handler-原理"><a href="#Handler-原理" class="headerlink" title="Handler 原理"></a>Handler 原理</h2><p><img src="/img/handler_mechanism.png" alt="Handelr 原理"></p>
+<ol>
+<li>Looper#loop 死循环从MessageQueue 中获取Message 执行。</li>
+<li>Handler 通过send/post 向MessageQueue 中add Message，通过remove 从MessageQueue 中remove Message。</li>
+<li>MessgaeQueue 中没有Message 时阻塞，但是不消耗cpu 资源。</li>
+</ol>
+<h2 id="Handler-初始化流程"><a href="#Handler-初始化流程" class="headerlink" title="Handler 初始化流程"></a>Handler 初始化流程</h2><p><img src="/img/Handler 初始化流程.jpg" alt="Handler 初始化流程"></p>
+<ol>
+<li>Looper#prepare，最后epoll_create 创建epoll 句柄，epoll_ctl 将被监听的描述符添加到epoll句柄。</li>
+<li>Looper#loop，最后epoll_wait 等待事件触发。</li>
+</ol>
+<h2 id="Handler-sendMessage-流程"><a href="#Handler-sendMessage-流程" class="headerlink" title="Handler sendMessage 流程"></a>Handler sendMessage 流程</h2><p><img src="/img/Handler send message 流程.jpg" alt="Handler snedMessage 流程"></p>
+<ol>
+<li>MessageQueue#enqueueMessage，将Message 加入到MessageQueue。</li>
+<li>MessageQueue#nativeWake，最后write 唤醒epoll_wait 的Task。</li>
+</ol>
+<h2 id="IO-复用"><a href="#IO-复用" class="headerlink" title="IO 复用"></a>IO 复用</h2><p><img src="/img/io 复用.jpg" alt="IO 复用"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.zhihu.com/question/32163005/answer/55772739" target="_blank" rel="external">IO 多路复用是什么意思？</a><br><a href="https://my.oschina.net/editorial-story/blog/3052308" target="_blank" rel="external">epoll 的本质是什么？</a>：入门<br><a href="https://www.zhihu.com/question/34652589/answer/90344494" target="_blank" rel="external">Android中为什么主线程不会因为Looper.loop()里的死循环卡死？</a><br><a href="https://blog.csdn.net/u011671986/article/details/79449853" target="_blank" rel="external">我读过的最好的epoll讲解–转自”知乎“</a><br><a href="https://www.jianshu.com/p/397449cadc9a" target="_blank" rel="external">IO多路复用的三种机制Select，Poll，Epoll</a><br><a href="https://www.cnblogs.com/xcywt/p/8146143.html" target="_blank" rel="external">为什么epoll会那么高效</a><br><a href="http://gityuan.com/2015/12/06/linux_epoll/" target="_blank" rel="external">select/poll/epoll对比分析</a></p>
+<!--
+### 前提知识
+1. 中断：这里需要明白的是向一个文件系统写入数据就会产生一个中断最后监听文件系统就会收到消息执行
+2. epoll 就是I/O 相关操作。
+3. 为什么是IO复用呢？
+-->
 
       
     </div>
@@ -397,14 +379,6 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/android/" rel="tag"># android</a>
-          
-            <a href="/tags/nestedscrolling/" rel="tag"># nestedscrolling</a>
-          
-        </div>
-      
 
       
         
@@ -414,18 +388,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/05/Java序列化那些事/" rel="next" title="Java序列化那些事">
-                <i class="fa fa-chevron-left"></i> Java序列化那些事
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/10/20/fresco(1)：整体框架/" rel="prev" title="fresco(1)：整体框架">
-                fresco(1)：整体框架 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/09/28/Android-ANR-input-机制导读/" rel="prev" title="Android ANR input 机制导读">
+                Android ANR input 机制导读 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -473,8 +443,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/img/avatar.gif"
@@ -536,6 +515,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Handler-原理"><span class="nav-number">1.</span> <span class="nav-text">Handler 原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Handler-初始化流程"><span class="nav-number">2.</span> <span class="nav-text">Handler 初始化流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Handler-sendMessage-流程"><span class="nav-number">3.</span> <span class="nav-text">Handler sendMessage 流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IO-复用"><span class="nav-number">4.</span> <span class="nav-text">IO 复用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
